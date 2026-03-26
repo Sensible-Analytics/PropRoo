@@ -5,7 +5,7 @@ import { X, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, ExternalLin
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const PropertyDetailModal = ({ sale, onClose }) => {
     // State for property-specific historical and comparative data
@@ -31,7 +31,7 @@ const PropertyDetailModal = ({ sale, onClose }) => {
     const fetchPropertyDetails = async () => {
         setLoading(true);
         try {
-            const [historyRes, streetRes, suburbRes, streetTrendRes, suburbTrendRes] = await Promise.all([
+            const [historyRes, streetRes, suburbRes, streetTrendRes, suburbTrendRes] = await Promise.allSettled([
                 axios.get(`${API_URL}/property/${sale.property_id}/history`),
                 axios.get(`${API_URL}/stats/street_cagr`, {
                     params: {
@@ -57,13 +57,13 @@ const PropertyDetailModal = ({ sale, onClose }) => {
                 })
             ]);
 
-            setSalesHistory(historyRes.data);
-            setStreetStats(streetRes.data);
-            setSuburbStats(suburbRes.data);
-            setStreetTrend(streetTrendRes.data);
-            setSuburbTrend(suburbTrendRes.data);
+            setSalesHistory(historyRes.status === 'fulfilled' ? historyRes.value.data : []);
+            setStreetStats(streetRes.status === 'fulfilled' ? streetRes.value.data : null);
+            setSuburbStats(suburbRes.status === 'fulfilled' ? suburbRes.value.data : null);
+            setStreetTrend(streetTrendRes.status === 'fulfilled' ? streetTrendRes.value.data : []);
+            setSuburbTrend(suburbTrendRes.status === 'fulfilled' ? suburbTrendRes.value.data : []);
         } catch (error) {
-            console.error('Error fetching property details:', error);
+            console.warn('Error fetching property details:', error.message);
         } finally {
             setLoading(false);
         }

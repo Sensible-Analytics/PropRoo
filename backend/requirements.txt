@@ -5,3 +5,5 @@ requests
 sqlalchemy
 python-multipart
 beautifulsoup4
+pydantic
+psycopg2-binary

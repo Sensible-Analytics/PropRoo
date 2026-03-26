@@ -21,7 +21,7 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // API Base URL
-const API_URL = 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // Cluster Colors (Top 10 distinct colors)
 const CLUSTER_COLORS = [
@@ -77,16 +77,26 @@ const Dashboard = () => {
         setLoading(true);
         try {
             // 1. Fetch Leaderboards (Top 5)
-            const lbRes = await axios.get(`${API_URL}/stats/top_performers`, {
-                params: { year: selectedYear, property_type: propertyType || undefined }
-            });
-            setLeaderboards(lbRes.data);
+            try {
+                const lbRes = await axios.get(`${API_URL}/stats/top_performers`, {
+                    params: { year: selectedYear, property_type: propertyType || undefined }
+                });
+                setLeaderboards(lbRes.data || { growth: { suburbs: [], streets: [] }, activity: { suburbs: [], streets: [] } });
+            } catch (e) {
+                console.warn('Leaderboards fetch failed:', e.message);
+                setLeaderboards({ growth: { suburbs: [], streets: [] }, activity: { suburbs: [], streets: [] } });
+            }
 
             // 2. Fetch Unified Map Data (Clusters + Neighbors)
-            const mapRes = await axios.get(`${API_URL}/stats/unified_map`, {
-                params: { level: viewLevel === 'state' ? 'suburb' : viewLevel === 'suburb' ? 'street' : 'suburb', year: selectedYear }
-            });
-            setUnifiedData(mapRes.data);
+            try {
+                const mapRes = await axios.get(`${API_URL}/stats/unified_map`, {
+                    params: { level: viewLevel === 'state' ? 'suburb' : viewLevel === 'suburb' ? 'street' : 'suburb', year: selectedYear }
+                });
+                setUnifiedData(mapRes.data || { clusters: [] });
+            } catch (e) {
+                console.warn('Unified map fetch failed:', e.message);
+                setUnifiedData({ clusters: [] });
+            }
 
             // 3. Base Params for detailed list
             const baseParams = {
@@ -100,31 +110,51 @@ const Dashboard = () => {
 
             // 4. Detailed level data
             if (viewLevel === 'state') {
-                const res = await axios.get(`${API_URL}/sales`, { params: baseParams });
-                setSales(res.data);
+                try {
+                    const res = await axios.get(`${API_URL}/sales`, { params: baseParams });
+                    setSales(res.data || []);
+                } catch (e) {
+                    console.warn('Sales fetch failed:', e.message);
+                    setSales([]);
+                }
                 setMapCenter([-33.8688, 151.2093]);
                 setMapZoom(11);
             } else if (viewLevel === 'suburb') {
-                const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
-                setSales(res.data);
-                if (res.data.length > 0) {
-                    setMapCenter([res.data[0].latitude, res.data[0].longitude]);
-                    setMapZoom(13);
+                try {
+                    const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
+                    setSales(res.data || []);
+                    if (res.data?.length > 0) {
+                        setMapCenter([res.data[0].latitude, res.data[0].longitude]);
+                        setMapZoom(13);
+                    }
+                } catch (e) {
+                    console.warn('Suburb sales fetch failed:', e.message);
+                    setSales([]);
                 }
             } else if (viewLevel === 'street') {
-                const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
-                const streetSales = res.data.filter(s => s.property_street_name === selection.street);
-                setSales(streetSales);
-                if (streetSales.length > 0) {
-                    setMapCenter([streetSales[0].latitude, streetSales[0].longitude]);
-                    setMapZoom(15);
+                try {
+                    const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
+                    const streetSales = (res.data || []).filter(s => s.property_street_name === selection.street);
+                    setSales(streetSales);
+                    if (streetSales.length > 0) {
+                        setMapCenter([streetSales[0].latitude, streetSales[0].longitude]);
+                        setMapZoom(15);
+                    }
+                } catch (e) {
+                    console.warn('Street sales fetch failed:', e.message);
+                    setSales([]);
                 }
             } else if (viewLevel === 'property') {
-                const histRes = await axios.get(`${API_URL}/property/${selection.propertyId}/history`);
-                setSales(histRes.data);
-                if (histRes.data.length > 0) {
-                    setMapCenter([histRes.data[0].latitude, histRes.data[0].longitude]);
-                    setMapZoom(17);
+                try {
+                    const histRes = await axios.get(`${API_URL}/property/${selection.propertyId}/history`);
+                    setSales(histRes.data || []);
+                    if (histRes.data?.length > 0) {
+                        setMapCenter([histRes.data[0].latitude, histRes.data[0].longitude]);
+                        setMapZoom(17);
+                    }
+                } catch (e) {
+                    console.warn('Property history fetch failed:', e.message);
+                    setSales([]);
                 }
             }
         } catch (error) {

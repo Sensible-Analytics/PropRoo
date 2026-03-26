@@ -15,9 +15,10 @@ from .models import Sale
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-URL_BASE = 'https://www.valuergeneral.nsw.gov.au/__psi/'
-YEARLY_URL = URL_BASE + 'yearly/'
-DOWNLOAD_DIR = Path('backend/data')
+URL_BASE = "https://www.valuergeneral.nsw.gov.au/__psi/"
+YEARLY_URL = URL_BASE + "yearly/"
+DOWNLOAD_DIR = Path("backend/data")
+
 
 def download_file(url: str, filepath: Path) -> bool:
     """
@@ -26,13 +27,17 @@ def download_file(url: str, filepath: Path) -> bool:
     try:
         logger.info(f"Downloading {url}...")
         # Add a timeout and a user agent if needed
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=60) as response, open(filepath, 'wb') as out_file:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with (
+            urllib.request.urlopen(req, timeout=60) as response,
+            open(filepath, "wb") as out_file,
+        ):
             out_file.write(response.read())
         return True
     except Exception as e:
         logger.error(f"Error downloading {url}: {e}")
         return False
+
 
 def extract_dat_lines_from_nested_zip(zip_filepath: Path) -> List[str]:
     """
@@ -41,7 +46,7 @@ def extract_dat_lines_from_nested_zip(zip_filepath: Path) -> List[str]:
     dat_lines: List[str] = []
     try:
         # Outer zip (Yearly)
-        with zipfile.ZipFile(zip_filepath, 'r') as outer_zip:
+        with zipfile.ZipFile(zip_filepath, "r") as outer_zip:
             for file_info in outer_zip.namelist():
                 # Inner zips (Weekly)
                 if file_info.lower().endswith(".zip"):
@@ -51,44 +56,60 @@ def extract_dat_lines_from_nested_zip(zip_filepath: Path) -> List[str]:
                             for inner_file in inner_zip.namelist():
                                 if inner_file.lower().endswith(".dat"):
                                     try:
-                                        content = inner_zip.read(inner_file).decode("utf-8")
+                                        content = inner_zip.read(inner_file).decode(
+                                            "utf-8"
+                                        )
                                         dat_lines.extend(content.splitlines())
                                     except UnicodeDecodeError:
                                         # Fallback to latin-1 if utf-8 fails (sometimes common in older datasets)
-                                        content = inner_zip.read(inner_file).decode("latin-1")
+                                        content = inner_zip.read(inner_file).decode(
+                                            "latin-1"
+                                        )
                                         dat_lines.extend(content.splitlines())
                                     except Exception as e:
-                                        logger.warning(f"Failed to read DAT {inner_file} in {file_info}: {e}")
+                                        logger.warning(
+                                            f"Failed to read DAT {inner_file} in {file_info}: {e}"
+                                        )
                     except Exception as e:
                         logger.warning(f"Failed to read inner zip {file_info}: {e}")
     except zipfile.BadZipFile:
-            logger.error(f"Bad zip file: {zip_filepath}")
+        logger.error(f"Bad zip file: {zip_filepath}")
     except Exception as e:
         logger.error(f"Error reading outer zip {zip_filepath}: {e}")
     return dat_lines
 
-def download_recent_data(start_year: int = 2001, end_year: int = 2024) -> List[Path]:
+
+def download_recent_data(
+    start_year: int = 2001, end_year: int = 2024, latest_first: bool = True
+) -> List[Path]:
     """
     Download yearly ZIP files for the specified range.
+    If latest_first=True, starts from end_year and goes backward (latest data first).
     """
     if not DOWNLOAD_DIR.exists():
         DOWNLOAD_DIR.mkdir(parents=True)
-    
+
     downloaded_files: List[Path] = []
-    
-    # Iterate years
-    for year in range(start_year, end_year + 1):
+
+    # Create year range - either forward or backward
+    years = list(range(start_year, end_year + 1))
+    if latest_first:
+        years = sorted(years, reverse=True)  # Start with latest year first
+
+    for year in years:
         filename = f"{year}.zip"
         filepath = DOWNLOAD_DIR / filename
         url = YEARLY_URL + filename
-        
+
         if not filepath.exists():
             if download_file(url, filepath):
                 downloaded_files.append(filepath)
         else:
+            logger.info(f"Using cached file for {year}")
             downloaded_files.append(filepath)
-            
+
     return downloaded_files
+
 
 def parse_record(line: str) -> Optional[Dict[str, Any]]:
     """
@@ -99,27 +120,31 @@ def parse_record(line: str) -> Optional[Dict[str, Any]]:
     parts = [p.strip() for p in line.split(";")]
     if len(parts) < 25:
         return None
-    
+
     try:
+
         def parse_date(d_str: str) -> Optional[date]:
-            if not d_str: return None
+            if not d_str:
+                return None
             try:
-                return datetime.strptime(d_str, '%Y%m%d').date()
+                return datetime.strptime(d_str, "%Y%m%d").date()
             except ValueError:
                 return None
-        
+
         def parse_float(n_str: str) -> Optional[float]:
-            if not n_str: return None
+            if not n_str:
+                return None
             try:
                 return float(n_str)
             except ValueError:
                 return None
 
         def parse_int(n_str: str) -> Optional[int]:
-            if not n_str: return None
+            if not n_str:
+                return None
             try:
                 # Remove non-numeric chars like commas if any
-                clean_str = ''.join(c for c in n_str if c.isdigit() or c == '-')
+                clean_str = "".join(c for c in n_str if c.isdigit() or c == "-")
                 return int(clean_str)
             except ValueError:
                 return None
@@ -127,7 +152,7 @@ def parse_record(line: str) -> Optional[Dict[str, Any]]:
         contract_date = parse_date(parts[13])
         # Filter future dates
         if contract_date and contract_date > date.today():
-             return None
+            return None
 
         return {
             "district_code": parts[1],
@@ -150,22 +175,23 @@ def parse_record(line: str) -> Optional[Dict[str, Any]]:
             "primary_purpose": parts[18].title(),
             "strata_lot_number": parts[19],
             "dealing_number": parts[23],
-            "property_legal_description": None 
+            "property_legal_description": None,
         }
     except Exception as e:
         logger.error(f"Error parsing line: {e}")
         return None
 
-def ingest_data() -> None:
+
+def ingest_data(latest_first: bool = True) -> None:
     """
     Orchestrate the ingestion process: download, parse, and store in DB.
     """
     logger.info("Starting ingestion...")
     Base.metadata.create_all(bind=engine)
-    
-    files = download_recent_data()
+
+    files = download_recent_data(latest_first=latest_first)
     logger.info(f"Downloaded {len(files)} files.")
-    
+
     all_records: List[Dict[str, Any]] = []
     for f in files:
         lines = extract_dat_lines_from_nested_zip(f)
@@ -173,31 +199,33 @@ def ingest_data() -> None:
             record = parse_record(line)
             if record:
                 all_records.append(record)
-    
+
     logger.info(f"Parsed {len(all_records)} records. Saving to DB...")
-    
+
     db: Session = SessionLocal()
     try:
         # Batch insert
         # Wiping is easier for MVP, but consider upsert for production
         db.query(Sale).delete()
-        
+
         # Bulk insert in chunks to avoid memory issues with massive datasets
         chunk_size = 5000
         for i in range(0, len(all_records), chunk_size):
-            chunk = all_records[i:i + chunk_size]
+            chunk = all_records[i : i + chunk_size]
             db.bulk_insert_mappings(Sale, chunk)
             db.commit()
-            logger.info(f"Inserted {min(i + chunk_size, len(all_records))} / {len(all_records)} records...")
-            
+            logger.info(
+                f"Inserted {min(i + chunk_size, len(all_records))} / {len(all_records)} records..."
+            )
+
     except Exception as e:
         logger.error(f"Database error: {e}")
         db.rollback()
     finally:
         db.close()
-        
+
     logger.info("Ingestion complete.")
+
 
 if __name__ == "__main__":
     ingest_data()
-

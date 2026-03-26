@@ -1,0 +1,9 @@
+node_modules/
+backend/
+.git/
+.sisyphus/
+*.db
+venv/
+data/
+tests/
+.env*

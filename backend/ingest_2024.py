@@ -3,11 +3,13 @@ import sys
 import logging
 from pathlib import Path
 from datetime import date, timedelta, datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 import urllib.request
 import zipfile
 import io
 import pandas as pd
+import psycopg2
+import psycopg2.extras
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine, Base
 from app.models import (
@@ -191,10 +193,38 @@ def download_recent_data(
     return downloaded_files
 
 
+def get_sale_columns() -> List[str]:
+    return [
+        "district_code",
+        "property_id",
+        "sale_counter",
+        "download_datetime",
+        "property_name",
+        "property_unit_number",
+        "property_house_number",
+        "property_street_name",
+        "property_locality",
+        "property_post_code",
+        "area",
+        "area_type",
+        "contract_date",
+        "settlement_date",
+        "purchase_price",
+        "zoning",
+        "nature_of_property",
+        "primary_purpose",
+        "strata_lot_number",
+        "dealing_number",
+        "property_legal_description",
+    ]
+
+
+def record_to_tuple(record: Dict[str, Any]) -> Tuple:
+    cols = get_sale_columns()
+    return tuple(record.get(col) for col in cols)
+
+
 def ingest_data(latest_first: bool = True) -> None:
-    """
-    Orchestrate the ingestion process: download, parse, and store in DB.
-    """
     logger.info("Starting ingestion for 2024 data only...")
     Base.metadata.create_all(bind=engine)
 
@@ -212,21 +242,43 @@ def ingest_data(latest_first: bool = True) -> None:
     logger.info(f"Parsed {len(all_records)} records. Saving to DB...")
 
     db: Session = SessionLocal()
+    is_postgres = os.environ.get("DATABASE_URL", "").startswith("postgresql")
+
     try:
-        # Delete existing Sale records
         logger.info("Deleting existing Sale records...")
         db.query(Sale).delete()
         db.commit()
 
-        # Bulk insert in chunks to avoid memory issues with massive datasets
-        chunk_size = 5000
-        for i in range(0, len(all_records), chunk_size):
-            chunk = all_records[i : i + chunk_size]
-            db.bulk_insert_mappings(Sale, chunk)
-            db.commit()
-            logger.info(
-                f"Inserted {min(i + chunk_size, len(all_records))} / {len(all_records)} records..."
-            )
+        if is_postgres:
+            conn = psycopg2.connect(os.environ["DATABASE_URL"])
+            cur = conn.cursor()
+            cols = get_sale_columns()
+            insert_query = f"""
+                INSERT INTO sales ({", ".join(cols)})
+                VALUES %s
+            """
+            chunk_size = 10000
+            for i in range(0, len(all_records), chunk_size):
+                chunk = all_records[i : i + chunk_size]
+                values = [record_to_tuple(r) for r in chunk]
+                psycopg2.extras.execute_values(
+                    cur, insert_query, values, page_size=1000
+                )
+                conn.commit()
+                logger.info(
+                    f"Inserted {min(i + chunk_size, len(all_records))} / {len(all_records)} records..."
+                )
+            cur.close()
+            conn.close()
+        else:
+            chunk_size = 5000
+            for i in range(0, len(all_records), chunk_size):
+                chunk = all_records[i : i + chunk_size]
+                db.bulk_insert_mappings(Sale, chunk)
+                db.commit()
+                logger.info(
+                    f"Inserted {min(i + chunk_size, len(all_records))} / {len(all_records)} records..."
+                )
 
     except Exception as e:
         logger.error(f"Database error: {e}")

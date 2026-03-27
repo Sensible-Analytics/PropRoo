@@ -224,11 +224,15 @@ def record_to_tuple(record: Dict[str, Any]) -> Tuple:
     return tuple(record.get(col) for col in cols)
 
 
-def ingest_data(latest_first: bool = True) -> None:
-    logger.info("Starting ingestion for 2024 data only...")
+def ingest_data(
+    start_year: int = 2024, end_year: int = 2024, latest_first: bool = True
+) -> None:
+    logger.info(f"Starting ingestion for years {start_year}-{end_year}...")
     Base.metadata.create_all(bind=engine)
 
-    files = download_recent_data(latest_first=latest_first)
+    files = download_recent_data(
+        start_year=start_year, end_year=end_year, latest_first=latest_first
+    )
     logger.info(f"Downloaded {len(files)} files.")
 
     all_records: List[Dict[str, Any]] = []
@@ -290,4 +294,14 @@ def ingest_data(latest_first: bool = True) -> None:
 
 
 if __name__ == "__main__":
-    ingest_data()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ingest NSW property sales data")
+    parser.add_argument(
+        "--start-year", type=int, default=2020, help="Start year (default: 2020)"
+    )
+    parser.add_argument(
+        "--end-year", type=int, default=2024, help="End year (default: 2024)"
+    )
+    args = parser.parse_args()
+    ingest_data(start_year=args.start_year, end_year=args.end_year)

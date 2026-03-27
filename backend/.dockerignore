@@ -1,0 +1,10 @@
+.git
+.gitignore
+.ruff_cache
+.DS_Store
+*.md
+__pycache__
+*.pyc
+venv
+.venv
+*.log

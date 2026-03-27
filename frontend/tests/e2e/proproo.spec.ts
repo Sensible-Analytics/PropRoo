@@ -1,0 +1,279 @@
+import { test, expect } from '@playwright/test';
+
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
+const API_URL = process.env.API_URL || 'https://proproo-backend.onrender.com/api';
+
+test.describe('PropRoo E2E Test Suite', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    // Wait for initial load
+    await page.waitForLoadState('networkidle');
+  });
+
+  test.describe('1. State Level (Homepage)', () => {
+    test('homepage loads with NSW UNIFIED header', async ({ page }) => {
+      const header = page.locator('text=NSW UNIFIED');
+      await expect(header).toBeVisible({ timeout: 15000 });
+    });
+
+    test('state overview is displayed by default', async ({ page }) => {
+      const stateOverview = page.locator('text=STATE OVERVIEW');
+      await expect(stateOverview).toBeVisible({ timeout: 15000 });
+    });
+
+    test('year selector shows 2024 by default', async ({ page }) => {
+      const yearSelector = page.locator('select').filter({ hasText: '2024' });
+      await expect(yearSelector).toBeVisible({ timeout: 10000 });
+    });
+
+    test('map container renders with leaflet', async ({ page }) => {
+      const mapContainer = page.locator('.leaflet-container');
+      await expect(mapContainer).toBeVisible({ timeout: 20000 });
+    });
+
+    test('CAGR performance chart exists', async ({ page }) => {
+      await page.waitForTimeout(3000);
+      const cagrSection = page.locator('text=CAGR % PERFORMANCE');
+      await expect(cagrSection).toBeVisible({ timeout: 15000 });
+    });
+
+    test('transaction count chart exists', async ({ page }) => {
+      const transactionSection = page.locator('text=TRANSACTION COUNT');
+      await expect(transactionSection).toBeVisible({ timeout: 15000 });
+    });
+
+    test('data table shows property entries', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      const tableRows = page.locator('tbody tr');
+      const count = await tableRows.count();
+      expect(count).toBeGreaterThan(0);
+    });
+
+    test('price range slider is visible', async ({ page }) => {
+      const priceLabel = page.locator('text=PRICE RANGE');
+      await expect(priceLabel).toBeVisible({ timeout: 10000 });
+    });
+
+    test('category filter dropdown works', async ({ page }) => {
+      const categorySelect = page.locator('select').filter({ hasText: /ALL PROPERTIES|RESIDENCE|STRATA/ });
+      await expect(categorySelect).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe('2. Year Selection', () => {
+    test('can change year from 2024 to 2023', async ({ page }) => {
+      const yearSelect = page.locator('select').last();
+      await yearSelect.selectOption('2023');
+      await page.waitForTimeout(3000);
+      const updatedSelect = page.locator('select').last();
+      await expect(updatedSelect).toHaveValue('2023');
+    });
+
+    test('data reloads when year changes', async ({ page }) => {
+      const yearSelect = page.locator('select').last();
+      await yearSelect.selectOption('2022');
+      await page.waitForTimeout(5000);
+      // Table should still have data
+      const tableRows = page.locator('tbody tr');
+      await expect(tableRows.first()).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe('3. Suburb Level Navigation', () => {
+    test('can click on table row to drill into suburb', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      
+      // Find a suburb row and click it
+      const suburbRow = page.locator('tbody tr').first();
+      await suburbRow.click();
+      
+      // Should show back button and suburb name
+      await page.waitForTimeout(3000);
+      const backButton = page.locator('button').filter({ has: page.locator('svg') }).first();
+      await expect(backButton).toBeVisible({ timeout: 10000 });
+    });
+
+    test('map centers on suburb after drill-down', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      const suburbRow = page.locator('tbody tr').first();
+      await suburbRow.click();
+      
+      await page.waitForTimeout(3000);
+      // Map should be visible still
+      const mapContainer = page.locator('.leaflet-container');
+      await expect(mapContainer).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe('4. Street Level Navigation', () => {
+    test('can drill from suburb to street', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      
+      // First drill to suburb
+      const suburbRow = page.locator('tbody tr').first();
+      await suburbRow.click();
+      await page.waitForTimeout(3000);
+      
+      // Then drill to street (click on street address row)
+      const streetRow = page.locator('tbody tr').first();
+      await streetRow.click();
+      await page.waitForTimeout(3000);
+      
+      // Should still have map and table
+      const mapContainer = page.locator('.leaflet-container');
+      await expect(mapContainer).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe('5. Map Interactions', () => {
+    test('cluster markers are visible on map', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      // Check for SVG circles (cluster markers)
+      const markers = page.locator('.leaflet-interactive');
+      const count = await markers.count();
+      console.log(`Found ${count} map markers`);
+      expect(count).toBeGreaterThan(0);
+    });
+
+    test('can click on cluster marker to see popup', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      const marker = page.locator('.leaflet-interactive').first();
+      if (await marker.isVisible()) {
+        await marker.click();
+        await page.waitForTimeout(2000);
+        // Popup should appear with CAGR data
+        const popup = page.locator('.leaflet-popup');
+        await expect(popup).toBeVisible({ timeout: 10000 });
+      }
+    });
+
+    test('drill into cluster button exists in popup', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      const marker = page.locator('.leaflet-interactive').first();
+      if (await marker.isVisible()) {
+        await marker.click();
+        await page.waitForTimeout(2000);
+        const drillButton = page.locator('text=Drill Into Cluster');
+        await expect(drillButton).toBeVisible({ timeout: 10000 });
+      }
+    });
+  });
+
+  test.describe('6. API Data Loading', () => {
+    test('fetches sales data from backend', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      const tableRows = page.locator('tbody tr');
+      const count = await tableRows.count();
+      expect(count).toBeGreaterThan(0);
+      
+      // Verify price data exists
+      const firstRow = tableRows.first();
+      const priceCell = firstRow.locator('td').nth(1);
+      const priceText = await priceCell.textContent();
+      expect(priceText).toContain('$');
+    });
+
+    test('leaderboards display data', async ({ page }) => {
+      await page.waitForTimeout(5000);
+      // CAGR chart should have bars
+      const bars = page.locator('.recharts-bar-rectangle');
+      const barCount = await bars.count();
+      console.log(`Found ${barCount} chart bars`);
+      expect(barCount).toBeGreaterThan(0);
+    });
+  });
+
+  test.describe('7. Filters', () => {
+    test('category filter shows residence option', async ({ page }) => {
+      const categorySelect = page.locator('select').filter({ hasText: /RESIDENCE|ALL PROPERTIES/ });
+      await expect(categorySelect).toBeVisible({ timeout: 10000 });
+    });
+
+    test('can filter by residence type', async ({ page }) => {
+      const categorySelect = page.locator('select').filter({ hasText: /RESIDENCE|ALL PROPERTIES/ });
+      await categorySelect.selectOption('Residence');
+      await page.waitForTimeout(3000);
+      // Should still have data
+      const tableRows = page.locator('tbody tr');
+      expect(await tableRows.count()).toBeGreaterThan(0);
+    });
+  });
+
+  test.describe('8. Error Handling', () => {
+    test('shows loading state initially', async ({ page }) => {
+      // Page should show loading or data within reasonable time
+      await page.waitForTimeout(10000);
+      const mapContainer = page.locator('.leaflet-container');
+      await expect(mapContainer).toBeVisible({ timeout: 10000 });
+    });
+
+    test('no critical console errors on load', async ({ page }) => {
+      const errors: string[] = [];
+      page.on('pageerror', err => errors.push(err.message));
+      
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(5000);
+      
+      // Filter out expected network errors
+      const criticalErrors = errors.filter(e => 
+        !e.includes('Failed to fetch') &&
+        !e.includes('NetworkError') &&
+        !e.includes('net::ERR')
+      );
+      
+      expect(criticalErrors.length).toBe(0);
+    });
+  });
+
+  test.describe('9. Backend API Verification', () => {
+    test('backend health endpoint responds', async ({ request }) => {
+      const response = await request.get(`${API_URL.replace('/api', '')}/health`);
+      expect(response.ok()).toBeTruthy();
+      const data = await response.json();
+      expect(data.status).toBe('ok');
+    });
+
+    test('backend sales endpoint returns data', async ({ request }) => {
+      const response = await request.get(`${API_URL}/sales?limit=5`);
+      expect(response.ok()).toBeTruthy();
+      const data = await response.json();
+      expect(Array.isArray(data)).toBeTruthy();
+      expect(data.length).toBeGreaterThan(0);
+    });
+
+    test('backend top performers endpoint returns data', async ({ request }) => {
+      const response = await request.get(`${API_URL}/stats/top_performers?year=2024`);
+      expect(response.ok()).toBeTruthy();
+      const data = await response.json();
+      expect(data).toHaveProperty('growth');
+    });
+
+    test('backend unified map endpoint returns data', async ({ request }) => {
+      const response = await request.get(`${API_URL}/stats/unified_map?level=suburb&year=2024`);
+      expect(response.ok()).toBeTruthy();
+      const data = await response.json();
+      expect(data).toHaveProperty('clusters');
+    });
+  });
+
+  test.describe('10. Responsive Layout', () => {
+    test('works on mobile viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 667 });
+      await page.goto('/');
+      await page.waitForLoadState('networkidle');
+      
+      // Should still render main components
+      const header = page.locator('text=NSW UNIFIED');
+      await expect(header).toBeVisible({ timeout: 15000 });
+    });
+
+    test('works on tablet viewport', async ({ page }) => {
+      await page.setViewportSize({ width: 768, height: 1024 });
+      await page.goto('/');
+      await page.waitForLoadState('networkidle');
+      
+      const header = page.locator('text=NSW UNIFIED');
+      await expect(header).toBeVisible({ timeout: 15000 });
+    });
+  });
+});

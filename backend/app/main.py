@@ -45,14 +45,11 @@ def test_db():
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
     try:
-        context = ssl.create_default_context()
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
 
-        conn = psycopg2.connect(
-            DATABASE_URL,
-            sslmode="require",
-        )
+        conn = psycopg2.connect(DATABASE_URL, sslmode="prefer", ssl_context=context)
         cur = conn.cursor()
         cur.execute("SELECT version();")
         version = cur.fetchone()

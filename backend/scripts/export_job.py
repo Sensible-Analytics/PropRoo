@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Standalone parquet export script — run as a Render one-off job."""
+"""Export sales to Parquet via DuckDB postgres_attach — pushes SQL to PostgreSQL."""
 
-import io
 import logging
 import os
 import sys
@@ -13,117 +12,40 @@ logger = logging.getLogger("export")
 
 
 def main():
-    from dateutil.relativedelta import relativedelta
-    import pandas as pd
-    import pyarrow as pa
-    import pyarrow.parquet as pq
-    import sqlalchemy
+    import duckdb
     from app.config import settings
-    from app.database import get_r2_client
-    from datetime import datetime
 
-    db_url = settings.database_url
-    r2 = get_r2_client()
-    bucket = settings.r2_bucket_name
+    db_url = os.environ.get("DATABASE_URL")
+    r2_bucket = settings.r2_bucket_name
 
     if not db_url:
         logger.error("DATABASE_URL not set")
         return
-    if not r2:
-        logger.error("R2 not configured")
-        return
 
-    engine = sqlalchemy.create_engine(db_url)
-    _export_sales(engine, r2, bucket)
+    logger.info("Connecting DuckDB + PostgreSQL via postgres_scanner...")
+    conn = duckdb.connect(database=":memory:")
+    conn.execute("INSTALL postgres_scanner; LOAD postgres_scanner;")
+    conn.execute(f"CALL postgres_attach('{db_url}')")
+    logger.info("PostgreSQL attached as 'postgres' schema")
 
-    for table in ["property_growth", "street_summary", "suburb_summary"]:
-        _export_small_table(engine, r2, bucket, table)
+    r2_cfg = (
+        f"S3_REGION 'auto', "
+        f"S3_ACCESS_KEY_ID '{settings.r2_access_key_id}', "
+        f"S3_SECRET_ACCESS_KEY '{settings.r2_secret_access_key}', "
+        f"S3_ENDPOINT '{settings.r2_endpoint.replace('https://', '')}'"
+    )
+
+    for table in ["sales", "property_growth", "street_summary", "suburb_summary"]:
+        logger.info(f"Exporting {table}...")
+        conn.execute(f"""
+            COPY (SELECT * FROM postgres.{table})
+            TO 's3://{r2_bucket}/parquet/{table}/latest.parquet'
+            (FORMAT PARQUET, COMPRESSION 'snappy', {r2_cfg})
+        """)
+        logger.info(f"  {table} exported")
 
     logger.info("All exports complete!")
-
-
-def _export_sales(engine, r2_client, bucket: str):
-    logger.info("Exporting sales...")
-    with engine.connect() as conn:
-        result = conn.execute(
-            sqlalchemy.text(
-                "SELECT MIN(contract_date)::text, MAX(contract_date)::text FROM sales"
-            )
-        )
-        row = result.fetchone()
-        min_date = row[0]
-        max_date = row[1]
-
-    min_dt = datetime.strptime(str(min_date)[:10], "%Y-%m-%d")
-    max_dt = datetime.strptime(str(max_date)[:10], "%Y-%m-%d")
-    logger.info(f"Sales date range: {min_dt.date()} to {max_dt.date()}")
-
-    chunk_start = min_dt
-    chunk_num = 0
-    all_dfs = []
-    while chunk_start <= max_dt:
-        chunk_end = min(chunk_start + relativedelta(months=6), max_dt)
-        where = f"contract_date >= '{chunk_start.date()}' AND contract_date <= '{chunk_end.date()}'"
-        try:
-            df = pd.read_sql(
-                f"SELECT * FROM sales WHERE {where}",
-                engine,
-                parse_dates=["contract_date", "settlement_date"],
-            )
-            logger.info(
-                f"  Chunk {chunk_num}: {len(df)} rows "
-                f"({chunk_start.date()} to {chunk_end.date()})"
-            )
-            all_dfs.append(df)
-        except Exception as e:
-            logger.error(f"  Chunk {chunk_num} failed: {e}")
-
-        chunk_start = chunk_end + relativedelta(days=1)
-        chunk_num += 1
-
-    if not all_dfs:
-        logger.error("No sales data exported")
-        return
-
-    merged = pd.concat(all_dfs, ignore_index=True)
-    logger.info(f"Merged {len(merged)} total sales rows")
-
-    buf = io.BytesIO()
-    pq.write_table(pa.Table.from_pandas(merged), buf, compression="snappy")
-    buf.seek(0)
-    data = buf.getvalue()
-    r2_client.put_object(
-        Bucket=bucket,
-        Key="parquet/sales/latest.parquet",
-        Body=data,
-        ContentType="application/octet-stream",
-    )
-    logger.info(
-        f"Sales export: {len(merged)} rows -> r2://{bucket}/parquet/sales/latest.parquet "
-        f"({len(data) / 1024 / 1024:.1f} MB)"
-    )
-
-
-def _export_small_table(engine, r2_client, bucket: str, table: str):
-    try:
-        df = pd.read_sql(f"SELECT * FROM {table}", engine)
-    except Exception as e:
-        logger.error(f"Failed to read {table}: {e}")
-        return
-
-    buf = io.BytesIO()
-    pq.write_table(pa.Table.from_pandas(df), buf, compression="snappy")
-    buf.seek(0)
-    data = buf.getvalue()
-    r2_client.put_object(
-        Bucket=bucket,
-        Key=f"parquet/{table}/latest.parquet",
-        Body=data,
-        ContentType="application/octet-stream",
-    )
-    logger.info(
-        f"Exported {table}: {len(df)} rows -> r2://{bucket}/parquet/{table}/latest.parquet"
-    )
+    conn.close()
 
 
 if __name__ == "__main__":

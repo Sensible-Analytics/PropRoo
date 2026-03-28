@@ -18,15 +18,20 @@ RAILWAY_TEST_VARIABLE = "THIS_SHOULD_APPEAR_IN_LOGS_IF_CODE_IS_LOADED"
 if DATABASE_URL:
     if DATABASE_URL.startswith("postgresql://"):
         sys.stderr.write(
-            f"[DB DEBUG] Using DATABASE_URL as-is: {DATABASE_URL[:80]}...\n"
+            f"[DB DEBUG] Using DATABASE_URL: {DATABASE_URL[:80]}...\n"
         )
         engine = create_engine(
             DATABASE_URL,
             pool_pre_ping=True,
             pool_recycle=300,
-            connect_args={"connect_timeout": 10},
+            connect_args={
+                "connect_timeout": 10,
+                "sslmode": "require"
+            }
         )
     else:
+        engine = create_engine(DATABASE_URL)
+else:
         engine = create_engine(DATABASE_URL)
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))

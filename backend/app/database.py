@@ -16,20 +16,19 @@ RAILWAY_TEST_VARIABLE = "THIS_SHOULD_APPEAR_IN_LOGS_IF_CODE_IS_LOADED"
 
 if DATABASE_URL:
     if DATABASE_URL.startswith("postgresql://"):
-        sys.stderr.write(f"[DB DEBUG] Using PostgreSQL with NullPool\n")
+        sys.stderr.write(f"[DB DEBUG] Using PostgreSQL with NullPool and SSL\n")
         engine = create_engine(
             DATABASE_URL,
             poolclass=NullPool,
             connect_args={
                 "connect_timeout": 10,
                 "sslmode": "require",
-                "keepalives": 1,
-                "keepalives_idle": 30,
-                "keepalives_interval": 10,
-                "keepalives_count": 5,
-            },
+                "application_name": "proproo-backend"
+            }
         )
     else:
+        engine = create_engine(DATABASE_URL)
+else:
         engine = create_engine(DATABASE_URL)
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))

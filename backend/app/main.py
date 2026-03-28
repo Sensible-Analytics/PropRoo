@@ -39,13 +39,22 @@ def health_check():
 def test_db():
     """Test database connection"""
     import os
-    import sys
+    import shutil
+    import subprocess
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
     results = {"tests": []}
 
     try:
+        # Try to create the certificate directory and copy system certs
+        cert_dir = "/opt/render/.postgresql"
+        cert_path = f"{cert_dir}/root.crt"
+
+        os.makedirs(cert_dir, exist_ok=True)
+        shutil.copy("/etc/ssl/certs/ca-certificates.crt", cert_path)
+        results["tests"].append({"cert_copy": f"Copied to {cert_path}"})
+
         from urllib.parse import urlparse
 
         parsed = urlparse(DATABASE_URL)
@@ -56,7 +65,7 @@ def test_db():
         try:
             import psycopg2
 
-            for mode in ["require", "prefer"]:
+            for mode in ["require"]:
                 try:
                     conn = psycopg2.connect(conn_str, sslmode=mode)
                     cur = conn.cursor()
@@ -72,7 +81,7 @@ def test_db():
         try:
             import psycopg
 
-            for mode in ["require", "verify-full"]:
+            for mode in ["verify-full"]:
                 try:
                     conn = psycopg.connect(conn_str, sslmode=mode)
                     cur = conn.cursor()

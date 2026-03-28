@@ -4,11 +4,13 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 const API_URL = process.env.API_URL || 'https://proproo.onrender.com/api';
 
 test.describe('PropRoo E2E Test Suite', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    // Wait for initial load
-    await page.waitForLoadState('networkidle');
-  });
+    test.beforeEach(async ({ page }) => {
+      const baseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
+      console.log(`Navigating to: ${baseUrl}`);
+      await page.goto(baseUrl);
+      // Wait for initial load
+      await page.waitForLoadState('networkidle');
+    });
 
   test.describe('1. State Level (Homepage)', () => {
     test('homepage loads with NSW UNIFIED header', async ({ page }) => {

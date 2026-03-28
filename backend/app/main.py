@@ -44,17 +44,40 @@ def test_db():
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-    try:
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
+    results = {"url_params": {}, "tests": []}
 
-        conn = psycopg2.connect(DATABASE_URL, sslmode="prefer", ssl_context=context)
-        cur = conn.cursor()
-        cur.execute("SELECT version();")
-        version = cur.fetchone()
-        cur.close()
-        conn.close()
-        return {"status": "ok", "version": version[0]}
+    try:
+        from urllib.parse import urlparse
+
+        parsed = urlparse(DATABASE_URL)
+        results["url_params"] = {
+            "scheme": parsed.scheme,
+            "hostname": parsed.hostname,
+            "port": parsed.port,
+            "path": parsed.path,
+        }
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        results["url_parsing_error"] = str(e)
+
+    test_configs = [
+        {"name": "default", "params": {}},
+        {"name": "sslmode=disable", "params": {"sslmode": "disable"}},
+        {"name": "sslmode=allow", "params": {"sslmode": "allow"}},
+        {"name": "sslmode=prefer", "params": {"sslmode": "prefer"}},
+        {"name": "sslmode=require", "params": {"sslmode": "require"}},
+        {"name": "sslmode=verify-ca", "params": {"sslmode": "verify-ca"}},
+        {"name": "sslmode=verify-full", "params": {"sslmode": "verify-full"}},
+    ]
+
+    for config in test_configs:
+        try:
+            conn = psycopg2.connect(DATABASE_URL, **config["params"])
+            cur = conn.cursor()
+            cur.execute("SELECT 1;")
+            cur.close()
+            conn.close()
+            results["tests"].append({config["name"]: "success"})
+        except Exception as e:
+            results["tests"].append({config["name"]: str(e)})
+
+    return results

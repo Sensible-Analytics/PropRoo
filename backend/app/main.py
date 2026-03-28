@@ -33,3 +33,22 @@ async def startup_event():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/test-db")
+def test_db():
+    """Test database connection"""
+    import psycopg2
+    import os
+
+    DATABASE_URL = os.environ.get("DATABASE_URL", "")
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("SELECT version();")
+        version = cur.fetchone()
+        cur.close()
+        conn.close()
+        return {"status": "ok", "version": version[0]}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}

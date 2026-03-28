@@ -11,18 +11,22 @@ sys.stderr.write(
 )
 sys.stderr.write(f"[DB DEBUG] DATA_DIR: {os.environ.get('DATA_DIR', 'Not set')}\n")
 
-RAILWAY_TEST_VARIABLE = "THIS_SHOULD_APPEAR_IN_LOGS_IF_CODE_IS_LOADED"
-
 if DATABASE_URL:
     if DATABASE_URL.startswith("postgresql://"):
-        sys.stderr.write("[DB DEBUG] Using PostgreSQL with NullPool and SSL\n")
+        sys.stderr.write("[DB DEBUG] Using PostgreSQL\n")
+
+        from urllib.parse import urlparse
+
+        parsed = urlparse(DATABASE_URL)
+
         engine = create_engine(
             DATABASE_URL,
             poolclass=NullPool,
             connect_args={
-                "connect_timeout": 10,
+                "connect_timeout": 30,
                 "sslmode": "require",
-                "application_name": "proproo-backend",
+                "keepalives": 1,
+                "keepalives_idle": 60,
             },
         )
     else:

@@ -29,17 +29,17 @@ async def viewport_data(
         duck = get_duck_conn()
         duck_rows = duck.execute(f"""
             SELECT
-                s.latitude,
-                s.longitude,
-                s.purchase_price,
-                s.contract_date::VARCHAR,
-                s.property_locality,
-                pg.avg_cagr
+                CAST(s.latitude AS DOUBLE) AS lat,
+                CAST(s.longitude AS DOUBLE) AS lng,
+                CAST(s.purchase_price AS DOUBLE) AS price,
+                CAST(s.contract_date AS VARCHAR) AS contract_date,
+                s.property_locality AS locality,
+                CAST(pg.avg_cagr AS DOUBLE) AS cagr
             FROM read_parquet('{r2_path}') s
             LEFT JOIN read_parquet('{pg_path}') pg ON pg.property_id = s.property_id
             WHERE s.latitude BETWEEN {min_lat} AND {max_lat}
               AND s.longitude BETWEEN {min_lng} AND {max_lng}
-              AND EXTRACT(YEAR FROM s.contract_date::DATE) <= {year}
+              AND EXTRACT(YEAR FROM s.contract_date) <= {year}
               AND s.latitude IS NOT NULL
         """).fetchall()
     except Exception as e:
@@ -53,8 +53,9 @@ async def viewport_data(
             if lat is None or lng is None:
                 continue
             try:
-                h3_idx = h3.h3_lat_lng_to_cell(lat, lng, resolution)
-            except Exception:
+                h3_idx = h3.h3_lat_lng_to_cell(float(lat), float(lng), resolution)
+            except Exception as ex:
+                logger.warning(f"H3 conversion failed for ({lat}, {lng}): {ex}")
                 continue
             if h3_idx not in h3_groups:
                 h3_groups[h3_idx] = {

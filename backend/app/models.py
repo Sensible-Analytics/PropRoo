@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Date, DateTime
 from .database import Base
 
+
 class Sale(Base):
     __tablename__ = "sales"
 
@@ -28,20 +29,29 @@ class Sale(Base):
     property_legal_description = Column(String)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    
+
     # Property listing URLs
     realestate_url = Column(String, nullable=True)
     domain_url = Column(String, nullable=True)
     listings_last_checked = Column(DateTime, nullable=True)
 
+
 class PropertyGrowth(Base):
     __tablename__ = "property_growth"
     property_id = Column(String, primary_key=True, index=True)
+    suburb = Column(String)
+    street_name = Column(String)
+    post_code = Column(Integer)
+    year = Column(Integer)
+    avg_cagr = Column(Float)
+    first_sale_year = Column(Integer)
+    last_sale_year = Column(Integer)
     cagr = Column(Float)
     total_growth = Column(Float)
     years_held = Column(Float)
     last_sale_price = Column(Float)
     first_sale_price = Column(Float)
+
 
 class StreetGrowth(Base):
     __tablename__ = "street_growth"
@@ -53,6 +63,7 @@ class StreetGrowth(Base):
     avg_cagr = Column(Float)
     property_count = Column(Integer)
 
+
 class SuburbGrowth(Base):
     __tablename__ = "suburb_growth"
     id = Column(Integer, primary_key=True, index=True)
@@ -60,6 +71,7 @@ class SuburbGrowth(Base):
     year = Column(Integer, index=True)
     avg_cagr = Column(Float)
     property_count = Column(Integer)
+
 
 class StreetSummary(Base):
     __tablename__ = "street_summary"
@@ -70,13 +82,17 @@ class StreetSummary(Base):
     unique_properties = Column(Integer)
     total_sales = Column(Integer)
     avg_cagr = Column(Float)
-    is_top_performer = Column(Integer, default=0) # 1 if in top tier
+    property_count = Column(Integer)
+    is_top_performer = Column(Integer, default=0)  # 1 if in top tier
+
 
 class SuburbSummary(Base):
     __tablename__ = "suburb_summary"
     id = Column(Integer, primary_key=True, index=True)
     suburb = Column(String, index=True)
+    post_code = Column(Integer)
     unique_properties = Column(Integer)
     total_sales = Column(Integer)
     avg_cagr = Column(Float)
+    property_count = Column(Integer)
     is_top_performer = Column(Integer, default=0)

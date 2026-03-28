@@ -20,7 +20,7 @@ async def viewport_data(
     year: int = Query(2024),
 ):
     resolution = zoom_to_resolution(zoom)
-    r2_path = f"s3://{settings.r2_bucket_name}/parquet/sale/latest.parquet"
+    r2_path = f"s3://{settings.r2_bucket_name}/parquet/sales/latest.parquet"
     pg_path = f"s3://{settings.r2_bucket_name}/parquet/property_growth/latest.parquet"
 
     try:

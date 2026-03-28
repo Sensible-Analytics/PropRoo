@@ -65,6 +65,7 @@ def get_duck_conn():
     conn = duckdb.connect(database=":memory:")
     conn.execute("INSTALL httpfs; LOAD httpfs;")
     conn.execute("INSTALL spatial; LOAD spatial;")
+    conn.execute("INSTALL h3 FROM community; LOAD h3;")
     from app.config import settings
 
     if settings.r2_access_key_id and settings.r2_endpoint:

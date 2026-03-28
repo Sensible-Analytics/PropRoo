@@ -57,7 +57,7 @@ async def api_health_check():
         conn = get_pg_conn()
         if conn:
             cur = conn.cursor()
-            cur.execute("SELECT COUNT(*) FROM sale")
+            cur.execute("SELECT COUNT(*) FROM sales")
             count = cur.fetchone()[0]
             cur.close()
             release_pg_conn(conn)

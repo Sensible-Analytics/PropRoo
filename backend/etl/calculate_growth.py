@@ -34,7 +34,7 @@ def _calc_property_growth(conn):
     query = """
         SELECT property_id, property_street_name, property_locality, property_post_code,
                purchase_price, contract_date
-        FROM sale
+        FROM sales
         WHERE latitude IS NOT NULL AND longitude IS NOT NULL
         ORDER BY property_id, contract_date
     """
@@ -134,7 +134,7 @@ def _calc_street_summary(conn):
                 COUNT(s.id),
                 COALESCE(AVG(pg.avg_cagr), 0),
                 COUNT(DISTINCT pg.property_id)
-            FROM sale s
+            FROM sales s
             LEFT JOIN property_growth pg ON pg.property_id = s.property_id
             GROUP BY s.property_street_name, s.property_locality, s.property_post_code
             ON CONFLICT (street_name, suburb, post_code) DO UPDATE
@@ -160,7 +160,7 @@ def _calc_suburb_summary(conn):
                 COUNT(s.id),
                 COALESCE(AVG(pg.avg_cagr), 0),
                 COUNT(DISTINCT pg.property_id)
-            FROM sale s
+            FROM sales s
             LEFT JOIN property_growth pg ON pg.property_id = s.property_id
             GROUP BY s.property_locality, s.property_post_code
             ON CONFLICT (suburb, post_code) DO UPDATE

@@ -99,7 +99,7 @@ async def top_performers(
 ):
     type_filter = ""
     if property_type:
-        type_filter = f"AND s.property_type = '{property_type}'"
+        type_filter = f"AND s.primary_purpose = '{property_type}'"
 
     parquet_data = _duck_query(f"""
         SELECT
@@ -108,7 +108,7 @@ async def top_performers(
             AVG(pg.avg_cagr) AS avg_cagr,
             COUNT(pg.property_id) AS property_count
         FROM read_parquet('{_r2("property_growth")}') pg
-        JOIN read_parquet('{_r2("sale")}') s ON s.property_id = pg.property_id
+        JOIN read_parquet('{_r2("sales")}') s ON s.property_id = pg.property_id
         WHERE pg.last_sale_year <= {year} {type_filter}
         GROUP BY pg.suburb, pg.post_code
         ORDER BY avg_cagr DESC

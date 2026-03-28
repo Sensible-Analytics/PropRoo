@@ -122,6 +122,7 @@ def get_db_stats():
             .filter(Sale.contract_date.isnot(None))
             .distinct()
             .count(),
+            "db_url_configured": os.environ.get("DATABASE_URL", "NOT SET")[:50] + "...",
         }
     except Exception as e:
         return {"error": str(e)}

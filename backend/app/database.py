@@ -64,17 +64,16 @@ def get_duck_conn():
 
     conn = duckdb.connect(database=":memory:")
     conn.execute("INSTALL httpfs; LOAD httpfs;")
-    conn.execute("INSTALL spatial; LOAD spatial;")
-    conn.execute("INSTALL h3 FROM community; LOAD h3;")
     from app.config import settings
 
     if settings.r2_access_key_id and settings.r2_endpoint:
-        conn.execute(f"SET s3_region='auto';")
+        conn.execute("SET s3_region='auto';")
         conn.execute(f"SET s3_access_key_id='{settings.r2_access_key_id}';")
         conn.execute(f"SET s3_secret_access_key='{settings.r2_secret_access_key}';")
         conn.execute(
             f"SET s3_endpoint='{settings.r2_endpoint.replace('https://', '')}';"
         )
+        conn.execute("SET s3_url_style='path';")
     return conn
 
 

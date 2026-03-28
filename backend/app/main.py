@@ -43,36 +43,35 @@ def test_db():
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-    results = {"cert_check": {}, "tests": []}
+    results = {"tests": []}
 
     try:
-        from urllib.parse import urlparse
-
-        parsed = urlparse(DATABASE_URL)
-
-        cert_paths = [
-            "/opt/render/.postgresql/root.crt",
-            "/etc/ssl/certs/ca-certificates.crt",
-            "/etc/pki/tls/certs/ca-bundle.crt",
-        ]
-
-        for path in cert_paths:
-            try:
-                with open(path, "r") as f:
-                    results["cert_check"][path] = "exists"
-            except:
-                results["cert_check"][path] = "not found"
-
         for ssl_mode in ["require", "verify-ca"]:
             try:
-                conn = psycopg2.connect(DATABASE_URL, sslmode=ssl_mode)
+                conn = psycopg2.connect(
+                    DATABASE_URL,
+                    sslmode=ssl_mode,
+                    sslrootcert="/etc/ssl/certs/ca-certificates.crt",
+                )
                 cur = conn.cursor()
                 cur.execute("SELECT 1;")
                 cur.close()
                 conn.close()
-                results["tests"].append({f"{ssl_mode}_system_cert": "success"})
+                results["tests"].append({f"{ssl_mode}_with_system_cert": "success"})
             except Exception as e:
-                results["tests"].append({f"{ssl_mode}_system_cert": str(e)[:200]})
+                results["tests"].append({f"{ssl_mode}_with_system_cert": str(e)[:300]})
+
+        try:
+            conn = psycopg2.connect(
+                DATABASE_URL, sslmode="require", sslrootcert="system"
+            )
+            cur = conn.cursor()
+            cur.execute("SELECT 1;")
+            cur.close()
+            conn.close()
+            results["tests"].append({"require_with_sslrootcert_system": "success"})
+        except Exception as e:
+            results["tests"].append({"require_with_sslrootcert_system": str(e)[:300]})
 
     except Exception as e:
         results["error"] = str(e)

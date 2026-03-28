@@ -24,6 +24,7 @@ def export_all():
 
     logger.info("Starting DuckDB postgres_scanner export...")
     conn = duckdb.connect(database=":memory:")
+    conn.execute("INSTALL httpfs; LOAD httpfs;")
     conn.execute("INSTALL postgres_scanner; LOAD postgres_scanner;")
     conn.execute(f"CALL postgres_attach('{db_url}')")
 
@@ -38,12 +39,10 @@ def export_all():
     ).fetchall()
     logger.info(f"Tables: {[(t[0], t[1]) for t in table_info]}")
 
-    r2_cfg = (
-        f"S3_REGION 'auto', "
-        f"S3_ACCESS_KEY_ID '{settings.r2_access_key_id}', "
-        f"S3_SECRET_ACCESS_KEY '{settings.r2_secret_access_key}', "
-        f"S3_ENDPOINT '{settings.r2_endpoint.replace('https://', '')}'"
-    )
+    conn.execute("SET s3_region='auto';")
+    conn.execute(f"SET s3_access_key_id='{settings.r2_access_key_id}';")
+    conn.execute(f"SET s3_secret_access_key='{settings.r2_secret_access_key}';")
+    conn.execute(f"SET s3_endpoint='{settings.r2_endpoint.replace('https://', '')}';")
 
     pg_schema = "main"
     for table in TABLES:
@@ -52,7 +51,7 @@ def export_all():
             conn.execute(f"""
                 COPY (SELECT * FROM {pg_schema}.{table})
                 TO 's3://{settings.r2_bucket_name}/parquet/{table}/latest.parquet'
-                (FORMAT PARQUET, COMPRESSION 'snappy', {r2_cfg})
+                (FORMAT PARQUET, COMPRESSION 'snappy')
             """)
             logger.info(f"  {table} exported to R2")
         except Exception as e:

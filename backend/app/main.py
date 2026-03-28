@@ -122,9 +122,18 @@ def get_db_stats():
             .filter(Sale.contract_date.isnot(None))
             .distinct()
             .count(),
-            "db_url_configured": os.environ.get("DATABASE_URL", "NOT SET")[:50] + "...",
         }
     except Exception as e:
         return {"error": str(e)}
     finally:
         db.close()
+
+
+@app.get("/admin/debug")
+def debug_info():
+    db_url = os.environ.get("DATABASE_URL", "NOT SET")
+    return {
+        "database_url_set": db_url != "NOT SET",
+        "database_url_prefix": db_url[:30] if db_url != "NOT SET" else "NOT SET",
+        "data_dir": os.environ.get("DATA_DIR", "NOT SET"),
+    }

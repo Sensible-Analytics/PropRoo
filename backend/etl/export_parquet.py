@@ -28,7 +28,13 @@ def export_all():
 def _export_table(engine, r2_client, table: str):
     logger.info(f"Exporting {table} to Parquet...")
     try:
-        df = pd.read_sql(f"SELECT * FROM {table}", engine)
+        CHUNK = 100_000 if table == "sales" else 500_000
+        chunks = list(pd.read_sql(f"SELECT * FROM {table}", engine, chunksize=CHUNK))
+        if len(chunks) == 1:
+            df = chunks[0]
+        else:
+            df = pd.concat(chunks, ignore_index=True)
+            logger.info(f"  Assembled {len(chunks)} chunks -> {len(df)} total rows")
     except Exception as e:
         logger.error(f"Failed to read table {table}: {e}")
         return

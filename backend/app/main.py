@@ -43,32 +43,36 @@ def test_db():
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-    results = {"url_params": {}, "tests": []}
+    results = {"cert_check": {}, "tests": []}
 
     try:
         from urllib.parse import urlparse
 
         parsed = urlparse(DATABASE_URL)
-        results["url_params"] = {
-            "scheme": parsed.scheme,
-            "hostname": parsed.hostname,
-            "port": parsed.port,
-            "path": parsed.path,
-        }
 
-        ip_url = f"postgresql://{parsed.username}:{parsed.password}@18.142.152.125:{parsed.port}{parsed.path}"
-        results["tests"].append({"ip_url": ip_url})
+        cert_paths = [
+            "/opt/render/.postgresql/root.crt",
+            "/etc/ssl/certs/ca-certificates.crt",
+            "/etc/pki/tls/certs/ca-bundle.crt",
+        ]
 
-        for ssl_mode in ["disable", "prefer", "require"]:
+        for path in cert_paths:
             try:
-                conn = psycopg2.connect(ip_url, sslmode=ssl_mode)
+                with open(path, "r") as f:
+                    results["cert_check"][path] = "exists"
+            except:
+                results["cert_check"][path] = "not found"
+
+        for ssl_mode in ["require", "verify-ca"]:
+            try:
+                conn = psycopg2.connect(DATABASE_URL, sslmode=ssl_mode)
                 cur = conn.cursor()
                 cur.execute("SELECT 1;")
                 cur.close()
                 conn.close()
-                results["tests"].append({f"ip_{ssl_mode}": "success"})
+                results["tests"].append({f"{ssl_mode}_system_cert": "success"})
             except Exception as e:
-                results["tests"].append({f"ip_{ssl_mode}": str(e)[:100]})
+                results["tests"].append({f"{ssl_mode}_system_cert": str(e)[:200]})
 
     except Exception as e:
         results["error"] = str(e)

@@ -38,8 +38,8 @@ def health_check():
 @app.get("/test-db")
 def test_db():
     """Test database connection"""
-    import psycopg2
     import os
+    import sys
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
@@ -53,16 +53,37 @@ def test_db():
 
         conn_str = f"host={parsed.hostname} port={port} dbname={parsed.path[1:]} user={parsed.username} password={parsed.password}"
 
-        for mode in ["disable", "allow", "prefer", "require"]:
-            try:
-                conn = psycopg2.connect(conn_str, sslmode=mode)
-                cur = conn.cursor()
-                cur.execute("SELECT 1;")
-                cur.close()
-                conn.close()
-                results["tests"].append({f"connstr_{mode}": "success"})
-            except Exception as e:
-                results["tests"].append({f"connstr_{mode}": str(e)[:200]})
+        try:
+            import psycopg2
+
+            for mode in ["require", "prefer"]:
+                try:
+                    conn = psycopg2.connect(conn_str, sslmode=mode)
+                    cur = conn.cursor()
+                    cur.execute("SELECT 1;")
+                    cur.close()
+                    conn.close()
+                    results["tests"].append({f"psycopg2_{mode}": "success"})
+                except Exception as e:
+                    results["tests"].append({f"psycopg2_{mode}": str(e)[:200]})
+        except ImportError:
+            results["tests"].append({"psycopg2": "not installed"})
+
+        try:
+            import psycopg
+
+            for mode in ["require", "verify-full"]:
+                try:
+                    conn = psycopg.connect(conn_str, sslmode=mode)
+                    cur = conn.cursor()
+                    cur.execute("SELECT 1;")
+                    cur.close()
+                    conn.close()
+                    results["tests"].append({f"psycopg_{mode}": "success"})
+                except Exception as e:
+                    results["tests"].append({f"psycopg_{mode}": str(e)[:200]})
+        except ImportError:
+            results["tests"].append({"psycopg": "not installed"})
 
     except Exception as e:
         results["error"] = str(e)

@@ -39,7 +39,6 @@ def health_check():
 def test_db():
     """Test database connection"""
     import psycopg2
-    import ssl
     import os
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
@@ -56,28 +55,22 @@ def test_db():
             "port": parsed.port,
             "path": parsed.path,
         }
+
+        ip_url = f"postgresql://{parsed.username}:{parsed.password}@18.142.152.125:{parsed.port}{parsed.path}"
+        results["tests"].append({"ip_url": ip_url})
+
+        for ssl_mode in ["disable", "prefer", "require"]:
+            try:
+                conn = psycopg2.connect(ip_url, sslmode=ssl_mode)
+                cur = conn.cursor()
+                cur.execute("SELECT 1;")
+                cur.close()
+                conn.close()
+                results["tests"].append({f"ip_{ssl_mode}": "success"})
+            except Exception as e:
+                results["tests"].append({f"ip_{ssl_mode}": str(e)[:100]})
+
     except Exception as e:
-        results["url_parsing_error"] = str(e)
-
-    test_configs = [
-        {"name": "default", "params": {}},
-        {"name": "sslmode=disable", "params": {"sslmode": "disable"}},
-        {"name": "sslmode=allow", "params": {"sslmode": "allow"}},
-        {"name": "sslmode=prefer", "params": {"sslmode": "prefer"}},
-        {"name": "sslmode=require", "params": {"sslmode": "require"}},
-        {"name": "sslmode=verify-ca", "params": {"sslmode": "verify-ca"}},
-        {"name": "sslmode=verify-full", "params": {"sslmode": "verify-full"}},
-    ]
-
-    for config in test_configs:
-        try:
-            conn = psycopg2.connect(DATABASE_URL, **config["params"])
-            cur = conn.cursor()
-            cur.execute("SELECT 1;")
-            cur.close()
-            conn.close()
-            results["tests"].append({config["name"]: "success"})
-        except Exception as e:
-            results["tests"].append({config["name"]: str(e)})
+        results["error"] = str(e)
 
     return results

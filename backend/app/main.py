@@ -46,32 +46,31 @@ def test_db():
     results = {"tests": []}
 
     try:
-        for ssl_mode in ["require", "verify-ca"]:
-            try:
-                conn = psycopg2.connect(
-                    DATABASE_URL,
-                    sslmode=ssl_mode,
-                    sslrootcert="/etc/ssl/certs/ca-certificates.crt",
-                )
-                cur = conn.cursor()
-                cur.execute("SELECT 1;")
-                cur.close()
-                conn.close()
-                results["tests"].append({f"{ssl_mode}_with_system_cert": "success"})
-            except Exception as e:
-                results["tests"].append({f"{ssl_mode}_with_system_cert": str(e)[:300]})
-
         try:
             conn = psycopg2.connect(
-                DATABASE_URL, sslmode="require", sslrootcert="system"
+                DATABASE_URL,
+                sslmode="verify-full",
+                sslrootcert="/etc/ssl/certs/ca-certificates.crt",
             )
             cur = conn.cursor()
             cur.execute("SELECT 1;")
             cur.close()
             conn.close()
-            results["tests"].append({"require_with_sslrootcert_system": "success"})
+            results["tests"].append({"verify-full_with_system_cert": "success"})
         except Exception as e:
-            results["tests"].append({"require_with_sslrootcert_system": str(e)[:300]})
+            results["tests"].append({"verify-full_with_system_cert": str(e)[:300]})
+
+        try:
+            conn = psycopg2.connect(
+                DATABASE_URL, sslmode="verify-full", sslrootcert="system"
+            )
+            cur = conn.cursor()
+            cur.execute("SELECT 1;")
+            cur.close()
+            conn.close()
+            results["tests"].append({"verify-full_sslrootcert_system": "success"})
+        except Exception as e:
+            results["tests"].append({"verify-full_sslrootcert_system": str(e)[:300]})
 
     except Exception as e:
         results["error"] = str(e)

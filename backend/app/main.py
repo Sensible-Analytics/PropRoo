@@ -40,20 +40,22 @@ def test_db():
     """Test database connection"""
     import os
     import shutil
-    import subprocess
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
     results = {"tests": []}
 
     try:
-        # Try to create the certificate directory and copy system certs
         cert_dir = "/opt/render/.postgresql"
         cert_path = f"{cert_dir}/root.crt"
 
         os.makedirs(cert_dir, exist_ok=True)
         shutil.copy("/etc/ssl/certs/ca-certificates.crt", cert_path)
-        results["tests"].append({"cert_copy": f"Copied to {cert_path}"})
+
+        file_size = os.path.getsize(cert_path)
+        results["tests"].append(
+            {"cert_copy": f"Copied to {cert_path}, size={file_size}"}
+        )
 
         from urllib.parse import urlparse
 
@@ -83,14 +85,25 @@ def test_db():
 
             for mode in ["verify-full"]:
                 try:
-                    conn = psycopg.connect(conn_str, sslmode=mode)
+                    conn = psycopg.connect(conn_str, sslmode=mode, ssl_context="system")
                     cur = conn.cursor()
                     cur.execute("SELECT 1;")
                     cur.close()
                     conn.close()
-                    results["tests"].append({f"psycopg_{mode}": "success"})
+                    results["tests"].append({f"psycopg_{mode}_system": "success"})
                 except Exception as e:
-                    results["tests"].append({f"psycopg_{mode}": str(e)[:200]})
+                    results["tests"].append({f"psycopg_{mode}_system": str(e)[:200]})
+
+            for mode in ["verify-full"]:
+                try:
+                    conn = psycopg.connect(conn_str, sslmode=mode, ssl_ca=cert_path)
+                    cur = conn.cursor()
+                    cur.execute("SELECT 1;")
+                    cur.close()
+                    conn.close()
+                    results["tests"].append({f"psycopg_{mode}_with_cert": "success"})
+                except Exception as e:
+                    results["tests"].append({f"psycopg_{mode}_with_cert": str(e)[:200]})
         except ImportError:
             results["tests"].append({"psycopg": "not installed"})
 

@@ -49,8 +49,9 @@ def test_db():
         from urllib.parse import urlparse
 
         parsed = urlparse(DATABASE_URL)
+        port = parsed.port or 5432
 
-        conn_str = f"host={parsed.hostname} port={parsed.port} dbname={parsed.path[1:]} user={parsed.username} password={parsed.password}"
+        conn_str = f"host={parsed.hostname} port={port} dbname={parsed.path[1:]} user={parsed.username} password={parsed.password}"
 
         for mode in ["disable", "allow", "prefer", "require"]:
             try:

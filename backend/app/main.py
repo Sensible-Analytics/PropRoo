@@ -41,6 +41,7 @@ def test_db():
     import os
     import ssl
     import socket
+    import subprocess
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
@@ -56,30 +57,36 @@ def test_db():
         results["tests"].append({"host": hostname, "port": port})
 
         try:
-            with socket.create_connection((hostname, port), timeout=10) as sock:
-                sock.sendall(b"\x00\x03\x00\x00")
-                data = sock.recv(1024)
-                results["tests"].append({"raw_tcp": f"Received: {data[:50]}"})
+            proc = subprocess.run(
+                ["psql", "--version"], capture_output=True, text=True, timeout=5
+            )
+            results["tests"].append({"psql": proc.stdout.strip()})
         except Exception as e:
-            results["tests"].append({"raw_tcp_error": str(e)[:200]})
+            results["tests"].append({"psql_error": str(e)[:100]})
 
         try:
-            context = ssl.create_default_context()
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE
-
-            with socket.create_connection((hostname, port), timeout=10) as sock:
-                with context.wrap_socket(sock, server_hostname=hostname) as ssock:
-                    results["tests"].append(
-                        {"raw_ssl": f"Connected with TLS {ssock.version()}"}
-                    )
+            result = subprocess.run(
+                [
+                    "psql",
+                    f"postgresql://{parsed.username}:{parsed.password}@{hostname}:{port}{parsed.path}",
+                    "-c",
+                    "SELECT 1;",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                env={**os.environ, "PGSSLMODE": "require"},
+            )
+            results["tests"].append(
+                {"psql_require": result.stdout[:200] + result.stderr[:200]}
+            )
         except Exception as e:
-            results["tests"].append({"raw_ssl_error": str(e)[:300]})
+            results["tests"].append({"psql_require_error": str(e)[:200]})
 
         try:
             import psycopg2
 
-            for mode in ["disable", "require"]:
+            for mode in ["require"]:
                 try:
                     conn = psycopg2.connect(
                         host=hostname,
@@ -88,39 +95,17 @@ def test_db():
                         user=parsed.username,
                         password=parsed.password,
                         sslmode=mode,
+                        sslcompression=0,
                     )
                     cur = conn.cursor()
                     cur.execute("SELECT 1;")
                     cur.close()
                     conn.close()
-                    results["tests"].append({f"psycopg2_{mode}": "success"})
+                    results["tests"].append({f"psycopg2_{mode}_nocomp": "success"})
                 except Exception as e:
-                    results["tests"].append({f"psycopg2_{mode}": str(e)[:200]})
+                    results["tests"].append({f"psycopg2_{mode}_nocomp": str(e)[:200]})
         except ImportError:
             results["tests"].append({"psycopg2": "not installed"})
-
-        try:
-            import psycopg
-
-            for mode in ["disable", "require"]:
-                try:
-                    conn = psycopg.connect(
-                        host=hostname,
-                        port=port,
-                        dbname=parsed.path[1:],
-                        user=parsed.username,
-                        password=parsed.password,
-                        sslmode=mode,
-                    )
-                    cur = conn.cursor()
-                    cur.execute("SELECT 1;")
-                    cur.close()
-                    conn.close()
-                    results["tests"].append({f"psycopg_{mode}": "success"})
-                except Exception as e:
-                    results["tests"].append({f"psycopg_{mode}": str(e)[:200]})
-        except ImportError:
-            results["tests"].append({"psycopg": "not installed"})
 
     except Exception as e:
         results["error"] = str(e)

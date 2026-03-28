@@ -1,1 +1,1 @@
-web: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+web: uvicorn app.main:app && python /app/scripts/ingest_2024.py

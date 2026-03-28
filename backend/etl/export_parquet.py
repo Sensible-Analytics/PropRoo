@@ -45,7 +45,7 @@ def export_all():
         f"S3_ENDPOINT '{settings.r2_endpoint.replace('https://', '')}'"
     )
 
-    pg_schema = "postgres"
+    pg_schema = "main"
     for table in TABLES:
         logger.info(f"Exporting {table}...")
         try:

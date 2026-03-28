@@ -83,9 +83,9 @@ test.describe('PropRoo E2E Test Suite', () => {
     test('can click on table row to drill into suburb', async ({ page }) => {
       await page.waitForTimeout(5000);
       
-      // Find a suburb row and click it
+      // Find a suburb row and click it (use force to bypass sticky header interception)
       const suburbRow = page.locator('tbody tr').first();
-      await suburbRow.click();
+      await suburbRow.click({ force: true });
       
       // Should show back button and suburb name
       await page.waitForTimeout(3000);
@@ -96,7 +96,7 @@ test.describe('PropRoo E2E Test Suite', () => {
     test('map centers on suburb after drill-down', async ({ page }) => {
       await page.waitForTimeout(5000);
       const suburbRow = page.locator('tbody tr').first();
-      await suburbRow.click();
+      await suburbRow.click({ force: true });
       
       await page.waitForTimeout(3000);
       // Map should be visible still
@@ -111,12 +111,12 @@ test.describe('PropRoo E2E Test Suite', () => {
       
       // First drill to suburb
       const suburbRow = page.locator('tbody tr').first();
-      await suburbRow.click();
+      await suburbRow.click({ force: true });
       await page.waitForTimeout(3000);
       
       // Then drill to street (click on street address row)
       const streetRow = page.locator('tbody tr').first();
-      await streetRow.click();
+      await streetRow.click({ force: true });
       await page.waitForTimeout(3000);
       
       // Should still have map and table

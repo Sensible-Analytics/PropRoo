@@ -84,5 +84,1005 @@
           - columnheader "Market Valuation" [ref=e74]
           - columnheader "Growth performance" [ref=e75]
           - columnheader "Actions" [ref=e76]
-      - rowgroup
+      - rowgroup [ref=e77]:
+        - row "Murringo Residence • 2024-12-31 $495,000 0.0% EXPLORE" [ref=e78] [cursor=pointer]:
+          - cell "Murringo Residence • 2024-12-31" [ref=e79]:
+            - paragraph [ref=e80]: Murringo
+            - paragraph [ref=e81]: Residence • 2024-12-31
+          - cell "$495,000" [ref=e82]:
+            - paragraph [ref=e83]: $495,000
+          - cell "0.0%" [ref=e84]:
+            - generic [ref=e88]: 0.0%
+          - cell "EXPLORE" [ref=e89]:
+            - button "EXPLORE" [ref=e90]
+        - row "Caringbah South Residence • 2024-12-31 $3,300,000 0.0% EXPLORE" [ref=e91] [cursor=pointer]:
+          - cell "Caringbah South Residence • 2024-12-31" [ref=e92]:
+            - paragraph [ref=e93]: Caringbah South
+            - paragraph [ref=e94]: Residence • 2024-12-31
+          - cell "$3,300,000" [ref=e95]:
+            - paragraph [ref=e96]: $3,300,000
+          - cell "0.0%" [ref=e97]:
+            - generic [ref=e101]: 0.0%
+          - cell "EXPLORE" [ref=e102]:
+            - button "EXPLORE" [ref=e103]
+        - row "Caringbah South Residence • 2024-12-31 $3,300,000 0.0% EXPLORE" [ref=e104] [cursor=pointer]:
+          - cell "Caringbah South Residence • 2024-12-31" [ref=e105]:
+            - paragraph [ref=e106]: Caringbah South
+            - paragraph [ref=e107]: Residence • 2024-12-31
+          - cell "$3,300,000" [ref=e108]:
+            - paragraph [ref=e109]: $3,300,000
+          - cell "0.0%" [ref=e110]:
+            - generic [ref=e114]: 0.0%
+          - cell "EXPLORE" [ref=e115]:
+            - button "EXPLORE" [ref=e116]
+        - row "Croydon Park Residence • 2024-12-31 $2,700,000 0.0% EXPLORE" [ref=e117] [cursor=pointer]:
+          - cell "Croydon Park Residence • 2024-12-31" [ref=e118]:
+            - paragraph [ref=e119]: Croydon Park
+            - paragraph [ref=e120]: Residence • 2024-12-31
+          - cell "$2,700,000" [ref=e121]:
+            - paragraph [ref=e122]: $2,700,000
+          - cell "0.0%" [ref=e123]:
+            - generic [ref=e127]: 0.0%
+          - cell "EXPLORE" [ref=e128]:
+            - button "EXPLORE" [ref=e129]
+        - row "Coffs Harbour Commercial • 2024-12-31 $3,120,000 0.0% EXPLORE" [ref=e130] [cursor=pointer]:
+          - cell "Coffs Harbour Commercial • 2024-12-31" [ref=e131]:
+            - paragraph [ref=e132]: Coffs Harbour
+            - paragraph [ref=e133]: Commercial • 2024-12-31
+          - cell "$3,120,000" [ref=e134]:
+            - paragraph [ref=e135]: $3,120,000
+          - cell "0.0%" [ref=e136]:
+            - generic [ref=e140]: 0.0%
+          - cell "EXPLORE" [ref=e141]:
+            - button "EXPLORE" [ref=e142]
+        - row "Lidcombe Residence • 2024-12-31 $744,000 1.8% EXPLORE" [ref=e143] [cursor=pointer]:
+          - cell "Lidcombe Residence • 2024-12-31" [ref=e144]:
+            - paragraph [ref=e145]: Lidcombe
+            - paragraph [ref=e146]: Residence • 2024-12-31
+          - cell "$744,000" [ref=e147]:
+            - paragraph [ref=e148]: $744,000
+          - cell "1.8%" [ref=e149]:
+            - generic [ref=e153]: 1.8%
+          - cell "EXPLORE" [ref=e154]:
+            - button "EXPLORE" [ref=e155]
+        - row "Zetland Residence • 2024-12-31 $950,000 7.4% EXPLORE" [ref=e156] [cursor=pointer]:
+          - cell "Zetland Residence • 2024-12-31" [ref=e157]:
+            - paragraph [ref=e158]: Zetland
+            - paragraph [ref=e159]: Residence • 2024-12-31
+          - cell "$950,000" [ref=e160]:
+            - paragraph [ref=e161]: $950,000
+          - cell "7.4%" [ref=e162]:
+            - generic [ref=e166]: 7.4%
+          - cell "EXPLORE" [ref=e167]:
+            - button "EXPLORE" [ref=e168]
+        - row "Mittagong Vacant Land • 2024-12-31 $700,000 0.0% EXPLORE" [ref=e169] [cursor=pointer]:
+          - cell "Mittagong Vacant Land • 2024-12-31" [ref=e170]:
+            - paragraph [ref=e171]: Mittagong
+            - paragraph [ref=e172]: Vacant Land • 2024-12-31
+          - cell "$700,000" [ref=e173]:
+            - paragraph [ref=e174]: $700,000
+          - cell "0.0%" [ref=e175]:
+            - generic [ref=e179]: 0.0%
+          - cell "EXPLORE" [ref=e180]:
+            - button "EXPLORE" [ref=e181]
+        - row "Mosman Residence • 2024-12-31 $1,070,000 5.8% EXPLORE" [ref=e182] [cursor=pointer]:
+          - cell "Mosman Residence • 2024-12-31" [ref=e183]:
+            - paragraph [ref=e184]: Mosman
+            - paragraph [ref=e185]: Residence • 2024-12-31
+          - cell "$1,070,000" [ref=e186]:
+            - paragraph [ref=e187]: $1,070,000
+          - cell "5.8%" [ref=e188]:
+            - generic [ref=e192]: 5.8%
+          - cell "EXPLORE" [ref=e193]:
+            - button "EXPLORE" [ref=e194]
+        - row "Mosman Residence • 2024-12-31 $1,070,000 5.8% EXPLORE" [ref=e195] [cursor=pointer]:
+          - cell "Mosman Residence • 2024-12-31" [ref=e196]:
+            - paragraph [ref=e197]: Mosman
+            - paragraph [ref=e198]: Residence • 2024-12-31
+          - cell "$1,070,000" [ref=e199]:
+            - paragraph [ref=e200]: $1,070,000
+          - cell "5.8%" [ref=e201]:
+            - generic [ref=e205]: 5.8%
+          - cell "EXPLORE" [ref=e206]:
+            - button "EXPLORE" [ref=e207]
+        - row "Wattle Grove Residence • 2024-12-31 $1,800,000 0.0% EXPLORE" [ref=e208] [cursor=pointer]:
+          - cell "Wattle Grove Residence • 2024-12-31" [ref=e209]:
+            - paragraph [ref=e210]: Wattle Grove
+            - paragraph [ref=e211]: Residence • 2024-12-31
+          - cell "$1,800,000" [ref=e212]:
+            - paragraph [ref=e213]: $1,800,000
+          - cell "0.0%" [ref=e214]:
+            - generic [ref=e218]: 0.0%
+          - cell "EXPLORE" [ref=e219]:
+            - button "EXPLORE" [ref=e220]
+        - row "Austral Vacant Land • 2024-12-31 $620,000 0.0% EXPLORE" [ref=e221] [cursor=pointer]:
+          - cell "Austral Vacant Land • 2024-12-31" [ref=e222]:
+            - paragraph [ref=e223]: Austral
+            - paragraph [ref=e224]: Vacant Land • 2024-12-31
+          - cell "$620,000" [ref=e225]:
+            - paragraph [ref=e226]: $620,000
+          - cell "0.0%" [ref=e227]:
+            - generic [ref=e231]: 0.0%
+          - cell "EXPLORE" [ref=e232]:
+            - button "EXPLORE" [ref=e233]
+        - row "Homebush Residence • 2024-12-31 $667,000 1.6% EXPLORE" [ref=e234] [cursor=pointer]:
+          - cell "Homebush Residence • 2024-12-31" [ref=e235]:
+            - paragraph [ref=e236]: Homebush
+            - paragraph [ref=e237]: Residence • 2024-12-31
+          - cell "$667,000" [ref=e238]:
+            - paragraph [ref=e239]: $667,000
+          - cell "1.6%" [ref=e240]:
+            - generic [ref=e244]: 1.6%
+          - cell "EXPLORE" [ref=e245]:
+            - button "EXPLORE" [ref=e246]
+        - row "Schofields Residence • 2024-12-31 $1,100,000 0.0% EXPLORE" [ref=e247] [cursor=pointer]:
+          - cell "Schofields Residence • 2024-12-31" [ref=e248]:
+            - paragraph [ref=e249]: Schofields
+            - paragraph [ref=e250]: Residence • 2024-12-31
+          - cell "$1,100,000" [ref=e251]:
+            - paragraph [ref=e252]: $1,100,000
+          - cell "0.0%" [ref=e253]:
+            - generic [ref=e257]: 0.0%
+          - cell "EXPLORE" [ref=e258]:
+            - button "EXPLORE" [ref=e259]
+        - row "Fountaindale Residence • 2024-12-31 $1,650,000 0.0% EXPLORE" [ref=e260] [cursor=pointer]:
+          - cell "Fountaindale Residence • 2024-12-31" [ref=e261]:
+            - paragraph [ref=e262]: Fountaindale
+            - paragraph [ref=e263]: Residence • 2024-12-31
+          - cell "$1,650,000" [ref=e264]:
+            - paragraph [ref=e265]: $1,650,000
+          - cell "0.0%" [ref=e266]:
+            - generic [ref=e270]: 0.0%
+          - cell "EXPLORE" [ref=e271]:
+            - button "EXPLORE" [ref=e272]
+        - row "Adamstown Heights Residence • 2024-12-31 $1,325,000 0.0% EXPLORE" [ref=e273] [cursor=pointer]:
+          - cell "Adamstown Heights Residence • 2024-12-31" [ref=e274]:
+            - paragraph [ref=e275]: Adamstown Heights
+            - paragraph [ref=e276]: Residence • 2024-12-31
+          - cell "$1,325,000" [ref=e277]:
+            - paragraph [ref=e278]: $1,325,000
+          - cell "0.0%" [ref=e279]:
+            - generic [ref=e283]: 0.0%
+          - cell "EXPLORE" [ref=e284]:
+            - button "EXPLORE" [ref=e285]
+        - row "New Lambton Residence • 2024-12-31 $1,865,000 0.0% EXPLORE" [ref=e286] [cursor=pointer]:
+          - cell "New Lambton Residence • 2024-12-31" [ref=e287]:
+            - paragraph [ref=e288]: New Lambton
+            - paragraph [ref=e289]: Residence • 2024-12-31
+          - cell "$1,865,000" [ref=e290]:
+            - paragraph [ref=e291]: $1,865,000
+          - cell "0.0%" [ref=e292]:
+            - generic [ref=e296]: 0.0%
+          - cell "EXPLORE" [ref=e297]:
+            - button "EXPLORE" [ref=e298]
+        - row "Gunnedah Residence • 2024-12-31 $900,000 0.0% EXPLORE" [ref=e299] [cursor=pointer]:
+          - cell "Gunnedah Residence • 2024-12-31" [ref=e300]:
+            - paragraph [ref=e301]: Gunnedah
+            - paragraph [ref=e302]: Residence • 2024-12-31
+          - cell "$900,000" [ref=e303]:
+            - paragraph [ref=e304]: $900,000
+          - cell "0.0%" [ref=e305]:
+            - generic [ref=e309]: 0.0%
+          - cell "EXPLORE" [ref=e310]:
+            - button "EXPLORE" [ref=e311]
+        - row "Schofields Residence • 2024-12-31 $680,000 0.8% EXPLORE" [ref=e312] [cursor=pointer]:
+          - cell "Schofields Residence • 2024-12-31" [ref=e313]:
+            - paragraph [ref=e314]: Schofields
+            - paragraph [ref=e315]: Residence • 2024-12-31
+          - cell "$680,000" [ref=e316]:
+            - paragraph [ref=e317]: $680,000
+          - cell "0.8%" [ref=e318]:
+            - generic [ref=e322]: 0.8%
+          - cell "EXPLORE" [ref=e323]:
+            - button "EXPLORE" [ref=e324]
+        - row "Parramatta Residence • 2024-12-31 $660,000 4.3% EXPLORE" [ref=e325] [cursor=pointer]:
+          - cell "Parramatta Residence • 2024-12-31" [ref=e326]:
+            - paragraph [ref=e327]: Parramatta
+            - paragraph [ref=e328]: Residence • 2024-12-31
+          - cell "$660,000" [ref=e329]:
+            - paragraph [ref=e330]: $660,000
+          - cell "4.3%" [ref=e331]:
+            - generic [ref=e335]: 4.3%
+          - cell "EXPLORE" [ref=e336]:
+            - button "EXPLORE" [ref=e337]
+        - row "Merrylands Residence • 2024-12-31 $485,000 5.0% EXPLORE" [ref=e338] [cursor=pointer]:
+          - cell "Merrylands Residence • 2024-12-31" [ref=e339]:
+            - paragraph [ref=e340]: Merrylands
+            - paragraph [ref=e341]: Residence • 2024-12-31
+          - cell "$485,000" [ref=e342]:
+            - paragraph [ref=e343]: $485,000
+          - cell "5.0%" [ref=e344]:
+            - generic [ref=e348]: 5.0%
+          - cell "EXPLORE" [ref=e349]:
+            - button "EXPLORE" [ref=e350]
+        - row "Hurstville Residence • 2024-12-31 $680,000 -24.3% EXPLORE" [ref=e351] [cursor=pointer]:
+          - cell "Hurstville Residence • 2024-12-31" [ref=e352]:
+            - paragraph [ref=e353]: Hurstville
+            - paragraph [ref=e354]: Residence • 2024-12-31
+          - cell "$680,000" [ref=e355]:
+            - paragraph [ref=e356]: $680,000
+          - cell "-24.3%" [ref=e357]:
+            - generic [ref=e361]: "-24.3%"
+          - cell "EXPLORE" [ref=e362]:
+            - button "EXPLORE" [ref=e363]
+        - row "Kogarah Residence • 2024-12-31 $985,000 0.0% EXPLORE" [ref=e364] [cursor=pointer]:
+          - cell "Kogarah Residence • 2024-12-31" [ref=e365]:
+            - paragraph [ref=e366]: Kogarah
+            - paragraph [ref=e367]: Residence • 2024-12-31
+          - cell "$985,000" [ref=e368]:
+            - paragraph [ref=e369]: $985,000
+          - cell "0.0%" [ref=e370]:
+            - generic [ref=e374]: 0.0%
+          - cell "EXPLORE" [ref=e375]:
+            - button "EXPLORE" [ref=e376]
+        - row "Carrington Residence • 2024-12-31 $1,520,000 0.0% EXPLORE" [ref=e377] [cursor=pointer]:
+          - cell "Carrington Residence • 2024-12-31" [ref=e378]:
+            - paragraph [ref=e379]: Carrington
+            - paragraph [ref=e380]: Residence • 2024-12-31
+          - cell "$1,520,000" [ref=e381]:
+            - paragraph [ref=e382]: $1,520,000
+          - cell "0.0%" [ref=e383]:
+            - generic [ref=e387]: 0.0%
+          - cell "EXPLORE" [ref=e388]:
+            - button "EXPLORE" [ref=e389]
+        - row "Wickham Residence • 2024-12-31 $1,135,000 18.8% EXPLORE" [ref=e390] [cursor=pointer]:
+          - cell "Wickham Residence • 2024-12-31" [ref=e391]:
+            - paragraph [ref=e392]: Wickham
+            - paragraph [ref=e393]: Residence • 2024-12-31
+          - cell "$1,135,000" [ref=e394]:
+            - paragraph [ref=e395]: $1,135,000
+          - cell "18.8%" [ref=e396]:
+            - generic [ref=e400]: 18.8%
+          - cell "EXPLORE" [ref=e401]:
+            - button "EXPLORE" [ref=e402]
+        - row "Box Hill Commercial • 2024-12-31 $11,583,000 0.0% EXPLORE" [ref=e403] [cursor=pointer]:
+          - cell "Box Hill Commercial • 2024-12-31" [ref=e404]:
+            - paragraph [ref=e405]: Box Hill
+            - paragraph [ref=e406]: Commercial • 2024-12-31
+          - cell "$11,583,000" [ref=e407]:
+            - paragraph [ref=e408]: $11,583,000
+          - cell "0.0%" [ref=e409]:
+            - generic [ref=e413]: 0.0%
+          - cell "EXPLORE" [ref=e414]:
+            - button "EXPLORE" [ref=e415]
+        - row "Kiama Residence • 2024-12-31 $805,000 7.4% EXPLORE" [ref=e416] [cursor=pointer]:
+          - cell "Kiama Residence • 2024-12-31" [ref=e417]:
+            - paragraph [ref=e418]: Kiama
+            - paragraph [ref=e419]: Residence • 2024-12-31
+          - cell "$805,000" [ref=e420]:
+            - paragraph [ref=e421]: $805,000
+          - cell "7.4%" [ref=e422]:
+            - generic [ref=e426]: 7.4%
+          - cell "EXPLORE" [ref=e427]:
+            - button "EXPLORE" [ref=e428]
+        - row "Tahmoor Residence • 2024-12-31 $900,000 3.0% EXPLORE" [ref=e429] [cursor=pointer]:
+          - cell "Tahmoor Residence • 2024-12-31" [ref=e430]:
+            - paragraph [ref=e431]: Tahmoor
+            - paragraph [ref=e432]: Residence • 2024-12-31
+          - cell "$900,000" [ref=e433]:
+            - paragraph [ref=e434]: $900,000
+          - cell "3.0%" [ref=e435]:
+            - generic [ref=e439]: 3.0%
+          - cell "EXPLORE" [ref=e440]:
+            - button "EXPLORE" [ref=e441]
+        - row "Bankstown Residence • 2024-12-31 $650,000 -3.7% EXPLORE" [ref=e442] [cursor=pointer]:
+          - cell "Bankstown Residence • 2024-12-31" [ref=e443]:
+            - paragraph [ref=e444]: Bankstown
+            - paragraph [ref=e445]: Residence • 2024-12-31
+          - cell "$650,000" [ref=e446]:
+            - paragraph [ref=e447]: $650,000
+          - cell "-3.7%" [ref=e448]:
+            - generic [ref=e452]: "-3.7%"
+          - cell "EXPLORE" [ref=e453]:
+            - button "EXPLORE" [ref=e454]
+        - row "Epping Residence • 2024-12-31 $759,000 2.4% EXPLORE" [ref=e455] [cursor=pointer]:
+          - cell "Epping Residence • 2024-12-31" [ref=e456]:
+            - paragraph [ref=e457]: Epping
+            - paragraph [ref=e458]: Residence • 2024-12-31
+          - cell "$759,000" [ref=e459]:
+            - paragraph [ref=e460]: $759,000
+          - cell "2.4%" [ref=e461]:
+            - generic [ref=e465]: 2.4%
+          - cell "EXPLORE" [ref=e466]:
+            - button "EXPLORE" [ref=e467]
+        - row "Lidcombe Residence • 2024-12-31 $980,000 9.3% EXPLORE" [ref=e468] [cursor=pointer]:
+          - cell "Lidcombe Residence • 2024-12-31" [ref=e469]:
+            - paragraph [ref=e470]: Lidcombe
+            - paragraph [ref=e471]: Residence • 2024-12-31
+          - cell "$980,000" [ref=e472]:
+            - paragraph [ref=e473]: $980,000
+          - cell "9.3%" [ref=e474]:
+            - generic [ref=e478]: 9.3%
+          - cell "EXPLORE" [ref=e479]:
+            - button "EXPLORE" [ref=e480]
+        - row "Lidcombe Residence • 2024-12-31 $850,000 5.1% EXPLORE" [ref=e481] [cursor=pointer]:
+          - cell "Lidcombe Residence • 2024-12-31" [ref=e482]:
+            - paragraph [ref=e483]: Lidcombe
+            - paragraph [ref=e484]: Residence • 2024-12-31
+          - cell "$850,000" [ref=e485]:
+            - paragraph [ref=e486]: $850,000
+          - cell "5.1%" [ref=e487]:
+            - generic [ref=e491]: 5.1%
+          - cell "EXPLORE" [ref=e492]:
+            - button "EXPLORE" [ref=e493]
+        - row "Narrabeen Residence • 2024-12-31 $1,250,000 7.9% EXPLORE" [ref=e494] [cursor=pointer]:
+          - cell "Narrabeen Residence • 2024-12-31" [ref=e495]:
+            - paragraph [ref=e496]: Narrabeen
+            - paragraph [ref=e497]: Residence • 2024-12-31
+          - cell "$1,250,000" [ref=e498]:
+            - paragraph [ref=e499]: $1,250,000
+          - cell "7.9%" [ref=e500]:
+            - generic [ref=e504]: 7.9%
+          - cell "EXPLORE" [ref=e505]:
+            - button "EXPLORE" [ref=e506]
+        - row "Camperdown Residence • 2024-12-31 $900,000 -12.8% EXPLORE" [ref=e507] [cursor=pointer]:
+          - cell "Camperdown Residence • 2024-12-31" [ref=e508]:
+            - paragraph [ref=e509]: Camperdown
+            - paragraph [ref=e510]: Residence • 2024-12-31
+          - cell "$900,000" [ref=e511]:
+            - paragraph [ref=e512]: $900,000
+          - cell "-12.8%" [ref=e513]:
+            - generic [ref=e517]: "-12.8%"
+          - cell "EXPLORE" [ref=e518]:
+            - button "EXPLORE" [ref=e519]
+        - row "North Ryde Residence • 2024-12-31 $865,000 23.1% EXPLORE" [ref=e520] [cursor=pointer]:
+          - cell "North Ryde Residence • 2024-12-31" [ref=e521]:
+            - paragraph [ref=e522]: North Ryde
+            - paragraph [ref=e523]: Residence • 2024-12-31
+          - cell "$865,000" [ref=e524]:
+            - paragraph [ref=e525]: $865,000
+          - cell "23.1%" [ref=e526]:
+            - generic [ref=e530]: 23.1%
+          - cell "EXPLORE" [ref=e531]:
+            - button "EXPLORE" [ref=e532]
+        - row "Kiama Downs Residence • 2024-12-31 $1,750,000 0.0% EXPLORE" [ref=e533] [cursor=pointer]:
+          - cell "Kiama Downs Residence • 2024-12-31" [ref=e534]:
+            - paragraph [ref=e535]: Kiama Downs
+            - paragraph [ref=e536]: Residence • 2024-12-31
+          - cell "$1,750,000" [ref=e537]:
+            - paragraph [ref=e538]: $1,750,000
+          - cell "0.0%" [ref=e539]:
+            - generic [ref=e543]: 0.0%
+          - cell "EXPLORE" [ref=e544]:
+            - button "EXPLORE" [ref=e545]
+        - row "Shell Cove Residence • 2024-12-31 $1,000,000 0.0% EXPLORE" [ref=e546] [cursor=pointer]:
+          - cell "Shell Cove Residence • 2024-12-31" [ref=e547]:
+            - paragraph [ref=e548]: Shell Cove
+            - paragraph [ref=e549]: Residence • 2024-12-31
+          - cell "$1,000,000" [ref=e550]:
+            - paragraph [ref=e551]: $1,000,000
+          - cell "0.0%" [ref=e552]:
+            - generic [ref=e556]: 0.0%
+          - cell "EXPLORE" [ref=e557]:
+            - button "EXPLORE" [ref=e558]
+        - row "Rhodes Residence • 2024-12-31 $1,192,000 22.2% EXPLORE" [ref=e559] [cursor=pointer]:
+          - cell "Rhodes Residence • 2024-12-31" [ref=e560]:
+            - paragraph [ref=e561]: Rhodes
+            - paragraph [ref=e562]: Residence • 2024-12-31
+          - cell "$1,192,000" [ref=e563]:
+            - paragraph [ref=e564]: $1,192,000
+          - cell "22.2%" [ref=e565]:
+            - generic [ref=e569]: 22.2%
+          - cell "EXPLORE" [ref=e570]:
+            - button "EXPLORE" [ref=e571]
+        - row "Granville Residence • 2024-12-31 $643,880 6.6% EXPLORE" [ref=e572] [cursor=pointer]:
+          - cell "Granville Residence • 2024-12-31" [ref=e573]:
+            - paragraph [ref=e574]: Granville
+            - paragraph [ref=e575]: Residence • 2024-12-31
+          - cell "$643,880" [ref=e576]:
+            - paragraph [ref=e577]: $643,880
+          - cell "6.6%" [ref=e578]:
+            - generic [ref=e582]: 6.6%
+          - cell "EXPLORE" [ref=e583]:
+            - button "EXPLORE" [ref=e584]
+        - row "Hurstville Residence • 2024-12-31 $728,000 -17.2% EXPLORE" [ref=e585] [cursor=pointer]:
+          - cell "Hurstville Residence • 2024-12-31" [ref=e586]:
+            - paragraph [ref=e587]: Hurstville
+            - paragraph [ref=e588]: Residence • 2024-12-31
+          - cell "$728,000" [ref=e589]:
+            - paragraph [ref=e590]: $728,000
+          - cell "-17.2%" [ref=e591]:
+            - generic [ref=e595]: "-17.2%"
+          - cell "EXPLORE" [ref=e596]:
+            - button "EXPLORE" [ref=e597]
+        - row "Bondi Beach Residence • 2024-12-31 $1,700,000 0.0% EXPLORE" [ref=e598] [cursor=pointer]:
+          - cell "Bondi Beach Residence • 2024-12-31" [ref=e599]:
+            - paragraph [ref=e600]: Bondi Beach
+            - paragraph [ref=e601]: Residence • 2024-12-31
+          - cell "$1,700,000" [ref=e602]:
+            - paragraph [ref=e603]: $1,700,000
+          - cell "0.0%" [ref=e604]:
+            - generic [ref=e608]: 0.0%
+          - cell "EXPLORE" [ref=e609]:
+            - button "EXPLORE" [ref=e610]
+        - row "Bondi Beach Residence • 2024-12-31 $1,100,000 0.0% EXPLORE" [ref=e611] [cursor=pointer]:
+          - cell "Bondi Beach Residence • 2024-12-31" [ref=e612]:
+            - paragraph [ref=e613]: Bondi Beach
+            - paragraph [ref=e614]: Residence • 2024-12-31
+          - cell "$1,100,000" [ref=e615]:
+            - paragraph [ref=e616]: $1,100,000
+          - cell "0.0%" [ref=e617]:
+            - generic [ref=e621]: 0.0%
+          - cell "EXPLORE" [ref=e622]:
+            - button "EXPLORE" [ref=e623]
+        - row "Bronte Residence • 2024-12-31 $5,500,000 0.0% EXPLORE" [ref=e624] [cursor=pointer]:
+          - cell "Bronte Residence • 2024-12-31" [ref=e625]:
+            - paragraph [ref=e626]: Bronte
+            - paragraph [ref=e627]: Residence • 2024-12-31
+          - cell "$5,500,000" [ref=e628]:
+            - paragraph [ref=e629]: $5,500,000
+          - cell "0.0%" [ref=e630]:
+            - generic [ref=e634]: 0.0%
+          - cell "EXPLORE" [ref=e635]:
+            - button "EXPLORE" [ref=e636]
+        - row "Beacon Hill Residence • 2024-12-31 $2,010,000 0.0% EXPLORE" [ref=e637] [cursor=pointer]:
+          - cell "Beacon Hill Residence • 2024-12-31" [ref=e638]:
+            - paragraph [ref=e639]: Beacon Hill
+            - paragraph [ref=e640]: Residence • 2024-12-31
+          - cell "$2,010,000" [ref=e641]:
+            - paragraph [ref=e642]: $2,010,000
+          - cell "0.0%" [ref=e643]:
+            - generic [ref=e647]: 0.0%
+          - cell "EXPLORE" [ref=e648]:
+            - button "EXPLORE" [ref=e649]
+        - row "Soldiers Point Residence • 2024-12-31 $1,150,000 0.0% EXPLORE" [ref=e650] [cursor=pointer]:
+          - cell "Soldiers Point Residence • 2024-12-31" [ref=e651]:
+            - paragraph [ref=e652]: Soldiers Point
+            - paragraph [ref=e653]: Residence • 2024-12-31
+          - cell "$1,150,000" [ref=e654]:
+            - paragraph [ref=e655]: $1,150,000
+          - cell "0.0%" [ref=e656]:
+            - generic [ref=e660]: 0.0%
+          - cell "EXPLORE" [ref=e661]:
+            - button "EXPLORE" [ref=e662]
+        - row "Glenroy Residence • 2024-12-31 $480,000 0.0% EXPLORE" [ref=e663] [cursor=pointer]:
+          - cell "Glenroy Residence • 2024-12-31" [ref=e664]:
+            - paragraph [ref=e665]: Glenroy
+            - paragraph [ref=e666]: Residence • 2024-12-31
+          - cell "$480,000" [ref=e667]:
+            - paragraph [ref=e668]: $480,000
+          - cell "0.0%" [ref=e669]:
+            - generic [ref=e673]: 0.0%
+          - cell "EXPLORE" [ref=e674]:
+            - button "EXPLORE" [ref=e675]
+        - row "Tocumwal Vacant Land • 2024-12-31 $150,000 0.0% EXPLORE" [ref=e676] [cursor=pointer]:
+          - cell "Tocumwal Vacant Land • 2024-12-31" [ref=e677]:
+            - paragraph [ref=e678]: Tocumwal
+            - paragraph [ref=e679]: Vacant Land • 2024-12-31
+          - cell "$150,000" [ref=e680]:
+            - paragraph [ref=e681]: $150,000
+          - cell "0.0%" [ref=e682]:
+            - generic [ref=e686]: 0.0%
+          - cell "EXPLORE" [ref=e687]:
+            - button "EXPLORE" [ref=e688]
+        - row "Mount Kuring-Gai Residence • 2024-12-31 $1,695,000 6.5% EXPLORE" [ref=e689] [cursor=pointer]:
+          - cell "Mount Kuring-Gai Residence • 2024-12-31" [ref=e690]:
+            - paragraph [ref=e691]: Mount Kuring-Gai
+            - paragraph [ref=e692]: Residence • 2024-12-31
+          - cell "$1,695,000" [ref=e693]:
+            - paragraph [ref=e694]: $1,695,000
+          - cell "6.5%" [ref=e695]:
+            - generic [ref=e699]: 6.5%
+          - cell "EXPLORE" [ref=e700]:
+            - button "EXPLORE" [ref=e701]
+        - row "Moree Residence • 2024-12-31 $1,350,000 0.0% EXPLORE" [ref=e702] [cursor=pointer]:
+          - cell "Moree Residence • 2024-12-31" [ref=e703]:
+            - paragraph [ref=e704]: Moree
+            - paragraph [ref=e705]: Residence • 2024-12-31
+          - cell "$1,350,000" [ref=e706]:
+            - paragraph [ref=e707]: $1,350,000
+          - cell "0.0%" [ref=e708]:
+            - generic [ref=e712]: 0.0%
+          - cell "EXPLORE" [ref=e713]:
+            - button "EXPLORE" [ref=e714]
+        - row "Narrabeen Residence • 2024-12-31 $1,650,000 40.2% EXPLORE" [ref=e715] [cursor=pointer]:
+          - cell "Narrabeen Residence • 2024-12-31" [ref=e716]:
+            - paragraph [ref=e717]: Narrabeen
+            - paragraph [ref=e718]: Residence • 2024-12-31
+          - cell "$1,650,000" [ref=e719]:
+            - paragraph [ref=e720]: $1,650,000
+          - cell "40.2%" [ref=e721]:
+            - generic [ref=e725]: 40.2%
+          - cell "EXPLORE" [ref=e726]:
+            - button "EXPLORE" [ref=e727]
+        - row "Port Macquarie Residence • 2024-12-31 $590,000 1.0% EXPLORE" [ref=e728] [cursor=pointer]:
+          - cell "Port Macquarie Residence • 2024-12-31" [ref=e729]:
+            - paragraph [ref=e730]: Port Macquarie
+            - paragraph [ref=e731]: Residence • 2024-12-31
+          - cell "$590,000" [ref=e732]:
+            - paragraph [ref=e733]: $590,000
+          - cell "1.0%" [ref=e734]:
+            - generic [ref=e738]: 1.0%
+          - cell "EXPLORE" [ref=e739]:
+            - button "EXPLORE" [ref=e740]
+        - row "Bonnyrigg Residence • 2024-12-31 $1,290,000 0.0% EXPLORE" [ref=e741] [cursor=pointer]:
+          - cell "Bonnyrigg Residence • 2024-12-31" [ref=e742]:
+            - paragraph [ref=e743]: Bonnyrigg
+            - paragraph [ref=e744]: Residence • 2024-12-31
+          - cell "$1,290,000" [ref=e745]:
+            - paragraph [ref=e746]: $1,290,000
+          - cell "0.0%" [ref=e747]:
+            - generic [ref=e751]: 0.0%
+          - cell "EXPLORE" [ref=e752]:
+            - button "EXPLORE" [ref=e753]
+        - row "Ettalong Beach Residence • 2024-12-31 $810,000 3.8% EXPLORE" [ref=e754] [cursor=pointer]:
+          - cell "Ettalong Beach Residence • 2024-12-31" [ref=e755]:
+            - paragraph [ref=e756]: Ettalong Beach
+            - paragraph [ref=e757]: Residence • 2024-12-31
+          - cell "$810,000" [ref=e758]:
+            - paragraph [ref=e759]: $810,000
+          - cell "3.8%" [ref=e760]:
+            - generic [ref=e764]: 3.8%
+          - cell "EXPLORE" [ref=e765]:
+            - button "EXPLORE" [ref=e766]
+        - row "Branxton Residence • 2024-12-31 $1,165,000 0.0% EXPLORE" [ref=e767] [cursor=pointer]:
+          - cell "Branxton Residence • 2024-12-31" [ref=e768]:
+            - paragraph [ref=e769]: Branxton
+            - paragraph [ref=e770]: Residence • 2024-12-31
+          - cell "$1,165,000" [ref=e771]:
+            - paragraph [ref=e772]: $1,165,000
+          - cell "0.0%" [ref=e773]:
+            - generic [ref=e777]: 0.0%
+          - cell "EXPLORE" [ref=e778]:
+            - button "EXPLORE" [ref=e779]
+        - row "Blacktown Residence • 2024-12-31 $550,000 6.2% EXPLORE" [ref=e780] [cursor=pointer]:
+          - cell "Blacktown Residence • 2024-12-31" [ref=e781]:
+            - paragraph [ref=e782]: Blacktown
+            - paragraph [ref=e783]: Residence • 2024-12-31
+          - cell "$550,000" [ref=e784]:
+            - paragraph [ref=e785]: $550,000
+          - cell "6.2%" [ref=e786]:
+            - generic [ref=e790]: 6.2%
+          - cell "EXPLORE" [ref=e791]:
+            - button "EXPLORE" [ref=e792]
+        - row "Armidale Residence • 2024-12-31 $230,000 0.0% EXPLORE" [ref=e793] [cursor=pointer]:
+          - cell "Armidale Residence • 2024-12-31" [ref=e794]:
+            - paragraph [ref=e795]: Armidale
+            - paragraph [ref=e796]: Residence • 2024-12-31
+          - cell "$230,000" [ref=e797]:
+            - paragraph [ref=e798]: $230,000
+          - cell "0.0%" [ref=e799]:
+            - generic [ref=e803]: 0.0%
+          - cell "EXPLORE" [ref=e804]:
+            - button "EXPLORE" [ref=e805]
+        - row "The Junction Residence • 2024-12-31 $4,625,000 0.0% EXPLORE" [ref=e806] [cursor=pointer]:
+          - cell "The Junction Residence • 2024-12-31" [ref=e807]:
+            - paragraph [ref=e808]: The Junction
+            - paragraph [ref=e809]: Residence • 2024-12-31
+          - cell "$4,625,000" [ref=e810]:
+            - paragraph [ref=e811]: $4,625,000
+          - cell "0.0%" [ref=e812]:
+            - generic [ref=e816]: 0.0%
+          - cell "EXPLORE" [ref=e817]:
+            - button "EXPLORE" [ref=e818]
+        - row "North Kellyville Residence • 2024-12-31 $1,880,000 0.0% EXPLORE" [ref=e819] [cursor=pointer]:
+          - cell "North Kellyville Residence • 2024-12-31" [ref=e820]:
+            - paragraph [ref=e821]: North Kellyville
+            - paragraph [ref=e822]: Residence • 2024-12-31
+          - cell "$1,880,000" [ref=e823]:
+            - paragraph [ref=e824]: $1,880,000
+          - cell "0.0%" [ref=e825]:
+            - generic [ref=e829]: 0.0%
+          - cell "EXPLORE" [ref=e830]:
+            - button "EXPLORE" [ref=e831]
+        - row "Fishing Point Residence • 2024-12-31 $1,470,000 0.0% EXPLORE" [ref=e832] [cursor=pointer]:
+          - cell "Fishing Point Residence • 2024-12-31" [ref=e833]:
+            - paragraph [ref=e834]: Fishing Point
+            - paragraph [ref=e835]: Residence • 2024-12-31
+          - cell "$1,470,000" [ref=e836]:
+            - paragraph [ref=e837]: $1,470,000
+          - cell "0.0%" [ref=e838]:
+            - generic [ref=e842]: 0.0%
+          - cell "EXPLORE" [ref=e843]:
+            - button "EXPLORE" [ref=e844]
+        - row "Angus Residence • 2024-12-31 $500,000 0.0% EXPLORE" [ref=e845] [cursor=pointer]:
+          - cell "Angus Residence • 2024-12-31" [ref=e846]:
+            - paragraph [ref=e847]: Angus
+            - paragraph [ref=e848]: Residence • 2024-12-31
+          - cell "$500,000" [ref=e849]:
+            - paragraph [ref=e850]: $500,000
+          - cell "0.0%" [ref=e851]:
+            - generic [ref=e855]: 0.0%
+          - cell "EXPLORE" [ref=e856]:
+            - button "EXPLORE" [ref=e857]
+        - row "The Rocks Residence • 2024-12-31 $6,400,000 53.2% EXPLORE" [ref=e858] [cursor=pointer]:
+          - cell "The Rocks Residence • 2024-12-31" [ref=e859]:
+            - paragraph [ref=e860]: The Rocks
+            - paragraph [ref=e861]: Residence • 2024-12-31
+          - cell "$6,400,000" [ref=e862]:
+            - paragraph [ref=e863]: $6,400,000
+          - cell "53.2%" [ref=e864]:
+            - generic [ref=e868]: 53.2%
+          - cell "EXPLORE" [ref=e869]:
+            - button "EXPLORE" [ref=e870]
+        - row "Engadine Residence • 2024-12-31 $1,600,000 0.0% EXPLORE" [ref=e871] [cursor=pointer]:
+          - cell "Engadine Residence • 2024-12-31" [ref=e872]:
+            - paragraph [ref=e873]: Engadine
+            - paragraph [ref=e874]: Residence • 2024-12-31
+          - cell "$1,600,000" [ref=e875]:
+            - paragraph [ref=e876]: $1,600,000
+          - cell "0.0%" [ref=e877]:
+            - generic [ref=e881]: 0.0%
+          - cell "EXPLORE" [ref=e882]:
+            - button "EXPLORE" [ref=e883]
+        - row "Wingello Residence • 2024-12-31 $1,650,000 0.0% EXPLORE" [ref=e884] [cursor=pointer]:
+          - cell "Wingello Residence • 2024-12-31" [ref=e885]:
+            - paragraph [ref=e886]: Wingello
+            - paragraph [ref=e887]: Residence • 2024-12-31
+          - cell "$1,650,000" [ref=e888]:
+            - paragraph [ref=e889]: $1,650,000
+          - cell "0.0%" [ref=e890]:
+            - generic [ref=e894]: 0.0%
+          - cell "EXPLORE" [ref=e895]:
+            - button "EXPLORE" [ref=e896]
+        - row "Gledswood Hills Residence • 2024-12-30 $905,000 0.0% EXPLORE" [ref=e897] [cursor=pointer]:
+          - cell "Gledswood Hills Residence • 2024-12-30" [ref=e898]:
+            - paragraph [ref=e899]: Gledswood Hills
+            - paragraph [ref=e900]: Residence • 2024-12-30
+          - cell "$905,000" [ref=e901]:
+            - paragraph [ref=e902]: $905,000
+          - cell "0.0%" [ref=e903]:
+            - generic [ref=e907]: 0.0%
+          - cell "EXPLORE" [ref=e908]:
+            - button "EXPLORE" [ref=e909]
+        - row "Redbournberry Residence • 2024-12-30 $620,000 0.0% EXPLORE" [ref=e910] [cursor=pointer]:
+          - cell "Redbournberry Residence • 2024-12-30" [ref=e911]:
+            - paragraph [ref=e912]: Redbournberry
+            - paragraph [ref=e913]: Residence • 2024-12-30
+          - cell "$620,000" [ref=e914]:
+            - paragraph [ref=e915]: $620,000
+          - cell "0.0%" [ref=e916]:
+            - generic [ref=e920]: 0.0%
+          - cell "EXPLORE" [ref=e921]:
+            - button "EXPLORE" [ref=e922]
+        - row "Canley Heights Residence • 2024-12-30 $1,100,000 0.0% EXPLORE" [ref=e923] [cursor=pointer]:
+          - cell "Canley Heights Residence • 2024-12-30" [ref=e924]:
+            - paragraph [ref=e925]: Canley Heights
+            - paragraph [ref=e926]: Residence • 2024-12-30
+          - cell "$1,100,000" [ref=e927]:
+            - paragraph [ref=e928]: $1,100,000
+          - cell "0.0%" [ref=e929]:
+            - generic [ref=e933]: 0.0%
+          - cell "EXPLORE" [ref=e934]:
+            - button "EXPLORE" [ref=e935]
+        - row "Rouse Hill Residence • 2024-12-30 $1,150,000 0.0% EXPLORE" [ref=e936] [cursor=pointer]:
+          - cell "Rouse Hill Residence • 2024-12-30" [ref=e937]:
+            - paragraph [ref=e938]: Rouse Hill
+            - paragraph [ref=e939]: Residence • 2024-12-30
+          - cell "$1,150,000" [ref=e940]:
+            - paragraph [ref=e941]: $1,150,000
+          - cell "0.0%" [ref=e942]:
+            - generic [ref=e946]: 0.0%
+          - cell "EXPLORE" [ref=e947]:
+            - button "EXPLORE" [ref=e948]
+        - row "Lidcombe Residence • 2024-12-30 $2,580,000 -20.9% EXPLORE" [ref=e949] [cursor=pointer]:
+          - cell "Lidcombe Residence • 2024-12-30" [ref=e950]:
+            - paragraph [ref=e951]: Lidcombe
+            - paragraph [ref=e952]: Residence • 2024-12-30
+          - cell "$2,580,000" [ref=e953]:
+            - paragraph [ref=e954]: $2,580,000
+          - cell "-20.9%" [ref=e955]:
+            - generic [ref=e959]: "-20.9%"
+          - cell "EXPLORE" [ref=e960]:
+            - button "EXPLORE" [ref=e961]
+        - row "Lidcombe Residence • 2024-12-30 $2,580,000 -20.9% EXPLORE" [ref=e962] [cursor=pointer]:
+          - cell "Lidcombe Residence • 2024-12-30" [ref=e963]:
+            - paragraph [ref=e964]: Lidcombe
+            - paragraph [ref=e965]: Residence • 2024-12-30
+          - cell "$2,580,000" [ref=e966]:
+            - paragraph [ref=e967]: $2,580,000
+          - cell "-20.9%" [ref=e968]:
+            - generic [ref=e972]: "-20.9%"
+          - cell "EXPLORE" [ref=e973]:
+            - button "EXPLORE" [ref=e974]
+        - row "Lidcombe Residence • 2024-12-30 $2,580,000 -20.9% EXPLORE" [ref=e975] [cursor=pointer]:
+          - cell "Lidcombe Residence • 2024-12-30" [ref=e976]:
+            - paragraph [ref=e977]: Lidcombe
+            - paragraph [ref=e978]: Residence • 2024-12-30
+          - cell "$2,580,000" [ref=e979]:
+            - paragraph [ref=e980]: $2,580,000
+          - cell "-20.9%" [ref=e981]:
+            - generic [ref=e985]: "-20.9%"
+          - cell "EXPLORE" [ref=e986]:
+            - button "EXPLORE" [ref=e987]
+        - row "Lidcombe Residence • 2024-12-30 $2,580,000 -20.9% EXPLORE" [ref=e988] [cursor=pointer]:
+          - cell "Lidcombe Residence • 2024-12-30" [ref=e989]:
+            - paragraph [ref=e990]: Lidcombe
+            - paragraph [ref=e991]: Residence • 2024-12-30
+          - cell "$2,580,000" [ref=e992]:
+            - paragraph [ref=e993]: $2,580,000
+          - cell "-20.9%" [ref=e994]:
+            - generic [ref=e998]: "-20.9%"
+          - cell "EXPLORE" [ref=e999]:
+            - button "EXPLORE" [ref=e1000]
+        - row "Keiraville Residence • 2024-12-30 $330,000 0.0% EXPLORE" [ref=e1001] [cursor=pointer]:
+          - cell "Keiraville Residence • 2024-12-30" [ref=e1002]:
+            - paragraph [ref=e1003]: Keiraville
+            - paragraph [ref=e1004]: Residence • 2024-12-30
+          - cell "$330,000" [ref=e1005]:
+            - paragraph [ref=e1006]: $330,000
+          - cell "0.0%" [ref=e1007]:
+            - generic [ref=e1011]: 0.0%
+          - cell "EXPLORE" [ref=e1012]:
+            - button "EXPLORE" [ref=e1013]
+        - row "Bardia Residence • 2024-12-30 $800,000 0.0% EXPLORE" [ref=e1014] [cursor=pointer]:
+          - cell "Bardia Residence • 2024-12-30" [ref=e1015]:
+            - paragraph [ref=e1016]: Bardia
+            - paragraph [ref=e1017]: Residence • 2024-12-30
+          - cell "$800,000" [ref=e1018]:
+            - paragraph [ref=e1019]: $800,000
+          - cell "0.0%" [ref=e1020]:
+            - generic [ref=e1024]: 0.0%
+          - cell "EXPLORE" [ref=e1025]:
+            - button "EXPLORE" [ref=e1026]
+        - row "Homebush West Residence • 2024-12-30 $1,232,000 33.9% EXPLORE" [ref=e1027] [cursor=pointer]:
+          - cell "Homebush West Residence • 2024-12-30" [ref=e1028]:
+            - paragraph [ref=e1029]: Homebush West
+            - paragraph [ref=e1030]: Residence • 2024-12-30
+          - cell "$1,232,000" [ref=e1031]:
+            - paragraph [ref=e1032]: $1,232,000
+          - cell "33.9%" [ref=e1033]:
+            - generic [ref=e1037]: 33.9%
+          - cell "EXPLORE" [ref=e1038]:
+            - button "EXPLORE" [ref=e1039]
+        - row "Marsden Park Residence • 2024-12-30 $800,000 5.9% EXPLORE" [ref=e1040] [cursor=pointer]:
+          - cell "Marsden Park Residence • 2024-12-30" [ref=e1041]:
+            - paragraph [ref=e1042]: Marsden Park
+            - paragraph [ref=e1043]: Residence • 2024-12-30
+          - cell "$800,000" [ref=e1044]:
+            - paragraph [ref=e1045]: $800,000
+          - cell "5.9%" [ref=e1046]:
+            - generic [ref=e1050]: 5.9%
+          - cell "EXPLORE" [ref=e1051]:
+            - button "EXPLORE" [ref=e1052]
+        - row "Padstow Residence • 2024-12-30 $1,670,000 0.0% EXPLORE" [ref=e1053] [cursor=pointer]:
+          - cell "Padstow Residence • 2024-12-30" [ref=e1054]:
+            - paragraph [ref=e1055]: Padstow
+            - paragraph [ref=e1056]: Residence • 2024-12-30
+          - cell "$1,670,000" [ref=e1057]:
+            - paragraph [ref=e1058]: $1,670,000
+          - cell "0.0%" [ref=e1059]:
+            - generic [ref=e1063]: 0.0%
+          - cell "EXPLORE" [ref=e1064]:
+            - button "EXPLORE" [ref=e1065]
+        - row "Kelso Residence • 2024-12-30 $980,000 0.0% EXPLORE" [ref=e1066] [cursor=pointer]:
+          - cell "Kelso Residence • 2024-12-30" [ref=e1067]:
+            - paragraph [ref=e1068]: Kelso
+            - paragraph [ref=e1069]: Residence • 2024-12-30
+          - cell "$980,000" [ref=e1070]:
+            - paragraph [ref=e1071]: $980,000
+          - cell "0.0%" [ref=e1072]:
+            - generic [ref=e1076]: 0.0%
+          - cell "EXPLORE" [ref=e1077]:
+            - button "EXPLORE" [ref=e1078]
+        - row "Telarah Residence • 2024-12-30 $680,000 0.0% EXPLORE" [ref=e1079] [cursor=pointer]:
+          - cell "Telarah Residence • 2024-12-30" [ref=e1080]:
+            - paragraph [ref=e1081]: Telarah
+            - paragraph [ref=e1082]: Residence • 2024-12-30
+          - cell "$680,000" [ref=e1083]:
+            - paragraph [ref=e1084]: $680,000
+          - cell "0.0%" [ref=e1085]:
+            - generic [ref=e1089]: 0.0%
+          - cell "EXPLORE" [ref=e1090]:
+            - button "EXPLORE" [ref=e1091]
+        - row "Macquarie Park Residence • 2024-12-30 $1,200,000 -12.5% EXPLORE" [ref=e1092] [cursor=pointer]:
+          - cell "Macquarie Park Residence • 2024-12-30" [ref=e1093]:
+            - paragraph [ref=e1094]: Macquarie Park
+            - paragraph [ref=e1095]: Residence • 2024-12-30
+          - cell "$1,200,000" [ref=e1096]:
+            - paragraph [ref=e1097]: $1,200,000
+          - cell "-12.5%" [ref=e1098]:
+            - generic [ref=e1102]: "-12.5%"
+          - cell "EXPLORE" [ref=e1103]:
+            - button "EXPLORE" [ref=e1104]
+        - row "Macquarie Park Residence • 2024-12-30 $3,100,000 -12.5% EXPLORE" [ref=e1105] [cursor=pointer]:
+          - cell "Macquarie Park Residence • 2024-12-30" [ref=e1106]:
+            - paragraph [ref=e1107]: Macquarie Park
+            - paragraph [ref=e1108]: Residence • 2024-12-30
+          - cell "$3,100,000" [ref=e1109]:
+            - paragraph [ref=e1110]: $3,100,000
+          - cell "-12.5%" [ref=e1111]:
+            - generic [ref=e1115]: "-12.5%"
+          - cell "EXPLORE" [ref=e1116]:
+            - button "EXPLORE" [ref=e1117]
+        - row "Macquarie Park Residence • 2024-12-30 $1,180,000 -12.5% EXPLORE" [ref=e1118] [cursor=pointer]:
+          - cell "Macquarie Park Residence • 2024-12-30" [ref=e1119]:
+            - paragraph [ref=e1120]: Macquarie Park
+            - paragraph [ref=e1121]: Residence • 2024-12-30
+          - cell "$1,180,000" [ref=e1122]:
+            - paragraph [ref=e1123]: $1,180,000
+          - cell "-12.5%" [ref=e1124]:
+            - generic [ref=e1128]: "-12.5%"
+          - cell "EXPLORE" [ref=e1129]:
+            - button "EXPLORE" [ref=e1130]
+        - row "Macquarie Park Residence • 2024-12-30 $1,195,000 -12.5% EXPLORE" [ref=e1131] [cursor=pointer]:
+          - cell "Macquarie Park Residence • 2024-12-30" [ref=e1132]:
+            - paragraph [ref=e1133]: Macquarie Park
+            - paragraph [ref=e1134]: Residence • 2024-12-30
+          - cell "$1,195,000" [ref=e1135]:
+            - paragraph [ref=e1136]: $1,195,000
+          - cell "-12.5%" [ref=e1137]:
+            - generic [ref=e1141]: "-12.5%"
+          - cell "EXPLORE" [ref=e1142]:
+            - button "EXPLORE" [ref=e1143]
+        - row "Yeoval Residence • 2024-12-30 $20,000 0.0% EXPLORE" [ref=e1144] [cursor=pointer]:
+          - cell "Yeoval Residence • 2024-12-30" [ref=e1145]:
+            - paragraph [ref=e1146]: Yeoval
+            - paragraph [ref=e1147]: Residence • 2024-12-30
+          - cell "$20,000" [ref=e1148]:
+            - paragraph [ref=e1149]: $20,000
+          - cell "0.0%" [ref=e1150]:
+            - generic [ref=e1154]: 0.0%
+          - cell "EXPLORE" [ref=e1155]:
+            - button "EXPLORE" [ref=e1156]
+        - row "Billinudgel Commercial • 2024-12-30 $735,000 0.0% EXPLORE" [ref=e1157] [cursor=pointer]:
+          - cell "Billinudgel Commercial • 2024-12-30" [ref=e1158]:
+            - paragraph [ref=e1159]: Billinudgel
+            - paragraph [ref=e1160]: Commercial • 2024-12-30
+          - cell "$735,000" [ref=e1161]:
+            - paragraph [ref=e1162]: $735,000
+          - cell "0.0%" [ref=e1163]:
+            - generic [ref=e1167]: 0.0%
+          - cell "EXPLORE" [ref=e1168]:
+            - button "EXPLORE" [ref=e1169]
+        - row "Schofields Residence • 2024-12-30 $1,270,000 0.0% EXPLORE" [ref=e1170] [cursor=pointer]:
+          - cell "Schofields Residence • 2024-12-30" [ref=e1171]:
+            - paragraph [ref=e1172]: Schofields
+            - paragraph [ref=e1173]: Residence • 2024-12-30
+          - cell "$1,270,000" [ref=e1174]:
+            - paragraph [ref=e1175]: $1,270,000
+          - cell "0.0%" [ref=e1176]:
+            - generic [ref=e1180]: 0.0%
+          - cell "EXPLORE" [ref=e1181]:
+            - button "EXPLORE" [ref=e1182]
+        - row "Caddens Residence • 2024-12-30 $1,185,000 7.2% EXPLORE" [ref=e1183] [cursor=pointer]:
+          - cell "Caddens Residence • 2024-12-30" [ref=e1184]:
+            - paragraph [ref=e1185]: Caddens
+            - paragraph [ref=e1186]: Residence • 2024-12-30
+          - cell "$1,185,000" [ref=e1187]:
+            - paragraph [ref=e1188]: $1,185,000
+          - cell "7.2%" [ref=e1189]:
+            - generic [ref=e1193]: 7.2%
+          - cell "EXPLORE" [ref=e1194]:
+            - button "EXPLORE" [ref=e1195]
+        - row "Parramatta Residence • 2024-12-30 $215,000 7.3% EXPLORE" [ref=e1196] [cursor=pointer]:
+          - cell "Parramatta Residence • 2024-12-30" [ref=e1197]:
+            - paragraph [ref=e1198]: Parramatta
+            - paragraph [ref=e1199]: Residence • 2024-12-30
+          - cell "$215,000" [ref=e1200]:
+            - paragraph [ref=e1201]: $215,000
+          - cell "7.3%" [ref=e1202]:
+            - generic [ref=e1206]: 7.3%
+          - cell "EXPLORE" [ref=e1207]:
+            - button "EXPLORE" [ref=e1208]
+        - row "Parramatta Residence • 2024-12-30 $525,000 2.2% EXPLORE" [ref=e1209] [cursor=pointer]:
+          - cell "Parramatta Residence • 2024-12-30" [ref=e1210]:
+            - paragraph [ref=e1211]: Parramatta
+            - paragraph [ref=e1212]: Residence • 2024-12-30
+          - cell "$525,000" [ref=e1213]:
+            - paragraph [ref=e1214]: $525,000
+          - cell "2.2%" [ref=e1215]:
+            - generic [ref=e1219]: 2.2%
+          - cell "EXPLORE" [ref=e1220]:
+            - button "EXPLORE" [ref=e1221]
+        - row "Port Macquarie Residence • 2024-12-30 $365,000 -1.5% EXPLORE" [ref=e1222] [cursor=pointer]:
+          - cell "Port Macquarie Residence • 2024-12-30" [ref=e1223]:
+            - paragraph [ref=e1224]: Port Macquarie
+            - paragraph [ref=e1225]: Residence • 2024-12-30
+          - cell "$365,000" [ref=e1226]:
+            - paragraph [ref=e1227]: $365,000
+          - cell "-1.5%" [ref=e1228]:
+            - generic [ref=e1232]: "-1.5%"
+          - cell "EXPLORE" [ref=e1233]:
+            - button "EXPLORE" [ref=e1234]
+        - row "Pokolbin Residence • 2024-12-30 $150,000 0.0% EXPLORE" [ref=e1235] [cursor=pointer]:
+          - cell "Pokolbin Residence • 2024-12-30" [ref=e1236]:
+            - paragraph [ref=e1237]: Pokolbin
+            - paragraph [ref=e1238]: Residence • 2024-12-30
+          - cell "$150,000" [ref=e1239]:
+            - paragraph [ref=e1240]: $150,000
+          - cell "0.0%" [ref=e1241]:
+            - generic [ref=e1245]: 0.0%
+          - cell "EXPLORE" [ref=e1246]:
+            - button "EXPLORE" [ref=e1247]
+        - row "Killara Residence • 2024-12-30 $688,000 -7.9% EXPLORE" [ref=e1248] [cursor=pointer]:
+          - cell "Killara Residence • 2024-12-30" [ref=e1249]:
+            - paragraph [ref=e1250]: Killara
+            - paragraph [ref=e1251]: Residence • 2024-12-30
+          - cell "$688,000" [ref=e1252]:
+            - paragraph [ref=e1253]: $688,000
+          - cell "-7.9%" [ref=e1254]:
+            - generic [ref=e1258]: "-7.9%"
+          - cell "EXPLORE" [ref=e1259]:
+            - button "EXPLORE" [ref=e1260]
+        - row "Marsfield Residence • 2024-12-30 $1,400,000 1.7% EXPLORE" [ref=e1261] [cursor=pointer]:
+          - cell "Marsfield Residence • 2024-12-30" [ref=e1262]:
+            - paragraph [ref=e1263]: Marsfield
+            - paragraph [ref=e1264]: Residence • 2024-12-30
+          - cell "$1,400,000" [ref=e1265]:
+            - paragraph [ref=e1266]: $1,400,000
+          - cell "1.7%" [ref=e1267]:
+            - generic [ref=e1271]: 1.7%
+          - cell "EXPLORE" [ref=e1272]:
+            - button "EXPLORE" [ref=e1273]
+        - row "Ryde Residence • 2024-12-30 $500,000 -5.4% EXPLORE" [ref=e1274] [cursor=pointer]:
+          - cell "Ryde Residence • 2024-12-30" [ref=e1275]:
+            - paragraph [ref=e1276]: Ryde
+            - paragraph [ref=e1277]: Residence • 2024-12-30
+          - cell "$500,000" [ref=e1278]:
+            - paragraph [ref=e1279]: $500,000
+          - cell "-5.4%" [ref=e1280]:
+            - generic [ref=e1284]: "-5.4%"
+          - cell "EXPLORE" [ref=e1285]:
+            - button "EXPLORE" [ref=e1286]
+        - row "Burwood Residence • 2024-12-30 $650,000 0.0% EXPLORE" [ref=e1287] [cursor=pointer]:
+          - cell "Burwood Residence • 2024-12-30" [ref=e1288]:
+            - paragraph [ref=e1289]: Burwood
+            - paragraph [ref=e1290]: Residence • 2024-12-30
+          - cell "$650,000" [ref=e1291]:
+            - paragraph [ref=e1292]: $650,000
+          - cell "0.0%" [ref=e1293]:
+            - generic [ref=e1297]: 0.0%
+          - cell "EXPLORE" [ref=e1298]:
+            - button "EXPLORE" [ref=e1299]
+        - row "Rooty Hill Residence • 2024-12-30 $800,000 3.2% EXPLORE" [ref=e1300] [cursor=pointer]:
+          - cell "Rooty Hill Residence • 2024-12-30" [ref=e1301]:
+            - paragraph [ref=e1302]: Rooty Hill
+            - paragraph [ref=e1303]: Residence • 2024-12-30
+          - cell "$800,000" [ref=e1304]:
+            - paragraph [ref=e1305]: $800,000
+          - cell "3.2%" [ref=e1306]:
+            - generic [ref=e1310]: 3.2%
+          - cell "EXPLORE" [ref=e1311]:
+            - button "EXPLORE" [ref=e1312]
+        - row "Riverstone Residence • 2024-12-30 $850,000 0.0% EXPLORE" [ref=e1313] [cursor=pointer]:
+          - cell "Riverstone Residence • 2024-12-30" [ref=e1314]:
+            - paragraph [ref=e1315]: Riverstone
+            - paragraph [ref=e1316]: Residence • 2024-12-30
+          - cell "$850,000" [ref=e1317]:
+            - paragraph [ref=e1318]: $850,000
+          - cell "0.0%" [ref=e1319]:
+            - generic [ref=e1323]: 0.0%
+          - cell "EXPLORE" [ref=e1324]:
+            - button "EXPLORE" [ref=e1325]
+        - row "Mount Druitt Residence • 2024-12-30 $685,000 12.3% EXPLORE" [ref=e1326] [cursor=pointer]:
+          - cell "Mount Druitt Residence • 2024-12-30" [ref=e1327]:
+            - paragraph [ref=e1328]: Mount Druitt
+            - paragraph [ref=e1329]: Residence • 2024-12-30
+          - cell "$685,000" [ref=e1330]:
+            - paragraph [ref=e1331]: $685,000
+          - cell "12.3%" [ref=e1332]:
+            - generic [ref=e1336]: 12.3%
+          - cell "EXPLORE" [ref=e1337]:
+            - button "EXPLORE" [ref=e1338]
+        - row "Blacktown Residence • 2024-12-30 $415,000 1.7% EXPLORE" [ref=e1339] [cursor=pointer]:
+          - cell "Blacktown Residence • 2024-12-30" [ref=e1340]:
+            - paragraph [ref=e1341]: Blacktown
+            - paragraph [ref=e1342]: Residence • 2024-12-30
+          - cell "$415,000" [ref=e1343]:
+            - paragraph [ref=e1344]: $415,000
+          - cell "1.7%" [ref=e1345]:
+            - generic [ref=e1349]: 1.7%
+          - cell "EXPLORE" [ref=e1350]:
+            - button "EXPLORE" [ref=e1351]
+        - row "Tahmoor Residence • 2024-12-30 $762,500 0.0% EXPLORE" [ref=e1352] [cursor=pointer]:
+          - cell "Tahmoor Residence • 2024-12-30" [ref=e1353]:
+            - paragraph [ref=e1354]: Tahmoor
+            - paragraph [ref=e1355]: Residence • 2024-12-30
+          - cell "$762,500" [ref=e1356]:
+            - paragraph [ref=e1357]: $762,500
+          - cell "0.0%" [ref=e1358]:
+            - generic [ref=e1362]: 0.0%
+          - cell "EXPLORE" [ref=e1363]:
+            - button "EXPLORE" [ref=e1364]
+        - row "Harris Park Residence • 2024-12-30 $435,000 7.8% EXPLORE" [ref=e1365] [cursor=pointer]:
+          - cell "Harris Park Residence • 2024-12-30" [ref=e1366]:
+            - paragraph [ref=e1367]: Harris Park
+            - paragraph [ref=e1368]: Residence • 2024-12-30
+          - cell "$435,000" [ref=e1369]:
+            - paragraph [ref=e1370]: $435,000
+          - cell "7.8%" [ref=e1371]:
+            - generic [ref=e1375]: 7.8%
+          - cell "EXPLORE" [ref=e1376]:
+            - button "EXPLORE" [ref=e1377]
 ```

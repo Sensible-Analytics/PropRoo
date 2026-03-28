@@ -39,7 +39,6 @@ def health_check():
 def test_db():
     """Test database connection"""
     import psycopg2
-    import ssl
     import os
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
@@ -47,33 +46,22 @@ def test_db():
     results = {"tests": []}
 
     try:
-        try:
-            context = ssl.create_default_context()
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE
+        from urllib.parse import urlparse
 
-            conn = psycopg2.connect(DATABASE_URL, ssl_context=context)
-            cur = conn.cursor()
-            cur.execute("SELECT 1;")
-            cur.close()
-            conn.close()
-            results["tests"].append({"ssl_context_CERT_NONE": "success"})
-        except Exception as e:
-            results["tests"].append({"ssl_context_CERT_NONE": str(e)[:300]})
+        parsed = urlparse(DATABASE_URL)
 
-        try:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE
+        conn_str = f"host={parsed.hostname} port={parsed.port} dbname={parsed.path[1:]} user={parsed.username} password={parsed.password}"
 
-            conn = psycopg2.connect(DATABASE_URL, ssl_context=context)
-            cur = conn.cursor()
-            cur.execute("SELECT 1;")
-            cur.close()
-            conn.close()
-            results["tests"].append({"SSL_CONTEXT_TLS_CLIENT": "success"})
-        except Exception as e:
-            results["tests"].append({"SSL_CONTEXT_TLS_CLIENT": str(e)[:300]})
+        for mode in ["disable", "allow", "prefer", "require"]:
+            try:
+                conn = psycopg2.connect(conn_str, sslmode=mode)
+                cur = conn.cursor()
+                cur.execute("SELECT 1;")
+                cur.close()
+                conn.close()
+                results["tests"].append({f"connstr_{mode}": "success"})
+            except Exception as e:
+                results["tests"].append({f"connstr_{mode}": str(e)[:200]})
 
     except Exception as e:
         results["error"] = str(e)

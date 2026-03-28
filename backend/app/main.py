@@ -39,37 +39,48 @@ def health_check():
 def test_db():
     """Test database connection"""
     import os
-    import shutil
+    import ssl
+    import socket
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
     results = {"tests": []}
 
     try:
-        cert_dir = "/opt/render/.postgresql"
-        cert_path = f"{cert_dir}/root.crt"
-
-        os.makedirs(cert_dir, exist_ok=True)
-        shutil.copy("/etc/ssl/certs/ca-certificates.crt", cert_path)
-
-        file_size = os.path.getsize(cert_path)
-        results["tests"].append(
-            {"cert_copy": f"Copied to {cert_path}, size={file_size}"}
-        )
-
         from urllib.parse import urlparse
 
         parsed = urlparse(DATABASE_URL)
+        hostname = parsed.hostname
         port = parsed.port or 5432
 
-        conn_str = f"host={parsed.hostname} port={port} dbname={parsed.path[1:]} user={parsed.username} password={parsed.password}"
+        results["tests"].append({"host": hostname, "port": port})
+
+        try:
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+
+            with socket.create_connection((hostname, port), timeout=10) as sock:
+                with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+                    results["tests"].append(
+                        {"raw_ssl": f"Connected with TLS {ssock.version()}"}
+                    )
+        except Exception as e:
+            results["tests"].append({"raw_ssl_error": str(e)[:300]})
 
         try:
             import psycopg2
 
             for mode in ["require"]:
                 try:
-                    conn = psycopg2.connect(conn_str, sslmode=mode)
+                    conn = psycopg2.connect(
+                        host=hostname,
+                        port=port,
+                        dbname=parsed.path[1:],
+                        user=parsed.username,
+                        password=parsed.password,
+                        sslmode=mode,
+                    )
                     cur = conn.cursor()
                     cur.execute("SELECT 1;")
                     cur.close()
@@ -83,27 +94,23 @@ def test_db():
         try:
             import psycopg
 
-            for mode in ["verify-full"]:
+            for mode in ["require"]:
                 try:
-                    conn = psycopg.connect(conn_str, sslmode=mode, ssl_context="system")
+                    conn = psycopg.connect(
+                        host=hostname,
+                        port=port,
+                        dbname=parsed.path[1:],
+                        user=parsed.username,
+                        password=parsed.password,
+                        sslmode=mode,
+                    )
                     cur = conn.cursor()
                     cur.execute("SELECT 1;")
                     cur.close()
                     conn.close()
-                    results["tests"].append({f"psycopg_{mode}_system": "success"})
+                    results["tests"].append({f"psycopg_{mode}": "success"})
                 except Exception as e:
-                    results["tests"].append({f"psycopg_{mode}_system": str(e)[:200]})
-
-            for mode in ["verify-full"]:
-                try:
-                    conn = psycopg.connect(conn_str, sslmode=mode, ssl_ca=cert_path)
-                    cur = conn.cursor()
-                    cur.execute("SELECT 1;")
-                    cur.close()
-                    conn.close()
-                    results["tests"].append({f"psycopg_{mode}_with_cert": "success"})
-                except Exception as e:
-                    results["tests"].append({f"psycopg_{mode}_with_cert": str(e)[:200]})
+                    results["tests"].append({f"psycopg_{mode}": str(e)[:200]})
         except ImportError:
             results["tests"].append({"psycopg": "not installed"})
 

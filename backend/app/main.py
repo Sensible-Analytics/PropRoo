@@ -47,31 +47,33 @@ def test_db():
     results = {"tests": []}
 
     try:
-        context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-
         try:
-            conn = psycopg2.connect(
-                DATABASE_URL, sslmode="require", ssl_context=context
-            )
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+
+            conn = psycopg2.connect(DATABASE_URL, ssl_context=context)
             cur = conn.cursor()
             cur.execute("SELECT 1;")
             cur.close()
             conn.close()
-            results["tests"].append({"require_with_ssl_context": "success"})
+            results["tests"].append({"ssl_context_CERT_NONE": "success"})
         except Exception as e:
-            results["tests"].append({"require_with_ssl_context": str(e)[:300]})
+            results["tests"].append({"ssl_context_CERT_NONE": str(e)[:300]})
 
         try:
-            conn = psycopg2.connect(DATABASE_URL, sslmode="require", ssl_context=None)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+
+            conn = psycopg2.connect(DATABASE_URL, ssl_context=context)
             cur = conn.cursor()
             cur.execute("SELECT 1;")
             cur.close()
             conn.close()
-            results["tests"].append({"require_with_ssl_context_none": "success"})
+            results["tests"].append({"SSL_CONTEXT_TLS_CLIENT": "success"})
         except Exception as e:
-            results["tests"].append({"require_with_ssl_context_none": str(e)[:300]})
+            results["tests"].append({"SSL_CONTEXT_TLS_CLIENT": str(e)[:300]})
 
     except Exception as e:
         results["error"] = str(e)

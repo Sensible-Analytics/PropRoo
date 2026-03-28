@@ -1,6 +1,6 @@
 """
 Scheduled data ingestion script with retention policy.
-Run weekly via Railway cron job or external scheduler.
+Run weekly via Render cron job or external scheduler.
 Keeps only current year data.
 """
 

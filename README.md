@@ -8,7 +8,7 @@
 
 **Smart property analytics for Australian investors**
 
-[![🚀 Try It Now](https://img.shields.io/badge/Try_It_Now-00C7B7?style=for-the-badge&logo=vercel&logoColor=white)](https://proproo.sensibleanalytics.co)
+[![🚀 Try It Now](https://img.shields.io/badge/Try_It_Now-00C7B7?style=for-the-badge&logo=render&logoColor=white)](https://proproo.sensibleanalytics.co)
 [![📱 View Demo](https://img.shields.io/badge/View_Demo-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sensible-Analytics/PropRoo)
 
 </div>

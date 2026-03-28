@@ -6,6 +6,7 @@ databases:
   - name: proproo-db
     databaseName: proproo
     ipAllowList: []
+    postgresVersion: "16"
 
 # Backend: FastAPI Python Web Service
 services:
@@ -13,7 +14,7 @@ services:
     name: proproo-backend
     runtime: python
     region: singapore
-    plan: starter
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT

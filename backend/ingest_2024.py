@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 URL_BASE = "https://www.valuergeneral.nsw.gov.au/__psi/"
 YEARLY_URL = URL_BASE + "yearly/"
 
-# Use /tmp for Railway (which uses PostgreSQL), /app/data for local SQLite
+# Use /tmp for Render (which uses PostgreSQL), /app/data for local SQLite
 if os.environ.get("DATABASE_URL", "").startswith("postgresql"):
-    DOWNLOAD_DIR = Path("/tmp/downloads")  # Railway PostgreSQL - use writable /tmp
+    DOWNLOAD_DIR = Path("/tmp/downloads")  # Render PostgreSQL - use writable /tmp
 else:
     DOWNLOAD_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))  # Local SQLite
 

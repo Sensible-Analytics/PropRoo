@@ -50,7 +50,7 @@ class SaleResponse(BaseModel):
     domain_url: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.get("/sales", response_model=List[SaleResponse])

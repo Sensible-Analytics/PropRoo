@@ -1,7 +1,7 @@
 print("[MAIN] Importing main module...")
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import sales
+from .routers import sales, stats, map as map_router
 from .database import Base, engine, SessionLocal
 from .models import Sale
 import os
@@ -22,7 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(sales.router, prefix="/api", tags=["sales"])
+app.include_router(sales.router, prefix="/api/sales", tags=["sales"])
+app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
+app.include_router(map_router.router, prefix="/api/map", tags=["map"])
 
 
 @app.on_event("startup")
@@ -44,6 +46,24 @@ def health_check():
         return {"status": "ok", "record_count": 0}
     finally:
         db.close()
+
+
+@app.get("/api/health")
+async def api_health_check():
+    from app.database import get_pg_conn, release_pg_conn
+
+    count = 0
+    try:
+        conn = get_pg_conn()
+        if conn:
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM sale")
+            count = cur.fetchone()[0]
+            cur.close()
+            release_pg_conn(conn)
+    except Exception:
+        pass
+    return {"status": "ok", "record_count": count}
 
 
 def run_ingestion(start_year: int, end_year: int):

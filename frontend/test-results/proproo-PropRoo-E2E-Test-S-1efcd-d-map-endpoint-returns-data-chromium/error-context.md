@@ -85,4 +85,7 @@
           - columnheader "Growth performance" [ref=e75]
           - columnheader "Actions" [ref=e76]
       - rowgroup
+  - generic [ref=e78]:
+    - img [ref=e82]
+    - paragraph [ref=e87]: Orchestrating Unified Intelligence...
 ```

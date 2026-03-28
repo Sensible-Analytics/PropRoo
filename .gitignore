@@ -31,5 +31,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
+.env.production
+backend/.env
 .vercel
 .DS_Store

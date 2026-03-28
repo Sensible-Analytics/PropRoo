@@ -9,7 +9,7 @@ from app.database import get_r2_client
 
 logger = logging.getLogger(__name__)
 
-TABLES = ["sale", "property_growth", "street_summary", "suburb_summary"]
+TABLES = ["sales", "property_growth", "street_summary", "suburb_summary"]
 
 
 def export_all():

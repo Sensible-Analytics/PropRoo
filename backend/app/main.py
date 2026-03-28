@@ -165,6 +165,35 @@ def get_db_stats():
         db.close()
 
 
+@app.get("/admin/export-debug")
+async def export_debug():
+    import duckdb
+
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        return {"error": "DATABASE_URL not set"}
+
+    conn = duckdb.connect(database=":memory:")
+    try:
+        conn.execute("INSTALL postgres_scanner; LOAD postgres_scanner;")
+        conn.execute(f"CALL postgres_attach('{db_url}')")
+        schemas = conn.execute(
+            "SELECT schema_name FROM information_schema.schemata"
+        ).fetchall()
+        tables = conn.execute(
+            "SELECT table_schema, table_name FROM information_schema.tables "
+            "ORDER BY table_schema"
+        ).fetchall()
+        return {
+            "schemas": [s[0] for s in schemas],
+            "tables": [(t[0], t[1]) for t in tables],
+        }
+    except Exception as e:
+        return {"error": str(e)}
+    finally:
+        conn.close()
+
+
 @app.get("/admin/debug")
 def debug_info():
     db_url = os.environ.get("DATABASE_URL", "NOT SET")

@@ -56,6 +56,14 @@ def test_db():
         results["tests"].append({"host": hostname, "port": port})
 
         try:
+            with socket.create_connection((hostname, port), timeout=10) as sock:
+                sock.sendall(b"\x00\x03\x00\x00")
+                data = sock.recv(1024)
+                results["tests"].append({"raw_tcp": f"Received: {data[:50]}"})
+        except Exception as e:
+            results["tests"].append({"raw_tcp_error": str(e)[:200]})
+
+        try:
             context = ssl.create_default_context()
             context.check_hostname = False
             context.verify_mode = ssl.CERT_NONE
@@ -71,7 +79,7 @@ def test_db():
         try:
             import psycopg2
 
-            for mode in ["require"]:
+            for mode in ["disable", "require"]:
                 try:
                     conn = psycopg2.connect(
                         host=hostname,
@@ -94,7 +102,7 @@ def test_db():
         try:
             import psycopg
 
-            for mode in ["require"]:
+            for mode in ["disable", "require"]:
                 try:
                     conn = psycopg.connect(
                         host=hostname,

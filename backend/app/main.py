@@ -132,6 +132,22 @@ def trigger_analytics(background_tasks: BackgroundTasks = None):
     return {"status": "started", "message": "Analytics calculation started"}
 
 
+def run_export():
+    try:
+        from etl.export_parquet import export_all
+
+        export_all()
+        logger.info("Parquet export completed")
+    except Exception as e:
+        logger.error(f"Export failed: {e}")
+
+
+@app.post("/admin/export-parquet")
+def trigger_export(background_tasks: BackgroundTasks = None):
+    background_tasks.add_task(run_export)
+    return {"status": "started", "message": "Parquet export to R2 started"}
+
+
 @app.get("/admin/db-stats")
 def get_db_stats():
     db = SessionLocal()

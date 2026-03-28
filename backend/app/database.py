@@ -17,14 +17,15 @@ RAILWAY_TEST_VARIABLE = "THIS_SHOULD_APPEAR_IN_LOGS_IF_CODE_IS_LOADED"
 
 if DATABASE_URL:
     if DATABASE_URL.startswith("postgresql://"):
-        # Add SSL configuration for PostgreSQL
-        if "sslmode" not in DATABASE_URL:
-            sep = "&" if "?" in DATABASE_URL else "?"
-            DATABASE_URL = f"{DATABASE_URL}{sep}sslmode=require"
         sys.stderr.write(
-            f"[DB DEBUG] Updated DATABASE_URL with sslmode: {DATABASE_URL[:100]}\n"
+            f"[DB DEBUG] Using DATABASE_URL as-is: {DATABASE_URL[:80]}...\n"
         )
-        engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=300)
+        engine = create_engine(
+            DATABASE_URL,
+            pool_pre_ping=True,
+            pool_recycle=300,
+            connect_args={"connect_timeout": 10},
+        )
     else:
         engine = create_engine(DATABASE_URL)
 else:

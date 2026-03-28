@@ -39,11 +39,20 @@ def health_check():
 def test_db():
     """Test database connection"""
     import psycopg2
+    import ssl
     import os
 
     DATABASE_URL = os.environ.get("DATABASE_URL", "")
+
     try:
-        conn = psycopg2.connect(DATABASE_URL)
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
+        conn = psycopg2.connect(
+            DATABASE_URL,
+            sslmode="require",
+        )
         cur = conn.cursor()
         cur.execute("SELECT version();")
         version = cur.fetchone()

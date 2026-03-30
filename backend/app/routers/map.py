@@ -53,7 +53,7 @@ async def viewport_data(
             if lat is None or lng is None:
                 continue
             try:
-                h3_idx = h3.h3_lat_lng_to_cell(float(lat), float(lng), resolution)
+                h3_idx = h3.latlng_to_cell(float(lat), float(lng), resolution)
             except Exception as ex:
                 logger.warning(f"H3 conversion failed for ({lat}, {lng}): {ex}")
                 continue

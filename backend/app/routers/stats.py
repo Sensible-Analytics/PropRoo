@@ -15,7 +15,10 @@ def _r2(table: str) -> str:
 def _duck_query(query: str):
     try:
         duck = get_duck_conn()
-        return duck.execute(query).df().to_dict("records")
+        df = duck.execute(query).df()
+        # Replace NaN with None for JSON compliance (DuckDB returns NaN for empty aggregates)
+        df = df.where(pd.notnull(df), None)
+        return df.to_dict("records")
     except Exception as e:
         logger.warning(f"DuckDB query failed: {e}, falling back to PostgreSQL")
         return None

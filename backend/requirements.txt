@@ -7,7 +7,7 @@ pyarrow==16.1.0
 duckdb==0.10.3
 boto3==1.42.79
 h3==3.7.7
-redis==5.3.1
+redis==7.4.0
 python-dotenv==1.2.2
 httpx==0.28.1
 pydantic==2.12.5

@@ -1,9 +1,11 @@
 import json
 import hashlib
 import redis as redis_lib
+import logging
 from functools import wraps
 from app.config import settings
 
+logger = logging.getLogger(__name__)
 _redis = None
 
 
@@ -15,6 +17,7 @@ def _get_redis():
                 _redis = redis_lib.from_url(settings.redis_url, decode_responses=True)
                 _redis.ping()
             except Exception:
+                logger.warning("Failed to connect to Redis", exc_info=True)
                 _redis = None
     return _redis
 
@@ -39,13 +42,13 @@ def cached(ttl: int = DEFAULT_TTL):
                     if cached_val:
                         return json.loads(cached_val)
                 except Exception:
-                    pass
+                    logger.debug("Failed to get cached value", exc_info=True)
             result = await func(*args, **kwargs)
             if redis_client:
                 try:
                     redis_client.setex(key, ttl, json.dumps(result, default=str))
                 except Exception:
-                    pass
+                    logger.debug("Failed to set cache value", exc_info=True)
             return result
 
         return wrapper
@@ -61,4 +64,4 @@ def invalidate_all():
             if keys:
                 redis_client.delete(*keys)
         except Exception:
-            pass
+            logger.warning("Failed to invalidate cache", exc_info=True)

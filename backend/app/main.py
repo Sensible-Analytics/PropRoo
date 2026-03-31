@@ -62,7 +62,9 @@ async def api_health_check():
             cur.close()
             release_pg_conn(conn)
     except Exception:
-        pass
+        logger.warning(
+            "Failed to get database connection for health check", exc_info=True
+        )
     return {"status": "ok", "record_count": count}
 
 
@@ -159,8 +161,9 @@ def get_db_stats():
             .distinct()
             .count(),
         }
-    except Exception as e:
-        return {"error": str(e)}
+    except Exception:
+        logger.exception("Error fetching db stats")
+        return {"error": "Failed to retrieve database statistics"}
     finally:
         db.close()
 
@@ -188,8 +191,9 @@ async def export_debug():
             "schemas": [s[0] for s in schemas],
             "tables": [(t[0], t[1]) for t in tables],
         }
-    except Exception as e:
-        return {"error": str(e)}
+    except Exception:
+        logger.exception("Error in export debug")
+        return {"error": "Failed to retrieve export debug information"}
     finally:
         conn.close()
 

@@ -74,7 +74,7 @@ const Dashboard = () => {
                 }
             } else if (viewLevel === 'suburb') {
                 try {
-                    const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
+                    const res = await axios.get(`${API_URL}/sales/sales`, { params: { ...baseParams, suburb: selection.suburb } });
                     setSales(res.data || []);
                 } catch (e: any) {
                     console.warn('Suburb sales fetch failed:', e.message);
@@ -82,7 +82,7 @@ const Dashboard = () => {
                 }
             } else if (viewLevel === 'street') {
                 try {
-                    const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
+                    const res = await axios.get(`${API_URL}/sales/sales`, { params: { ...baseParams, suburb: selection.suburb } });
                     const streetSales = (res.data || []).filter((s: any) => s.property_street_name === selection.street);
                     setSales(streetSales);
                 } catch (e: any) {
@@ -91,7 +91,7 @@ const Dashboard = () => {
                 }
             } else if (viewLevel === 'property') {
                 try {
-                    const histRes = await axios.get(`${API_URL}/property/${selection.propertyId}/history`);
+                    const histRes = await axios.get(`${API_URL}/sales/property/${selection.propertyId}/history`);
                     setSales(histRes.data || []);
                 } catch (e: any) {
                     console.warn('Property history fetch failed:', e.message);

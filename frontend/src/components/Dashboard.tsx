@@ -46,7 +46,7 @@ const Dashboard = () => {
             }
 
             try {
-                const mapRes = await axios.get(`${API_URL}/stats/unified_map`, {
+                const mapRes = await axios.get(`${API_URL}/sales/stats/unified_map`, {
                     params: { level: viewLevel === 'state' ? 'suburb' : viewLevel === 'suburb' ? 'street' : 'suburb', year }
                 });
                 setUnifiedData(mapRes.data || { clusters: [] });

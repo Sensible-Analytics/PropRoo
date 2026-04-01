@@ -66,7 +66,7 @@ const Dashboard = () => {
 
             if (viewLevel === 'state') {
                 try {
-                    const res = await axios.get(`${API_URL}/sales`, { params: baseParams });
+                    const res = await axios.get(`${API_URL}/sales/sales`, { params: baseParams });
                     setSales(res.data || []);
                 } catch (e: any) {
                     console.warn('Sales fetch failed:', e.message);

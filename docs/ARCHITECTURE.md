@@ -344,7 +344,7 @@ Network Errors:
 - Database Connections: 20-50 pool size recommended  
 7. DEPLOYMENT SPECIFICS
 7.1 Environment Variables
-DATABASE_URL=postgresql://proproo_user:YOcwrcWxWUc01MNYKhsHcjyHVYLoEDSn@dpg-d73f9p6uk2gs73cptno0-a.singapore-postgres.render.com/proproo
+DATABASE_URL=postgresql://proproo_user:***REDACTED***@dpg-d73f9p6uk2gs73cptno0-a.singapore-postgres.render.com/proproo
 PYTHON_VERSION=3.12.0
 DATA_DIR=/tmp
 7.2 Resource Allocation

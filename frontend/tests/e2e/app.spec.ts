@@ -3,6 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('PropRoo Frontend', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    // Wait for the React app to render content beyond the initial HTML
+    await page.waitForFunction(() => document.body.innerText.length > 1000);
   });
 
   test('homepage loads successfully', async ({ page }) => {

@@ -73,6 +73,6 @@ services:
       - key: NODE_VERSION
         value: "18"
       - key: VITE_API_URL
-        value: https://proproo.onrender.com
+        value: https://proproo-backend.onrender.com/api
     domains:
       - proproo.sensibleanalytics.co

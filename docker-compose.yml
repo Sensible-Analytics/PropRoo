@@ -28,9 +28,9 @@ services:
 
   postgres:
     image: postgis/postgis:16-3.4
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+environment:
+    - POSTGRES_USER=postgres
+    # POSTGRES_PASSWORD must be set via .env for security (not hardcoded)
       - POSTGRES_DB=postgres
     ports:
       - "5432:5432"

@@ -1,3 +1,18 @@
+# AI Agent Files (BLOCKED)
+AGENTS.md
+CLAUDE.md
+SYSTEM_PROMPT.md
+agent-instructions.md
+prompt.md
+
+# Agent Directories
+.claude/
+.sisyphus/
+.ai/
+.agent/
+opencode/
+openhands/
+
 # Database
 *.db
 sales.db
@@ -34,4 +49,3 @@ Thumbs.db
 .env.production
 backend/.env
 .vercel
-.DS_Store

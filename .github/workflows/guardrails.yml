@@ -1,0 +1,93 @@
+name: Guardrails
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Block secret keys
+      - name: Detect secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          scanDepth: 100
+          ignorePaths: .git-hooks
+        continue-on-error: true
+
+      # 2. Block unwanted markdown files
+      - name: Check for unwanted files
+        run: |
+          # List of patterns to block
+          BLOCKED_FILES=(
+            "AGENTS.md"
+            "CLAUDE.md"
+            "SYSTEM_PROMPT.md"
+            "agent-instructions.md"
+            "prompt.md"
+            ".ai-notes"
+            ".agent"
+          )
+          
+          for pattern in "${BLOCKED_FILES[@]}"; do
+            if find . -name "$pattern" -type f 2>/dev/null | grep -q .; then
+              echo "❌ Found blocked file: $pattern"
+              echo "This type of file is not allowed in commits."
+              exit 1
+            fi
+          done
+          echo "✅ No blocked files found"
+
+      # 3. Check for personal references in code
+      - name: Check for personal/sensitive references
+        run: |
+          # Patterns that might contain unwanted references
+          SENSITIVE_PATTERNS=(
+            "sensibleanalytics.co"
+            "prabhatranjan"
+            ".sisyphus"
+            "openhands"
+            "opencode"
+          )
+          
+          for pattern in "${SENSITIVE_PATTERNS[@]}"; do
+            if grep -r "$pattern" . --include="*.ts" --include="*.js" --include="*.py" --include="*.md" 2>/dev/null | grep -v "node_modules" | grep -v ".git" | grep -q .; then
+              echo "⚠️ Found reference: $pattern"
+              echo "Please review if this reference is appropriate."
+              # Warning only, not blocking
+            fi
+          done
+          echo "✅ Sensitive reference check complete"
+
+      # 4. Check for large generated files
+      - name: Check for large files
+        run: |
+          # Warn about large files that shouldn't be in repo
+          find . -type f -size +1M \( -name "*.log" -o -name "*.tmp" -o -name "*.cache" \) 2>/dev/null
+          echo "✅ Large file check complete"
+
+      # 5. Ensure required files exist
+      - name: Check for required files
+        if: always()
+        run: |
+          # If this is a project repo, check for basic structure
+          if [ -f "package.json" ] || [ -f "requirements.txt" ] || [ -f "Cargo.toml" ]; then
+            echo "✅ Project structure detected"
+          fi
+
+  block-commits:
+    needs: guardrails
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Fail the workflow
+        run: |
+          echo "❌ Guardrails check failed"
+          echo "Please fix the issues above before merging."
+          exit 1

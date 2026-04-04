@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Search, Home, TrendingUp, Loader, ArrowLeft, ChevronRight, Calendar, Map as MapIcon, Layers } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 import DualRangeSlider from './DualRangeSlider';
+import { latLngToCell, cellToLatLng } from 'h3-js';
 
 // deck.gl + MapLibre imports
 import DeckGL from '@deck.gl/react';
@@ -221,21 +222,38 @@ export default function Dashboard() {
           if (!cancelled) setStreetLeaderboard([]);
         }
 
-        // 3. Fetch H3 cells for map
+        // 3. Fetch coordinates for H3 cells, compute H3 client-side
         try {
           const resolution = getH3Resolution(mapZoom);
           const sql = `
             SELECT 
-              h3_latlng_to_cell(latitude, longitude, ${resolution}) as h3_index,
-              h3_cell_to_lat(h3_latlng_to_cell(latitude, longitude, ${resolution})) as lat,
-              h3_cell_to_lng(h3_latlng_to_cell(latitude, longitude, ${resolution})) as lng,
-              AVG(purchase_price) as median_price,
-              COUNT(*) as sale_count
+              latitude, longitude, purchase_price
             FROM sales 
             WHERE strftime(contract_date, '%Y') = '${selectedYear}'
-            GROUP BY h3_index
+              AND latitude IS NOT NULL AND longitude IS NOT NULL
+            LIMIT 100000
           `;
-          const cells = await cachedQuery<H3Cell>(sql);
+          const rows = await cachedQuery<{ latitude: number; longitude: number; purchase_price: number }>(sql);
+          // Compute H3 cells client-side
+          const cellMap = new Map<string, { prices: number[]; latSum: number; lngSum: number; count: number }>();
+          for (const row of rows) {
+            const h3Index = latLngToCell(row.latitude, row.longitude, resolution);
+            const existing = cellMap.get(h3Index);
+            if (existing) {
+              existing.prices.push(row.purchase_price);
+              existing.latSum += row.latitude;
+              existing.lngSum += row.longitude;
+              existing.count++;
+            } else {
+              cellMap.set(h3Index, { prices: [row.purchase_price], latSum: row.latitude, lngSum: row.longitude, count: 1 });
+            }
+          }
+          const cells: H3Cell[] = [];
+          for (const [h3Index, data] of cellMap) {
+            const [lat, lng] = cellToLatLng(h3Index);
+            const medianPrice = data.prices.sort((a, b) => a - b)[Math.floor(data.prices.length / 2)] || 0;
+            cells.push({ h3_index: h3Index, lat, lng, median_price: medianPrice, sale_count: data.count, avg_cagr: 0 });
+          }
           if (!cancelled) setH3Cells(cells);
         } catch (e) {
           console.warn('H3 cells fetch failed:', e);

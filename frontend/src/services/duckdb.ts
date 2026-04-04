@@ -5,8 +5,8 @@ import duckdb_wasm_eh from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url';
 import eh_worker_bundled from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url';
 import { Table } from 'apache-arrow';
 
-// R2 public base URL — no auth needed for reads
-const R2_BASE_URL = 'https://pub-1e149224362a4914aecb74b6c2adedbe.r2.dev';
+// R2 proxy via Pages Functions (avoids CORS — server-side fetch)
+const R2_BASE_URL = '/r2';
 
 // Parquet files to load on startup
 const PARQUET_FILES = [

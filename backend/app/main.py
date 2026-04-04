@@ -1,9 +1,9 @@
 print("[MAIN] Importing main module...")
+from typing import Optional
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import sales, stats, map as map_router
-from .database import Base, engine, SessionLocal
-from .models import Sale
+from .database import get_duck_conn, parquet_path
 import os
 import logging
 from datetime import datetime
@@ -27,45 +27,32 @@ app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
 app.include_router(map_router.router, prefix="/api/map", tags=["map"])
 
 
-@app.on_event("startup")
-async def startup_event():
-    try:
-        Base.metadata.create_all(bind=engine)
-        print("[STARTUP] Database tables created/verified")
-    except Exception as e:
-        print(f"[STARTUP] Error initializing database: {e}")
-
-
 @app.get("/health")
 def health_check():
-    db = SessionLocal()
-    try:
-        count = db.query(Sale).count()
-        return {"status": "ok", "record_count": count}
-    except Exception as e:
+    path = parquet_path("sales.parquet")
+    if not os.path.exists(path):
         return {"status": "ok", "record_count": 0}
-    finally:
-        db.close()
+    try:
+        conn = get_duck_conn()
+        result = conn.execute(f"SELECT COUNT(*) FROM read_parquet('{path}')").fetchone()
+        conn.close()
+        return {"status": "ok", "record_count": result[0]}
+    except Exception:
+        return {"status": "ok", "record_count": 0}
 
 
 @app.get("/api/health")
 async def api_health_check():
-    from app.database import get_pg_conn, release_pg_conn
-
-    count = 0
+    path = parquet_path("sales.parquet")
+    if not os.path.exists(path):
+        return {"status": "ok", "record_count": 0}
     try:
-        conn = get_pg_conn()
-        if conn:
-            cur = conn.cursor()
-            cur.execute("SELECT COUNT(*) FROM sales")
-            count = cur.fetchone()[0]
-            cur.close()
-            release_pg_conn(conn)
+        conn = get_duck_conn()
+        result = conn.execute(f"SELECT COUNT(*) FROM read_parquet('{path}')").fetchone()
+        conn.close()
+        return {"status": "ok", "record_count": result[0]}
     except Exception:
-        logger.warning(
-            "Failed to get database connection for health check", exc_info=True
-        )
-    return {"status": "ok", "record_count": count}
+        return {"status": "ok", "record_count": 0}
 
 
 def run_ingestion(start_year: int, end_year: int):
@@ -75,7 +62,7 @@ def run_ingestion(start_year: int, end_year: int):
         result = subprocess.run(
             [
                 "python",
-                "ingest_2024.py",
+                "etl/ingest.py",
                 "--start-year",
                 str(start_year),
                 "--end-year",
@@ -84,7 +71,7 @@ def run_ingestion(start_year: int, end_year: int):
             capture_output=True,
             text=True,
             timeout=1800,
-            cwd="/app",
+            cwd=os.path.join(os.path.dirname(__file__), ".."),
         )
         logger.info(f"Ingestion completed: {result.returncode}")
     except Exception as e:
@@ -93,9 +80,10 @@ def run_ingestion(start_year: int, end_year: int):
 
 def run_analytics():
     try:
-        from app.analytics import calculate_growth_metrics
+        from etl.calculate_growth import run_all as run_growth_calculation
+        from etl.ingest import DATA_DIR
 
-        calculate_growth_metrics()
+        run_growth_calculation(data_dir=str(DATA_DIR))
         logger.info("Analytics completed")
     except Exception as e:
         logger.error(f"Analytics failed: {e}")
@@ -103,9 +91,9 @@ def run_analytics():
 
 @app.post("/admin/ingest")
 def trigger_ingestion(
+    background_tasks: BackgroundTasks,
     start_year: int = 2022,
     end_year: int = 2026,
-    background_tasks: BackgroundTasks = None,
 ):
     background_tasks.add_task(run_ingestion, start_year, end_year)
     return {
@@ -116,9 +104,9 @@ def trigger_ingestion(
 
 @app.post("/admin/ingest-and-analyze")
 def trigger_ingestion_with_analytics(
+    background_tasks: BackgroundTasks,
     start_year: int = 2022,
     end_year: int = 2026,
-    background_tasks: BackgroundTasks = None,
 ):
     background_tasks.add_task(run_ingestion, start_year, end_year)
     background_tasks.add_task(run_analytics)
@@ -129,80 +117,49 @@ def trigger_ingestion_with_analytics(
 
 
 @app.post("/admin/analyze")
-def trigger_analytics(background_tasks: BackgroundTasks = None):
+def trigger_analytics(background_tasks: BackgroundTasks):
     background_tasks.add_task(run_analytics)
     return {"status": "started", "message": "Analytics calculation started"}
 
 
-def run_export():
-    try:
-        from etl.export_parquet import export_all
-
-        export_all()
-        logger.info("Parquet export completed")
-    except Exception as e:
-        logger.error(f"Export failed: {e}")
-
-
-@app.post("/admin/export-parquet")
-def trigger_export(background_tasks: BackgroundTasks = None):
-    background_tasks.add_task(run_export)
-    return {"status": "started", "message": "Parquet export to R2 started"}
-
-
 @app.get("/admin/db-stats")
 def get_db_stats():
-    db = SessionLocal()
+    path = parquet_path("sales.parquet")
+    if not os.path.exists(path):
+        return {"sales_count": 0, "years_available": 0}
     try:
-        return {
-            "sales_count": db.query(Sale).count(),
-            "years_available": db.query(Sale.contract_date)
-            .filter(Sale.contract_date.isnot(None))
-            .distinct()
-            .count(),
-        }
+        conn = get_duck_conn()
+        count = conn.execute(f"SELECT COUNT(*) FROM read_parquet('{path}')").fetchone()[
+            0
+        ]
+        years = conn.execute(
+            f"SELECT COUNT(DISTINCT EXTRACT(YEAR FROM contract_date)) FROM read_parquet('{path}') WHERE contract_date IS NOT NULL"
+        ).fetchone()[0]
+        conn.close()
+        return {"sales_count": count, "years_available": years}
     except Exception:
         logger.exception("Error fetching db stats")
         return {"error": "Failed to retrieve database statistics"}
-    finally:
-        db.close()
-
-
-@app.get("/admin/export-debug")
-async def export_debug():
-    import duckdb
-
-    db_url = os.environ.get("DATABASE_URL")
-    if not db_url:
-        return {"error": "DATABASE_URL not set"}
-
-    conn = duckdb.connect(database=":memory:")
-    try:
-        conn.execute("INSTALL postgres_scanner; LOAD postgres_scanner;")
-        conn.execute(f"CALL postgres_attach('{db_url}')")
-        schemas = conn.execute(
-            "SELECT schema_name FROM information_schema.schemata"
-        ).fetchall()
-        tables = conn.execute(
-            "SELECT table_schema, table_name FROM information_schema.tables "
-            "ORDER BY table_schema"
-        ).fetchall()
-        return {
-            "schemas": [s[0] for s in schemas],
-            "tables": [(t[0], t[1]) for t in tables],
-        }
-    except Exception:
-        logger.exception("Error in export debug")
-        return {"error": "Failed to retrieve export debug information"}
-    finally:
-        conn.close()
 
 
 @app.get("/admin/debug")
 def debug_info():
-    db_url = os.environ.get("DATABASE_URL", "NOT SET")
+    data_dir = os.environ.get(
+        "DATA_DIR", os.path.join(os.path.dirname(__file__), "..", "data")
+    )
+    files = {
+        "sales.parquet": os.path.exists(os.path.join(data_dir, "sales.parquet")),
+        "property_growth.parquet": os.path.exists(
+            os.path.join(data_dir, "property_growth.parquet")
+        ),
+        "street_summary.parquet": os.path.exists(
+            os.path.join(data_dir, "street_summary.parquet")
+        ),
+        "suburb_summary.parquet": os.path.exists(
+            os.path.join(data_dir, "suburb_summary.parquet")
+        ),
+    }
     return {
-        "database_url_set": db_url != "NOT SET",
-        "database_url_prefix": db_url[:30] if db_url != "NOT SET" else "NOT SET",
-        "data_dir": os.environ.get("DATA_DIR", "NOT SET"),
+        "data_dir": data_dir,
+        "files": files,
     }

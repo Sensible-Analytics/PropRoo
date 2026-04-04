@@ -1,32 +1,28 @@
 import os
+import sys
+import logging
+from pathlib import Path
+from datetime import date, timedelta, datetime
+from typing import List, Optional, Dict, Any
 import urllib.request
 import zipfile
 import io
 import pandas as pd
-from datetime import date, timedelta, datetime
-import logging
-from pathlib import Path
-from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session
-from .database import SessionLocal, engine, Base
-from .models import Sale
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 URL_BASE = "https://www.valuergeneral.nsw.gov.au/__psi/"
 YEARLY_URL = URL_BASE + "yearly/"
-DOWNLOAD_DIR = Path("backend/data")
+
+DATA_DIR = Path(os.environ.get("DATA_DIR", Path(__file__).resolve().parent / "data"))
 
 
 def download_file(url: str, filepath: Path) -> bool:
-    """
-    Download a file from a URL to a local path.
-    """
     try:
         logger.info(f"Downloading {url}...")
-        # Add a timeout and a user agent if needed
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with (
             urllib.request.urlopen(req, timeout=60) as response,
@@ -40,15 +36,10 @@ def download_file(url: str, filepath: Path) -> bool:
 
 
 def extract_dat_lines_from_nested_zip(zip_filepath: Path) -> List[str]:
-    """
-    Extract data lines from DAT files inside nested weekly ZIPs within a yearly ZIP.
-    """
     dat_lines: List[str] = []
     try:
-        # Outer zip (Yearly)
         with zipfile.ZipFile(zip_filepath, "r") as outer_zip:
             for file_info in outer_zip.namelist():
-                # Inner zips (Weekly)
                 if file_info.lower().endswith(".zip"):
                     try:
                         inner_zip_data = io.BytesIO(outer_zip.read(file_info))
@@ -61,7 +52,6 @@ def extract_dat_lines_from_nested_zip(zip_filepath: Path) -> List[str]:
                                         )
                                         dat_lines.extend(content.splitlines())
                                     except UnicodeDecodeError:
-                                        # Fallback to latin-1 if utf-8 fails (sometimes common in older datasets)
                                         content = inner_zip.read(inner_file).decode(
                                             "latin-1"
                                         )
@@ -79,42 +69,7 @@ def extract_dat_lines_from_nested_zip(zip_filepath: Path) -> List[str]:
     return dat_lines
 
 
-def download_recent_data(
-    start_year: int = 2001, end_year: int = 2024, latest_first: bool = True
-) -> List[Path]:
-    """
-    Download yearly ZIP files for the specified range.
-    If latest_first=True, starts from end_year and goes backward (latest data first).
-    """
-    if not DOWNLOAD_DIR.exists():
-        DOWNLOAD_DIR.mkdir(parents=True)
-
-    downloaded_files: List[Path] = []
-
-    # Create year range - either forward or backward
-    years = list(range(start_year, end_year + 1))
-    if latest_first:
-        years = sorted(years, reverse=True)  # Start with latest year first
-
-    for year in years:
-        filename = f"{year}.zip"
-        filepath = DOWNLOAD_DIR / filename
-        url = YEARLY_URL + filename
-
-        if not filepath.exists():
-            if download_file(url, filepath):
-                downloaded_files.append(filepath)
-        else:
-            logger.info(f"Using cached file for {year}")
-            downloaded_files.append(filepath)
-
-    return downloaded_files
-
-
 def parse_record(line: str) -> Optional[Dict[str, Any]]:
-    """
-    Parse a single line from a DAT file into a dictionary compatible with the Sale model.
-    """
     if not line.startswith("B;"):
         return None
     parts = [p.strip() for p in line.split(";")]
@@ -143,14 +98,12 @@ def parse_record(line: str) -> Optional[Dict[str, Any]]:
             if not n_str:
                 return None
             try:
-                # Remove non-numeric chars like commas if any
                 clean_str = "".join(c for c in n_str if c.isdigit() or c == "-")
                 return int(clean_str)
             except ValueError:
                 return None
 
         contract_date = parse_date(parts[13])
-        # Filter future dates
         if contract_date and contract_date > date.today():
             return None
 
@@ -182,14 +135,69 @@ def parse_record(line: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def ingest_data(latest_first: bool = True) -> None:
-    """
-    Orchestrate the ingestion process: download, parse, and store in DB.
-    """
-    logger.info("Starting ingestion...")
-    Base.metadata.create_all(bind=engine)
+def download_recent_data(
+    start_year: int = 2024, end_year: int = 2024, latest_first: bool = True
+) -> List[Path]:
+    if not DATA_DIR.exists():
+        DATA_DIR.mkdir(parents=True)
 
-    files = download_recent_data(latest_first=latest_first)
+    downloaded_files: List[Path] = []
+
+    years = list(range(start_year, end_year + 1))
+    if latest_first:
+        years = sorted(years, reverse=True)
+
+    for year in years:
+        filename = f"{year}.zip"
+        filepath = DATA_DIR / filename
+        url = YEARLY_URL + filename
+
+        if not filepath.exists():
+            if download_file(url, filepath):
+                downloaded_files.append(filepath)
+        else:
+            logger.info(f"Using cached file for {year}")
+            downloaded_files.append(filepath)
+
+    return downloaded_files
+
+
+def get_sale_columns() -> List[str]:
+    return [
+        "district_code",
+        "property_id",
+        "sale_counter",
+        "download_datetime",
+        "property_name",
+        "property_unit_number",
+        "property_house_number",
+        "property_street_name",
+        "property_locality",
+        "property_post_code",
+        "area",
+        "area_type",
+        "contract_date",
+        "settlement_date",
+        "purchase_price",
+        "zoning",
+        "nature_of_property",
+        "primary_purpose",
+        "strata_lot_number",
+        "dealing_number",
+        "property_legal_description",
+    ]
+
+
+def ingest_data(
+    start_year: int = 2024, end_year: int = 2024, latest_first: bool = True
+) -> None:
+    logger.info(f"Starting ingestion for years {start_year}-{end_year}...")
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    files = download_recent_data(
+        start_year=start_year, end_year=end_year, latest_first=latest_first
+    )
     logger.info(f"Downloaded {len(files)} files.")
 
     all_records: List[Dict[str, Any]] = []
@@ -200,32 +208,38 @@ def ingest_data(latest_first: bool = True) -> None:
             if record:
                 all_records.append(record)
 
-    logger.info(f"Parsed {len(all_records)} records. Saving to DB...")
+    logger.info(f"Parsed {len(all_records)} records. Writing to Parquet...")
 
-    db: Session = SessionLocal()
-    try:
-        # Batch insert
-        # Wiping is easier for MVP, but consider upsert for production
-        db.query(Sale).delete()
+    df = pd.DataFrame(all_records, columns=get_sale_columns())
 
-        # Bulk insert in chunks to avoid memory issues with massive datasets
-        chunk_size = 5000
-        for i in range(0, len(all_records), chunk_size):
-            chunk = all_records[i : i + chunk_size]
-            db.bulk_insert_mappings(Sale, chunk)
-            db.commit()
-            logger.info(
-                f"Inserted {min(i + chunk_size, len(all_records))} / {len(all_records)} records..."
-            )
+    df.insert(0, "id", range(1, len(df) + 1))
+    df["latitude"] = None
+    df["longitude"] = None
+    df["realestate_url"] = None
+    df["domain_url"] = None
+    df["listings_last_checked"] = None
 
-    except Exception as e:
-        logger.error(f"Database error: {e}")
-        db.rollback()
-    finally:
-        db.close()
+    parquet_path = DATA_DIR / "sales.parquet"
+    df.to_parquet(parquet_path, index=False, engine="pyarrow")
+    logger.info(f"Written {len(df)} records to {parquet_path}")
+
+    for f in files:
+        if f.exists():
+            f.unlink()
+            logger.info(f"Deleted original ZIP: {f}")
 
     logger.info("Ingestion complete.")
 
 
 if __name__ == "__main__":
-    ingest_data()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ingest NSW property sales data")
+    parser.add_argument(
+        "--start-year", type=int, default=2020, help="Start year (default: 2020)"
+    )
+    parser.add_argument(
+        "--end-year", type=int, default=2024, help="End year (default: 2024)"
+    )
+    args = parser.parse_args()
+    ingest_data(start_year=args.start_year, end_year=args.end_year)

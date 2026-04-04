@@ -1,4 +1,14 @@
 services:
+  backend:
+    build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      - DATA_DIR=/data
+    volumeMounts:
+      - data:/data
   frontend:
     build: ./frontend/Dockerfile
     command: npm install && npm run build --port 5173
@@ -7,12 +17,6 @@ services:
     restart: always
     environment:
       - VITE_API_URL=http://backend:8000/api
-  backend:
-    build: ./backend
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
-    ports:
-      - "8000:8000"
-    restart: always
-    environment:
-      - DATABASE_URL=postgresql://db:5432/postgres
-      - REDIS_URL=redis://redis:6379
+
+volumes:
+  data:

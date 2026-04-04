@@ -1,197 +1,143 @@
 from fastapi import APIRouter, Query
-from app.database import get_duck_conn
-from app.cache import cached
-from app.config import settings
+from app.database import get_duck_conn, parquet_path
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def _r2(table: str) -> str:
-    return f"s3://{settings.r2_bucket_name}/parquet/{table}/latest.parquet"
-
-
-def _duck_query(query: str):
-    try:
-        duck = get_duck_conn()
-        df = duck.execute(query).df()
-        # Replace NaN with None for JSON compliance (DuckDB returns NaN for empty aggregates)
-        df = df.where(pd.notnull(df), None)
-        return df.to_dict("records")
-    except Exception as e:
-        logger.warning(f"DuckDB query failed: {e}, falling back to PostgreSQL")
-        return None
+def _parquet(table: str) -> str:
+    return parquet_path(f"{table}.parquet")
 
 
 @router.get("/global_summary")
-@cached(ttl=300)
 async def global_summary(year: int = Query(2024)):
-    parquet_data = _duck_query(f"""
-        SELECT suburb, post_code, avg_cagr, unique_properties, total_sales
-        FROM read_parquet('{_r2("suburb_summary")}')
+    suburb_path = _parquet("suburb_summary")
+    street_path = _parquet("street_summary")
+
+    conn = get_duck_conn()
+
+    suburb_sql = f"""
+        SELECT suburb, avg_cagr, unique_properties, total_sales
+        FROM read_parquet('{suburb_path}')
         WHERE avg_cagr > 0
         ORDER BY avg_cagr DESC
         LIMIT 20
-    """)
-    top_streets_data = _duck_query(f"""
-        SELECT street_name, suburb, post_code, avg_cagr, total_sales
-        FROM read_parquet('{_r2("street_summary")}')
+    """
+    result = conn.execute(suburb_sql)
+    columns = [desc[0] for desc in result.description]
+    suburb_rows = result.fetchall()
+
+    street_sql = f"""
+        SELECT street_name, suburb, avg_cagr, total_sales
+        FROM read_parquet('{street_path}')
         WHERE avg_cagr > 0
         ORDER BY avg_cagr DESC
         LIMIT 20
-    """)
+    """
+    result = conn.execute(street_sql)
+    columns = [desc[0] for desc in result.description]
+    street_rows = result.fetchall()
 
-    if parquet_data is not None and top_streets_data is not None:
-        return {
-            "top_suburbs": parquet_data,
-            "top_streets": top_streets_data,
-            "year": year,
-        }
+    conn.close()
 
-    from app.database import get_db
-    from app.models import SuburbSummary, StreetSummary
-    from sqlalchemy import desc
-
-    db = next(get_db())
-    try:
-        top_suburbs = (
-            db.query(SuburbSummary)
-            .order_by(desc(SuburbSummary.avg_cagr))
-            .limit(20)
-            .all()
-        )
-        top_streets = (
-            db.query(StreetSummary)
-            .order_by(desc(StreetSummary.avg_cagr))
-            .limit(20)
-            .all()
-        )
-        return {
-            "top_suburbs": [
-                {
-                    "suburb": s.suburb,
-                    "post_code": s.post_code,
-                    "avg_cagr": s.avg_cagr,
-                    "unique_properties": s.unique_properties,
-                    "total_sales": s.total_sales,
-                }
-                for s in top_suburbs
-            ],
-            "top_streets": [
-                {
-                    "street_name": s.street_name,
-                    "suburb": s.suburb,
-                    "post_code": s.post_code,
-                    "avg_cagr": s.avg_cagr,
-                    "total_sales": s.total_sales,
-                }
-                for s in top_streets
-            ],
-            "year": year,
-        }
-    finally:
-        db.close()
+    return {
+        "top_suburbs": [
+            {
+                "suburb": r[0],
+                "avg_cagr": r[1],
+                "unique_properties": r[2],
+                "total_sales": r[3],
+            }
+            for r in suburb_rows
+        ],
+        "top_streets": [
+            {
+                "street_name": r[0],
+                "suburb": r[1],
+                "avg_cagr": r[2],
+                "total_sales": r[3],
+            }
+            for r in street_rows
+        ],
+        "year": year,
+    }
 
 
 @router.get("/top_performers")
-@cached(ttl=300)
 async def top_performers(
     year: int = Query(2024),
     property_type: str = Query(None),
 ):
+    growth_path = _parquet("property_growth")
+    sales_path = _parquet("sales")
+
     type_filter = ""
     if property_type:
         type_filter = f"AND s.primary_purpose = '{property_type}'"
 
-    parquet_data = _duck_query(f"""
+    conn = get_duck_conn()
+
+    sql = f"""
         SELECT
             pg.suburb,
-            pg.post_code,
             AVG(pg.avg_cagr) AS avg_cagr,
             COUNT(pg.property_id) AS property_count
-        FROM read_parquet('{_r2("property_growth")}') pg
-        JOIN read_parquet('{_r2("sales")}') s ON s.property_id = pg.property_id
+        FROM read_parquet('{growth_path}') pg
+        JOIN read_parquet('{sales_path}') s ON s.property_id = pg.property_id
         WHERE pg.last_sale_year <= {year} {type_filter}
-        GROUP BY pg.suburb, pg.post_code
+        GROUP BY pg.suburb
         ORDER BY avg_cagr DESC
         LIMIT 20
-    """)
+    """
+    result = conn.execute(sql)
+    columns = [desc[0] for desc in result.description]
+    rows = result.fetchall()
+    conn.close()
 
-    if parquet_data is not None:
-        return {"growth": {"suburbs": parquet_data}}
-
-    from app.database import get_db
-    from app.models import SuburbGrowth
-    from sqlalchemy import desc
-
-    db = next(get_db())
-    try:
-        suburbs = (
-            db.query(SuburbGrowth)
-            .filter(SuburbGrowth.year == year)
-            .order_by(desc(SuburbGrowth.avg_cagr))
-            .limit(20)
-            .all()
-        )
-        return {
-            "growth": {
-                "suburbs": [
-                    {
-                        "suburb": s.suburb,
-                        "avg_cagr": s.avg_cagr,
-                        "property_count": s.property_count,
-                    }
-                    for s in suburbs
-                ]
-            }
+    return {"growth": {"suburbs": [
+        {
+            "suburb": r[0],
+            "avg_cagr": r[1],
+            "property_count": r[2],
         }
-    finally:
-        db.close()
+        for r in rows
+    ]}}
 
 
 @router.get("/suburb_centroids")
-@cached(ttl=600)
 async def suburb_centroids(year: int = Query(2024)):
-    parquet_data = _duck_query(f"""
+    sales_path = _parquet("sales")
+    suburb_path = _parquet("suburb_summary")
+
+    conn = get_duck_conn()
+
+    sql = f"""
         SELECT
             s.property_locality AS suburb,
             AVG(s.latitude) AS lat,
             AVG(s.longitude) AS lng,
             ss.avg_cagr,
             ss.total_sales
-        FROM read_parquet('{_r2("sale")}') s
-        JOIN read_parquet('{_r2("suburb_summary")}') ss
+        FROM read_parquet('{sales_path}') s
+        LEFT JOIN read_parquet('{suburb_path}') ss
             ON ss.suburb = s.property_locality
         WHERE EXTRACT(YEAR FROM s.contract_date::DATE) <= {year}
           AND s.latitude IS NOT NULL
         GROUP BY s.property_locality, ss.avg_cagr, ss.total_sales
-    """)
+    """
+    result = conn.execute(sql)
+    columns = [desc[0] for desc in result.description]
+    rows = result.fetchall()
+    conn.close()
 
-    if parquet_data is not None:
-        return {"centroids": parquet_data}
-
-    from app.database import get_db
-    from app.models import Sale, SuburbSummary
-    from sqlalchemy import func
-
-    db = next(get_db())
-    try:
-        rows = (
-            db.query(
-                Sale.property_locality,
-                func.avg(Sale.latitude).label("lat"),
-                func.avg(Sale.longitude).label("lng"),
-            )
-            .filter(Sale.latitude != None)
-            .group_by(Sale.property_locality)
-            .all()
-        )
-        return {
-            "centroids": [
-                {"suburb": r.property_locality, "lat": r.lat, "lng": r.lng}
-                for r in rows
-            ]
+    return {"centroids": [
+        {
+            "suburb": r[0],
+            "lat": r[1],
+            "lng": r[2],
+            "avg_cagr": r[3],
+            "total_sales": r[4],
         }
-    finally:
-        db.close()
+        for r in rows
+    ]}

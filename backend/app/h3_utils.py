@@ -17,8 +17,8 @@ def zoom_to_resolution(zoom: int) -> int:
 
 
 def lat_lng_to_h3(lat: float, lng: float, resolution: int) -> str:
-    return h3.geo_to_h3(lat, lng, resolution)
+    return h3.latlng_to_cell(lat, lng, resolution)
 
 
 def h3_to_boundary(h3_index: str) -> list[list[float]]:
-    return list(h3.h3_to_geo_boundary(h3_index, geo_json=True))
+    return [list(coord) for coord in h3.cell_to_boundary(h3_index)]

@@ -2,7 +2,7 @@ fastapi==0.135.2
 uvicorn[standard]==0.42.0
 python-dateutil==2.9.0.post0
 pandas==2.3.3
-pyarrow==16.1.0
+pyarrow==23.0.1
 duckdb==0.10.3
 h3==3.7.7
 python-dotenv==1.2.2

@@ -14,7 +14,10 @@
     "test:e2e:ci": "playwright test --reporter=html --reporter=json"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.28.0",
+    "apache-arrow": "^15.0.0",
     "axios": "^1.13.2",
+    "idb": "^8.0.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",

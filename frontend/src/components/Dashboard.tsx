@@ -1,295 +1,776 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Search, Home, TrendingUp, Loader, ArrowLeft, ChevronRight, Calendar, Map as MapIcon, Layers } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
-import 'leaflet/dist/leaflet.css';
-import axios from 'axios';
 import DualRangeSlider from './DualRangeSlider';
-import PropRooMap from './Map/PropRooMap';
-import FilterPanel from './Sidebar/FilterPanel';
-import StatsPanel from './Sidebar/StatsPanel';
-import { useAppStore } from '../store/useAppStore';
-import { useStats } from '../hooks/useStats';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// deck.gl + MapLibre imports
+import DeckGL from '@deck.gl/react';
+import { Map } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { H3HexagonLayer } from '@deck.gl/geo-layers';
+import { HeatmapLayer, ContourLayer } from '@deck.gl/aggregation-layers';
+import { ScatterplotLayer, TextLayer } from '@deck.gl/layers';
+import { FlyToInterpolator } from '@deck.gl/core';
 
-const CLUSTER_COLORS = [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
-    '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#64748b'
-];
+// DuckDB + Cache services
+import { initDuckDB, query, isInitialized } from '../services/duckdb';
+import { get as cacheGet, set as cacheSet } from '../services/cache';
 
-const Dashboard = () => {
-    const { year, propertyType, priceRange, loadingMap, loadingSummary, summaryData } = useAppStore();
-    useStats();
+// Types
+interface SaleRecord {
+  id: number;
+  property_id: string;
+  property_locality: string;
+  property_street_name: string;
+  property_house_number?: string;
+  property_name?: string;
+  purchase_price: number;
+  contract_date: string;
+  primary_purpose: string;
+  latitude: number;
+  longitude: number;
+  area?: string;
+  zoning?: string;
+  cagr?: number;
+}
 
-    const [viewLevel, setViewLevel] = useState('state');
-    const [selection, setSelection] = useState({ suburb: null, street: null, propertyId: null });
-    const [sales, setSales] = useState([]);
-    const [leaderboards, setLeaderboards] = useState({ growth: { suburbs: [], streets: [] }, activity: { suburbs: [], streets: [] } });
-    const [unifiedData, setUnifiedData] = useState({ clusters: [] });
-    const [loading, setLoading] = useState(true);
+interface SuburbSummary {
+  suburb: string;
+  avg_cagr: number;
+  unique_properties: number;
+  total_sales: number;
+  lat: number;
+  lng: number;
+}
 
-    useEffect(() => {
-        fetchData();
-    }, [viewLevel, selection, year, propertyType, priceRange]);
+interface StreetSummary {
+  street_name: string;
+  suburb: string;
+  avg_cagr: number;
+  unique_properties: number;
+  total_sales: number;
+  lat: number;
+  lng: number;
+}
 
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            try {
-                const lbRes = await axios.get(`${API_URL}/stats/top_performers`, {
-                    params: { year, property_type: propertyType || undefined }
-                });
-                setLeaderboards(lbRes.data || { growth: { suburbs: [], streets: [] }, activity: { suburbs: [], streets: [] } });
-            } catch (e: any) {
-                console.warn('Leaderboards fetch failed:', e.message);
-                setLeaderboards({ growth: { suburbs: [], streets: [] }, activity: { suburbs: [], streets: [] } });
-            }
+interface H3Cell {
+  h3_index: string;
+  lat: number;
+  lng: number;
+  median_price: number;
+  sale_count: number;
+  avg_cagr: number;
+}
 
-            try {
-                const mapRes = await axios.get(`${API_URL}/sales/stats/unified_map`, {
-                    params: { level: viewLevel === 'state' ? 'suburb' : viewLevel === 'suburb' ? 'street' : 'suburb', year }
-                });
-                setUnifiedData(mapRes.data || { clusters: [] });
-            } catch (e: any) {
-                console.warn('Unified map fetch failed:', e.message);
-                setUnifiedData({ clusters: [] });
-            }
-
-            const baseParams = {
-                limit: 100,
-                start_date: `${year}-01-01`,
-                end_date: `${year}-12-31`,
-                property_type: propertyType || undefined,
-                min_price: priceRange.min || undefined,
-                max_price: priceRange.max >= 10000000 ? undefined : priceRange.max
-            };
-
-            if (viewLevel === 'state') {
-                try {
-                    const res = await axios.get(`${API_URL}/sales/sales`, { params: baseParams });
-                    setSales(res.data || []);
-                } catch (e: any) {
-                    console.warn('Sales fetch failed:', e.message);
-                    setSales([]);
-                }
-            } else if (viewLevel === 'suburb') {
-                try {
-                    const res = await axios.get(`${API_URL}/sales/sales`, { params: { ...baseParams, suburb: selection.suburb } });
-                    setSales(res.data || []);
-                } catch (e: any) {
-                    console.warn('Suburb sales fetch failed:', e.message);
-                    setSales([]);
-                }
-            } else if (viewLevel === 'street') {
-                try {
-                    const res = await axios.get(`${API_URL}/sales/sales`, { params: { ...baseParams, suburb: selection.suburb } });
-                    const streetSales = (res.data || []).filter((s: any) => s.property_street_name === selection.street);
-                    setSales(streetSales);
-                } catch (e: any) {
-                    console.warn('Street sales fetch failed:', e.message);
-                    setSales([]);
-                }
-            } else if (viewLevel === 'property') {
-                try {
-                    const histRes = await axios.get(`${API_URL}/sales/property/${selection.propertyId}/history`);
-                    setSales(histRes.data || []);
-                } catch (e: any) {
-                    console.warn('Property history fetch failed:', e.message);
-                    setSales([]);
-                }
-            }
-        } catch (error) {
-            console.error("Fetch failed:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleBack = () => {
-        if (viewLevel === 'property') setViewLevel('street');
-        else if (viewLevel === 'street') setViewLevel('suburb');
-        else if (viewLevel === 'suburb') setViewLevel('state');
-    };
-
-    const drillDown = (type: string, value: string) => {
-        if (type === 'suburb') {
-            setSelection({ suburb: value, street: null, propertyId: null });
-            setViewLevel('suburb');
-        } else if (type === 'street') {
-            setSelection({ ...selection, street: value, propertyId: null });
-            setViewLevel('street');
-        } else if (type === 'property') {
-            setSelection({ ...selection, propertyId: value });
-            setViewLevel('property');
-        }
-    };
-
-    const cagrData = useMemo(() => {
-        return (viewLevel === 'state' ? leaderboards.growth.suburbs : leaderboards.growth.streets)
-            .slice(0, 5)
-            .map((i: any) => ({
-                name: (i.suburb || i.street_name).split(' ')[0],
-                value: parseFloat((i.avg_cagr * 100).toFixed(1)),
-                fullName: i.suburb || i.street_name
-            }));
-    }, [leaderboards, viewLevel]);
-
-    const activityData = useMemo(() => {
-        return (viewLevel === 'state' ? leaderboards.activity.suburbs : leaderboards.activity.streets)
-            .slice(0, 5)
-            .map((i: any) => ({
-                name: (i.suburb || i.street_name).split(' ')[0],
-                value: i.sales_count || i.property_count,
-                fullName: i.suburb || i.street_name
-            }));
-    }, [leaderboards, viewLevel]);
-
-    return (
-        <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans">
-            <div className="h-20 shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 flex justify-between items-center z-50">
-                <div className="flex items-center gap-6">
-                    {viewLevel !== 'state' && (
-                        <button onClick={handleBack} className="p-2 hover:bg-slate-800 rounded-full transition-all border border-slate-700 bg-slate-900 shadow-lg group">
-                            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                        </button>
-                    )}
-                    <div className="flex flex-col">
-                        <div className="flex items-center gap-2 text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] mb-0.5">
-                            NSW UNIFIED SPATIAL <ChevronRight size={10} /> {viewLevel}
-                        </div>
-                        <p className="text-lg font-black tracking-tight text-white leading-none">
-                            {viewLevel === 'state' ? 'STATE OVERVIEW' :
-                                viewLevel === 'suburb' ? selection.suburb :
-                                    viewLevel === 'street' ? selection.street :
-                                        `ANALYSIS`}
-                        </p>
-                    </div>
-                </div>
-
-                <FilterPanel />
-            </div>
-
-            <div className="h-[520px] shrink-0 p-4 grid grid-cols-12 gap-4">
-                <div className="col-span-12 lg:col-span-8 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
-                    <div className="absolute top-4 left-4 z-[1000] flex gap-2">
-                        <div className="bg-slate-950/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] font-bold tracking-widest text-slate-300 backdrop-blur-sm flex items-center gap-2">
-                            <Layers size={12} className="text-blue-500" /> UNIFIED SPATIAL LAYER
-                        </div>
-                        <div className="bg-blue-900/40 px-3 py-1.5 rounded-xl border border-blue-500/30 text-[10px] font-bold tracking-widest text-blue-200 backdrop-blur-sm">
-                            {unifiedData.clusters.length} PERFORMANCE CLUSTERS
-                        </div>
-                    </div>
-
-                    <PropRooMap />
-                </div>
-
-                <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 h-full">
-                    <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
-                        <h4 className="flex items-center gap-2 text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-4">
-                            <TrendingUp size={14} /> CAGR % PERFORMANCE
-                        </h4>
-                        <div className="flex-grow">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={cagrData} layout="vertical">
-                                    <XAxis type="number" hide domain={[0, 'dataMax + 2']} />
-                                    <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} width={60} />
-                                    <Tooltip cursor={{ fill: '#ffffff05' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
-                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
-                                        {cagrData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={CLUSTER_COLORS[index % CLUSTER_COLORS.length]} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
-                        <h4 className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-4">
-                            <Home size={14} /> TRANSACTION COUNT
-                        </h4>
-                        <div className="flex-grow">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={activityData} layout="vertical">
-                                    <XAxis type="number" hide />
-                                    <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} width={60} />
-                                    <Tooltip cursor={{ fill: '#ffffff05' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
-                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} fill="#3b82f6" />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex-grow p-4 min-h-0 bg-slate-950">
-                <div className="h-full bg-slate-900/20 border border-slate-800/40 rounded-3xl flex flex-col overflow-hidden">
-                    <div className="px-8 py-4 border-b border-slate-800/40 flex justify-between items-center bg-slate-950/40">
-                        <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Spatial Entity Archive</p>
-                    </div>
-                    <div className="flex-grow overflow-auto custom-scrollbar">
-                        <table className="w-full text-left">
-                            <thead className="sticky top-0 bg-slate-950/90 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 z-10 border-b border-slate-800/40">
-                                <tr>
-                                    <th className="px-8 py-4">Contextual Address</th>
-                                    <th className="px-8 py-4 text-center">Market Valuation</th>
-                                    <th className="px-8 py-4">Growth performance</th>
-                                    <th className="px-8 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-800/30">
-                                {sales.map((s: any) => (
-                                    <tr
-                                        key={s.id}
-                                        onClick={() => drillDown(viewLevel === 'state' ? 'suburb' : 'street', viewLevel === 'state' ? s.property_locality : s.property_street_name)}
-                                        className="hover:bg-blue-600/5 group cursor-pointer transition-all"
-                                    >
-                                        <td className="px-8 py-4">
-                                            <p className="font-bold text-sm group-hover:text-blue-400 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
-                                            <p className="text-[9px] text-slate-600 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date}</p>
-                                        </td>
-                                        <td className="px-8 py-4 text-center">
-                                            <p className="font-mono text-base font-black text-slate-200 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
-                                        </td>
-                                        <td className="px-8 py-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-1 w-20 bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-emerald-500" style={{ width: `${Math.max(5, Math.min(100, (s.cagr || 0) * 800))}%` }}></div>
-                                                </div>
-                                                <span className="font-black text-emerald-400 text-xs">{((s.cagr || 0) * 100).toFixed(1)}%</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-4 text-right">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); drillDown('property', s.property_id); }}
-                                                className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white px-5 py-2 rounded-xl text-[9px] font-black tracking-[0.2em] transition-all uppercase border border-blue-500/20"
-                                            >
-                                                EXPLORE
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            {(loading || loadingMap || loadingSummary) && (
-                <div className="absolute inset-0 z-[10000] bg-slate-950/80 backdrop-blur-2xl flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-8">
-                        <div className="relative">
-                            <div className="h-20 w-20 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <Loader className="text-blue-500 animate-pulse" size={24} />
-                            </div>
-                        </div>
-                        <p className="text-blue-400 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse">Orchestrating Unified Intelligence...</p>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+// Constants
+const CARTO_BASEMAP = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+const INITIAL_VIEW_STATE = {
+  longitude: 151.2093,
+  latitude: -33.8688,
+  zoom: 10,
+  pitch: 45,
+  bearing: 0,
 };
 
-export default Dashboard;// Force deployment: Thu Apr  2 18:19:17 AEDT 2026
+const CLUSTER_COLORS = [
+  '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+  '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#64748b'
+];
+
+const availableYears = Array.from({ length: 24 }, (_, i) => 2024 - i);
+
+// CAGR color scale: red (negative) → gray (neutral) → green (positive)
+function cagrToColor(cagr: number): [number, number, number, number] {
+  const val = Math.max(-0.1, Math.min(0.2, cagr));
+  if (val < 0) {
+    const t = Math.min(1, Math.abs(val) / 0.1);
+    return [220, Math.round(50 + t * 30), 50, 200];
+  }
+  if (val < 0.05) {
+    const t = val / 0.05;
+    return [Math.round(140 + t * 60), Math.round(140 + t * 20), Math.round(140 - t * 80), 200];
+  }
+  const t = Math.min(1, (val - 0.05) / 0.15);
+  return [Math.round(50 - t * 30), Math.round(180 + t * 40), Math.round(60 + t * 20), 220];
+}
+
+// Price to elevation scale
+function priceToElevation(price: number, maxPrice: number): number {
+  return (price / maxPrice) * 5000;
+}
+
+// Get H3 resolution based on zoom level
+function getH3Resolution(zoom: number): number {
+  if (zoom >= 12 && zoom <= 14) return 9;
+  if (zoom >= 9 && zoom <= 11) return 7;
+  return 5;
+}
+
+// Format price for display
+function formatPrice(price: number): string {
+  if (price >= 1000000) return `$${(price / 1000000).toFixed(1)}M`;
+  if (price >= 1000) return `$${(price / 1000).toFixed(0)}K`;
+  return `$${price}`;
+}
+
+// Cached query helper
+async function cachedQuery<T>(sql: string): Promise<T[]> {
+  // Try cache first
+  const cached = await cacheGet<T[]>(sql);
+  if (cached) return cached;
+
+  // Run query
+  const result = await query<T>(sql);
+
+  // Cache result
+  await cacheSet(sql, result);
+
+  return result;
+}
+
+export default function Dashboard() {
+  // Navigation State
+  const [viewLevel, setViewLevel] = useState('state');
+  const [selection, setSelection] = useState({ suburb: null as string | null, street: null as string | null, propertyId: null as string | null });
+
+  // Data State
+  const [sales, setSales] = useState<SaleRecord[]>([]);
+  const [suburbLeaderboard, setSuburbLeaderboard] = useState<SuburbSummary[]>([]);
+  const [streetLeaderboard, setStreetLeaderboard] = useState<StreetSummary[]>([]);
+  const [h3Cells, setH3Cells] = useState<H3Cell[]>([]);
+  const [heatmapData, setHeatmapData] = useState<SaleRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState<Record<string, number>>({});
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Filters
+  const [selectedYear, setSelectedYear] = useState(2024);
+  const [propertyType, setPropertyType] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000000 });
+
+  // Map State
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [mapZoom, setMapZoom] = useState(10);
+
+  // Layer Toggles
+  const [showH3, setShowH3] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showContours, setShowContours] = useState(false);
+  const [showPins, setShowPins] = useState(false);
+
+  // Selected property for popup
+  const [selectedProperty, setSelectedProperty] = useState<SaleRecord | null>(null);
+
+  // Initialize DuckDB on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      try {
+        await initDuckDB((file, pct) => {
+          if (!cancelled) {
+            setDownloadProgress(prev => ({ ...prev, [file]: pct }));
+          }
+        });
+        if (!cancelled) {
+          setIsInitialized(true);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('DuckDB init failed:', err);
+          setInitError(err instanceof Error ? err.message : 'Failed to initialize DuckDB');
+        }
+      }
+    }
+
+    init();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Fetch data when filters change
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    let cancelled = false;
+    setLoading(true);
+
+    async function fetchData() {
+      try {
+        // 1. Fetch suburb leaderboard
+        try {
+          const sql = `SELECT suburb, avg_cagr, unique_properties, total_sales, lat, lng 
+                       FROM suburb_summary 
+                       ORDER BY avg_cagr DESC LIMIT 10`;
+          const suburbs = await cachedQuery<SuburbSummary>(sql);
+          if (!cancelled) setSuburbLeaderboard(suburbs);
+        } catch (e) {
+          console.warn('Suburb leaderboard fetch failed:', e);
+          if (!cancelled) setSuburbLeaderboard([]);
+        }
+
+        // 2. Fetch street leaderboard
+        try {
+          const sql = `SELECT street_name, suburb, avg_cagr, unique_properties, total_sales, lat, lng
+                       FROM street_summary 
+                       ORDER BY avg_cagr DESC LIMIT 10`;
+          const streets = await cachedQuery<StreetSummary>(sql);
+          if (!cancelled) setStreetLeaderboard(streets);
+        } catch (e) {
+          console.warn('Street leaderboard fetch failed:', e);
+          if (!cancelled) setStreetLeaderboard([]);
+        }
+
+        // 3. Fetch H3 cells for map
+        try {
+          const resolution = getH3Resolution(mapZoom);
+          const sql = `
+            SELECT 
+              h3_latlng_to_cell(latitude, longitude, ${resolution}) as h3_index,
+              h3_cell_to_lat(h3_latlng_to_cell(latitude, longitude, ${resolution})) as lat,
+              h3_cell_to_lng(h3_latlng_to_cell(latitude, longitude, ${resolution})) as lng,
+              AVG(purchase_price) as median_price,
+              COUNT(*) as sale_count
+            FROM sales 
+            WHERE strftime(contract_date, '%Y') = '${selectedYear}'
+            GROUP BY h3_index
+          `;
+          const cells = await cachedQuery<H3Cell>(sql);
+          if (!cancelled) setH3Cells(cells);
+        } catch (e) {
+          console.warn('H3 cells fetch failed:', e);
+          if (!cancelled) setH3Cells([]);
+        }
+
+        // 4. Fetch heatmap data
+        try {
+          const sql = `SELECT * FROM sales WHERE strftime(contract_date, '%Y') = '${selectedYear}' LIMIT 50000`;
+          const data = await cachedQuery<SaleRecord>(sql);
+          if (!cancelled) setHeatmapData(data);
+        } catch (e) {
+          console.warn('Heatmap data fetch failed:', e);
+          if (!cancelled) setHeatmapData([]);
+        }
+
+        // 5. Fetch sales for table
+        try {
+          let sql = `SELECT * FROM sales WHERE strftime(contract_date, '%Y') = '${selectedYear}'`;
+          if (propertyType) {
+            sql += ` AND primary_purpose = '${propertyType}'`;
+          }
+          if (priceRange.min > 0) {
+            sql += ` AND purchase_price >= ${priceRange.min}`;
+          }
+          if (priceRange.max < 10000000) {
+            sql += ` AND purchase_price <= ${priceRange.max}`;
+          }
+
+          if (viewLevel === 'suburb' && selection.suburb) {
+            sql += ` AND property_locality = '${selection.suburb}'`;
+          } else if (viewLevel === 'street' && selection.suburb && selection.street) {
+            sql += ` AND property_locality = '${selection.suburb}' AND property_street_name = '${selection.street}'`;
+          } else if (viewLevel === 'property' && selection.propertyId) {
+            sql = `SELECT * FROM sales WHERE property_id = '${selection.propertyId}' ORDER BY contract_date`;
+          }
+
+          sql += ' LIMIT 100';
+          const data = await cachedQuery<SaleRecord>(sql);
+          if (!cancelled) setSales(data);
+        } catch (e) {
+          console.warn('Sales fetch failed:', e);
+          if (!cancelled) setSales([]);
+        }
+      } catch (error) {
+        console.error('Fetch failed:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchData();
+    return () => { cancelled = true; };
+  }, [isInitialized, viewLevel, selection, selectedYear, propertyType, priceRange, mapZoom]);
+
+  // Navigation handlers
+  const handleBack = useCallback(() => {
+    if (viewLevel === 'property') {
+      setViewLevel('street');
+      setSelection(prev => ({ ...prev, propertyId: null }));
+    } else if (viewLevel === 'street') {
+      setViewLevel('suburb');
+      setSelection(prev => ({ ...prev, street: null }));
+    } else if (viewLevel === 'suburb') {
+      setViewLevel('state');
+      setSelection({ suburb: null, street: null, propertyId: null });
+    }
+  }, [viewLevel]);
+
+  const drillDown = useCallback((type: string, value: string) => {
+    if (type === 'suburb') {
+      setSelection({ suburb: value, street: null, propertyId: null });
+      setViewLevel('suburb');
+      // Fly to suburb
+      const suburb = suburbLeaderboard.find(s => s.suburb === value);
+      if (suburb) {
+        setViewState(prev => ({
+          ...prev,
+          longitude: suburb.lng,
+          latitude: suburb.lat,
+          zoom: 12,
+          pitch: 45,
+          transitionDuration: 1500,
+          transitionInterpolator: new FlyToInterpolator(),
+        }));
+      }
+    } else if (type === 'street') {
+      setSelection(prev => ({ ...prev, street: value, propertyId: null }));
+      setViewLevel('street');
+      const street = streetLeaderboard.find(s => s.street_name === value);
+      if (street) {
+        setViewState(prev => ({
+          ...prev,
+          longitude: street.lng,
+          latitude: street.lat,
+          zoom: 14,
+          pitch: 45,
+          transitionDuration: 1500,
+          transitionInterpolator: new FlyToInterpolator(),
+        }));
+      }
+    } else if (type === 'property') {
+      setSelection(prev => ({ ...prev, propertyId: value }));
+      setViewLevel('property');
+    }
+  }, [suburbLeaderboard, streetLeaderboard]);
+
+  const handleMapClick = useCallback((info: any) => {
+    if (info.object) {
+      const { object } = info;
+      if (object.properties) {
+        // H3 cell clicked - drill down
+        setViewState(prev => ({
+          ...prev,
+          longitude: object.geometry.coordinates[0][0][0],
+          latitude: object.geometry.coordinates[0][0][1],
+          zoom: Math.min(prev.zoom + 2, 15),
+          pitch: 45,
+          transitionDuration: 1500,
+          transitionInterpolator: new FlyToInterpolator(),
+        }));
+      }
+    }
+  }, []);
+
+  // Computed data for charts
+  const cagrData = useMemo(() => {
+    const data = viewLevel === 'state' ? suburbLeaderboard : streetLeaderboard;
+    return data.slice(0, 5).map(item => ({
+      name: (item.suburb || item.street_name || '').split(' ')[0],
+      value: parseFloat(((item.avg_cagr || 0) * 100).toFixed(1)),
+      fullName: item.suburb || item.street_name,
+    }));
+  }, [suburbLeaderboard, streetLeaderboard, viewLevel]);
+
+  const activityData = useMemo(() => {
+    const data = viewLevel === 'state' ? suburbLeaderboard : streetLeaderboard;
+    return data.slice(0, 5).map(item => ({
+      name: (item.suburb || item.street_name || '').split(' ')[0],
+      value: item.total_sales || item.unique_properties || 0,
+      fullName: item.suburb || item.street_name,
+    }));
+  }, [suburbLeaderboard, streetLeaderboard, viewLevel]);
+
+  // deck.gl layers
+  const layers = useMemo(() => {
+    const result: any[] = [];
+
+    // H3 Hexagon Layer
+    if (showH3 && h3Cells.length > 0) {
+      const maxPrice = Math.max(...h3Cells.map(c => c.median_price || 0), 1);
+      result.push(
+        new H3HexagonLayer({
+          id: 'h3-hexagons',
+          data: h3Cells,
+          extruded: true,
+          getHexagon: (d: H3Cell) => d.h3_index,
+          getElevation: (d: H3Cell) => priceToElevation(d.median_price || 0, maxPrice),
+          getFillColor: (d: H3Cell) => cagrToColor(d.avg_cagr || 0),
+          getLineColor: [255, 255, 255, 40],
+          lineWidthMinPixels: 0.5,
+          elevationScale: 100,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [255, 255, 255, 80],
+          transitions: { getFillColor: 600, getElevation: 600 },
+          getTooltip: (d: { object: H3Cell }) => d.object && {
+            html: `
+              <div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+                <div style="font-weight: bold; margin-bottom: 4px;">H3 Cell</div>
+                <div>Median Price: ${formatPrice(d.object.median_price || 0)}</div>
+                <div>Sales: ${d.object.sale_count}</div>
+                <div>Avg CAGR: ${((d.object.avg_cagr || 0) * 100).toFixed(1)}%</div>
+              </div>
+            `,
+          },
+        })
+      );
+    }
+
+    // Heatmap Layer
+    if (showHeatmap && heatmapData.length > 0) {
+      result.push(
+        new HeatmapLayer({
+          id: 'heatmap',
+          data: heatmapData.filter(d => d.latitude && d.longitude),
+          getPosition: (d: SaleRecord) => [d.longitude, d.latitude],
+          getWeight: (d: SaleRecord) => d.purchase_price / 1000000,
+          radiusPixels: 50,
+          intensity: 1.5,
+          threshold: 0.1,
+          opacity: 0.8,
+        })
+      );
+    }
+
+    // Contour Layer
+    if (showContours && heatmapData.length > 0) {
+      result.push(
+        new ContourLayer({
+          id: 'contours',
+          data: heatmapData.filter(d => d.latitude && d.longitude),
+          getPosition: (d: SaleRecord) => [d.longitude, d.latitude],
+          getWeight: (d: SaleRecord) => d.purchase_price / 1000000,
+          cellSize: 500,
+          contourStrokeWidth: 2,
+          contourColor: [100, 200, 255, 180],
+          opacity: 0.6,
+        })
+      );
+    }
+
+    // Property Pins (Scatterplot) at zoom 15+
+    if (showPins && viewState.zoom >= 15 && sales.length > 0) {
+      const maxPrice = Math.max(...sales.map(s => s.purchase_price || 0), 1);
+      result.push(
+        new ScatterplotLayer({
+          id: 'property-pins',
+          data: sales.filter(d => d.latitude && d.longitude),
+          getPosition: (d: SaleRecord) => [d.longitude, d.latitude],
+          getRadius: (d: SaleRecord) => Math.max(5, (d.purchase_price / maxPrice) * 50),
+          getFillColor: (d: SaleRecord) => cagrToColor(d.cagr || 0),
+          getLineColor: [255, 255, 255, 100],
+          lineWidthMinPixels: 1,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [255, 255, 255, 80],
+          transitions: { getFillColor: 600, getRadius: 600 },
+          onClick: (info: any) => {
+            if (info.object) {
+              setSelectedProperty(info.object);
+            }
+          },
+          getTooltip: (d: { object: SaleRecord }) => d.object && {
+            html: `
+              <div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+                <div style="font-weight: bold; margin-bottom: 4px;">${d.object.property_house_number || ''} ${d.object.property_street_name || ''}</div>
+                <div>${d.object.property_locality}</div>
+                <div>Price: ${formatPrice(d.object.purchase_price || 0)}</div>
+                <div>Date: ${d.object.contract_date}</div>
+              </div>
+            `,
+          },
+        })
+      );
+    }
+
+    return result;
+  }, [showH3, showHeatmap, showContours, showPins, h3Cells, heatmapData, sales, viewState.zoom]);
+
+  // Loading overlay
+  if (initError) {
+    return (
+      <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-2xl font-black mb-4">INITIALIZATION FAILED</div>
+          <p className="text-slate-400 mb-6">{initError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-colors"
+          >
+            RETRY
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isInitialized) {
+    const totalProgress = Object.values(downloadProgress).reduce((a, b) => a + b, 0) / (Object.keys(downloadProgress).length || 1);
+    return (
+      <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans items-center justify-center">
+        <div className="flex flex-col items-center gap-8">
+          <div className="relative">
+            <div className="h-20 w-20 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader className="text-blue-500 animate-pulse" size={24} />
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-blue-400 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse mb-4">
+              Loading PropRoo Engine...
+            </p>
+            {Object.keys(downloadProgress).length > 0 && (
+              <div className="space-y-2">
+                {Object.entries(downloadProgress).map(([file, pct]) => (
+                  <div key={file} className="flex items-center gap-3 text-xs">
+                    <span className="text-slate-400 w-32 text-right">{file}.parquet</span>
+                    <div className="w-48 h-2 bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-500 transition-all duration-300"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-slate-500 w-12">{pct}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-slate-600 text-[10px] mt-4">
+              Total: {Math.round(totalProgress)}%
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans">
+      {/* Header */}
+      <div className="h-20 shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 flex justify-between items-center z-50">
+        <div className="flex items-center gap-6">
+          {viewLevel !== 'state' && (
+            <button onClick={handleBack} className="p-2 hover:bg-slate-800 rounded-full transition-all border border-slate-700 bg-slate-900 shadow-lg group">
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            </button>
+          )}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] mb-0.5">
+              NSW UNIFIED SPATIAL <ChevronRight size={10} /> {viewLevel}
+            </div>
+            <p className="text-lg font-black tracking-tight text-white leading-none">
+              {viewLevel === 'state' ? 'STATE OVERVIEW' :
+                viewLevel === 'suburb' ? selection.suburb :
+                  viewLevel === 'street' ? selection.street :
+                    `ANALYSIS`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="w-56 flex flex-col gap-1">
+            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">PRICE RANGE</label>
+            <DualRangeSlider min={0} max={10000000} onChange={setPriceRange} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">CATEGORY</label>
+            <div className="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+              <select value={propertyType} onChange={e => setPropertyType(e.target.value)} className="bg-transparent text-xs font-bold focus:outline-none cursor-pointer">
+                <option value="">ALL PROPERTIES</option>
+                <option value="Residence">RESIDENCE</option>
+                <option value="Strata Unit">STRATA UNIT</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">YEAR</label>
+            <div className="bg-blue-600/20 px-3 py-1.5 rounded-xl border border-blue-500/30 flex items-center gap-2">
+              <Calendar size={12} className="text-blue-400" />
+              <select value={selectedYear} onChange={e => setSelectedYear(parseInt(e.target.value))} className="bg-transparent text-xs font-bold focus:outline-none cursor-pointer text-blue-300">
+                {availableYears.map(y => <option key={y} value={y} className="bg-slate-950 font-sans">{y}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Visual Workspace */}
+      <div className="h-[520px] shrink-0 p-4 grid grid-cols-12 gap-4">
+        {/* Map Area (70% width) */}
+        <div className="col-span-12 lg:col-span-8 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
+          {/* Layer Toggles */}
+          <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
+            <div className="bg-slate-950/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] font-bold tracking-widest text-slate-300 backdrop-blur-sm flex items-center gap-2">
+              <Layers size={12} className="text-blue-500" /> LAYERS
+            </div>
+            <div className="bg-slate-950/90 px-3 py-2 rounded-xl border border-slate-800 backdrop-blur-sm space-y-1.5">
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={showH3} onChange={e => setShowH3(e.target.checked)} className="accent-blue-500" />
+                H3 HEXAGONS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} className="accent-blue-500" />
+                HEATMAP
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={showContours} onChange={e => setShowContours(e.target.checked)} className="accent-blue-500" />
+                CONTOURS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
+                <input type="checkbox" checked={showPins} onChange={e => setShowPins(e.target.checked)} className="accent-blue-500" />
+                PROPERTY PINS
+              </label>
+            </div>
+          </div>
+
+          {/* Year Display */}
+          <div className="absolute top-4 right-4 z-[1000] bg-slate-950/90 px-4 py-2 rounded-xl border border-slate-800 backdrop-blur-sm">
+            <span className="text-2xl font-black text-blue-400">{selectedYear}</span>
+          </div>
+
+          {/* Time Slider */}
+          <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-slate-950/90 px-4 py-3 rounded-xl border border-slate-800 backdrop-blur-sm">
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">2001</span>
+              <input
+                type="range"
+                min={2001}
+                max={2024}
+                value={selectedYear}
+                onChange={e => setSelectedYear(parseInt(e.target.value))}
+                className="flex-1 h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-blue-500"
+              />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">2024</span>
+            </div>
+          </div>
+
+          {/* DeckGL Map */}
+          <DeckGL
+            viewState={viewState}
+            onViewStateChange={({ viewState: vs }) => {
+              setViewState(vs);
+              setMapZoom(Math.round(vs.zoom));
+            }}
+            controller={true}
+            layers={layers}
+            onClick={handleMapClick}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+          >
+            <Map
+              mapStyle={CARTO_BASEMAP}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </DeckGL>
+        </div>
+
+        {/* Analytical Charts (30% width) */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 h-full">
+          <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
+            <h4 className="flex items-center gap-2 text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-4">
+              <TrendingUp size={14} /> CAGR % PERFORMANCE
+            </h4>
+            <div className="flex-grow">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={cagrData} layout="vertical">
+                  <XAxis type="number" hide domain={[0, 'dataMax + 2']} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} width={60} />
+                  <Tooltip cursor={{ fill: '#ffffff05' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+                    {cagrData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={CLUSTER_COLORS[index % CLUSTER_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
+            <h4 className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-4">
+              <Home size={14} /> TRANSACTION COUNT
+            </h4>
+            <div className="flex-grow">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={activityData} layout="vertical">
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} width={60} />
+                  <Tooltip cursor={{ fill: '#ffffff05' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Entity Table */}
+      <div className="flex-grow p-4 min-h-0 bg-slate-950">
+        <div className="h-full bg-slate-900/20 border border-slate-800/40 rounded-3xl flex flex-col overflow-hidden">
+          <div className="px-8 py-4 border-b border-slate-800/40 flex justify-between items-center bg-slate-950/40">
+            <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Spatial Entity Archive</p>
+          </div>
+          <div className="flex-grow overflow-auto custom-scrollbar">
+            <table className="w-full text-left">
+              <thead className="sticky top-0 bg-slate-950/90 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 z-10 border-b border-slate-800/40">
+                <tr>
+                  <th className="px-8 py-4">Contextual Address</th>
+                  <th className="px-8 py-4 text-center">Market Valuation</th>
+                  <th className="px-8 py-4">Growth performance</th>
+                  <th className="px-8 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/30">
+                {sales.map(s => (
+                  <tr
+                    key={s.id}
+                    onClick={() => drillDown(viewLevel === 'state' ? 'suburb' : 'street', viewLevel === 'state' ? s.property_locality : s.property_street_name)}
+                    className="hover:bg-blue-600/5 group cursor-pointer transition-all"
+                  >
+                    <td className="px-8 py-4">
+                      <p className="font-bold text-sm group-hover:text-blue-400 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
+                      <p className="text-[9px] text-slate-600 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date}</p>
+                    </td>
+                    <td className="px-8 py-4 text-center">
+                      <p className="font-mono text-base font-black text-slate-200 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
+                    </td>
+                    <td className="px-8 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-1 w-20 bg-slate-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500" style={{ width: `${Math.max(5, Math.min(100, (s.cagr || 0) * 800))}%` }}></div>
+                        </div>
+                        <span className="font-black text-emerald-400 text-xs">{((s.cagr || 0) * 100).toFixed(1)}%</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-4 text-right">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); drillDown('property', s.property_id); }}
+                        className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white px-5 py-2 rounded-xl text-[9px] font-black tracking-[0.2em] transition-all uppercase border border-blue-500/20"
+                      >
+                        EXPLORE
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="absolute inset-0 z-[10000] bg-slate-950/80 backdrop-blur-2xl flex items-center justify-center">
+          <div className="flex flex-col items-center gap-8">
+            <div className="relative">
+              <div className="h-20 w-20 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader className="text-blue-500 animate-pulse" size={24} />
+              </div>
+            </div>
+            <p className="text-blue-400 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse">Orchestrating Unified Intelligence...</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

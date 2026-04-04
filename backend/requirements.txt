@@ -4,7 +4,7 @@ python-dateutil==2.9.0.post0
 pandas==2.3.3
 pyarrow==16.1.0
 duckdb==0.10.3
-h3==3.7.7
+h3==4.4.2
 python-dotenv==1.2.2
 httpx==0.28.1
 pydantic==2.12.5

@@ -699,19 +699,17 @@ def get_unified_map_data(
     property_type: Optional[str] = None,
 ):
     growth_path = _growth_path()
-    sales_path = _sales_path()
     suburb_path = _suburb_summary_path()
     street_path = _street_summary_path()
 
     conn = get_duck_conn()
 
     if level == "suburb":
-        # Join property_growth (for year filter) with suburb_summary (for property_count)
         top_sql = f"""
-            SELECT pg.suburb, pg.avg_cagr, ss.unique_properties AS property_count
+            SELECT pg.suburb, pg.avg_cagr, ss.latitude, ss.longitude
             FROM read_parquet('{growth_path}') pg
             LEFT JOIN read_parquet('{suburb_path}') ss ON pg.suburb = ss.suburb
-            WHERE pg.year = {year}
+            WHERE pg.year = {year} AND ss.latitude IS NOT NULL
             ORDER BY pg.avg_cagr DESC
             LIMIT 10
         """
@@ -720,66 +718,35 @@ def get_unified_map_data(
 
         clusters = []
         for i, tp in enumerate(top_performers):
-            target_sql = f"""
-                SELECT AVG(latitude) AS lat, AVG(longitude) AS lon
-                FROM read_parquet('{sales_path}')
-                WHERE property_locality = '{tp[0]}' AND latitude IS NOT NULL
-            """
-            target = conn.execute(target_sql).fetchone()
-            if not target or not target[0]:
+            name, cagr, lat, lon = tp
+            if not lat or not lon:
                 continue
 
             neighbors_sql = f"""
-                SELECT
-                    property_locality,
-                    AVG(latitude) AS lat,
-                    AVG(longitude) AS lon,
-                    (AVG(latitude) - {target[0]}) * (AVG(latitude) - {target[0]})
-                    + (AVG(longitude) - {target[1]}) * (AVG(longitude) - {target[1]}) AS dist
-                FROM read_parquet('{sales_path}')
-                WHERE property_locality != '{tp[0]}' AND latitude IS NOT NULL
-                GROUP BY property_locality
-                ORDER BY dist
-                LIMIT 5
+                SELECT suburb, latitude, longitude, avg_cagr
+                FROM read_parquet('{suburb_path}')
+                WHERE suburb != '{name}' AND latitude IS NOT NULL
             """
             result = conn.execute(neighbors_sql)
-            columns = [desc[0] for desc in result.description]
-            neighbors_raw = result.fetchall()
+            all_suburbs = result.fetchall()
 
-            neighbor_names = [n[0] for n in neighbors_raw]
-            neighbor_map = {n[0]: {"lat": n[1], "lon": n[2]} for n in neighbors_raw}
-
-            if neighbor_names:
-                names_str = ", ".join(f"'{n}'" for n in neighbor_names)
-                stats_sql = f"""
-                    SELECT suburb, avg_cagr
-                    FROM read_parquet('{suburb_path}')
-                    WHERE suburb IN ({names_str})
-                """
-                result = conn.execute(stats_sql)
-                columns = [desc[0] for desc in result.description]
-                neighbor_stats = result.fetchall()
-            else:
-                neighbor_stats = []
+            neighbors = sorted(
+                [
+                    {"name": r[0], "lat": r[1], "lon": r[2], "cagr": r[3]}
+                    for r in all_suburbs
+                ],
+                key=lambda n: (n["lat"] - lat) ** 2 + (n["lon"] - lon) ** 2,
+            )[:5]
 
             clusters.append(
                 {
-                    "id": tp[0],
-                    "name": tp[0],
-                    "lat": target[0],
-                    "lon": target[1],
-                    "cagr": tp[1],
+                    "id": name,
+                    "name": name,
+                    "lat": lat,
+                    "lon": lon,
+                    "cagr": cagr,
                     "rank": i + 1,
-                    "neighbors": [
-                        {
-                            "name": s[0],
-                            "lat": neighbor_map[s[0]]["lat"],
-                            "lon": neighbor_map[s[0]]["lon"],
-                            "cagr": s[1],
-                        }
-                        for s in neighbor_stats
-                        if s[0] in neighbor_map
-                    ],
+                    "neighbors": neighbors,
                 }
             )
 
@@ -787,13 +754,12 @@ def get_unified_map_data(
         return {"clusters": clusters}
 
     elif level == "street":
-        # Join property_growth (for year filter) with street_summary (for property_count)
         top_sql = f"""
-            SELECT pg.street_name, pg.suburb, pg.avg_cagr, ss.unique_properties AS property_count
+            SELECT pg.street_name, pg.suburb, pg.avg_cagr, ss.latitude, ss.longitude
             FROM read_parquet('{growth_path}') pg
             LEFT JOIN read_parquet('{street_path}') ss
               ON pg.street_name = ss.street_name AND pg.suburb = ss.suburb
-            WHERE pg.year = {year}
+            WHERE pg.year = {year} AND ss.latitude IS NOT NULL
             ORDER BY pg.avg_cagr DESC
             LIMIT 10
         """
@@ -802,69 +768,44 @@ def get_unified_map_data(
 
         clusters = []
         for i, tp in enumerate(top_performers):
-            target_sql = f"""
-                SELECT AVG(latitude) AS lat, AVG(longitude) AS lon
-                FROM read_parquet('{sales_path}')
-                WHERE property_street_name = '{tp[0]}'
-                  AND property_locality = '{tp[1]}'
-                  AND latitude IS NOT NULL
-            """
-            target = conn.execute(target_sql).fetchone()
-            if not target or not target[0]:
+            street, suburb, cagr, lat, lon = tp
+            if not lat or not lon:
                 continue
 
             neighbors_sql = f"""
-                SELECT
-                    property_street_name,
-                    property_locality,
-                    AVG(latitude) AS lat,
-                    AVG(longitude) AS lon,
-                    (AVG(latitude) - {target[0]}) * (AVG(latitude) - {target[0]})
-                    + (AVG(longitude) - {target[1]}) * (AVG(longitude) - {target[1]}) AS dist
-                FROM read_parquet('{sales_path}')
+                SELECT street_name, suburb, latitude, longitude, avg_cagr
+                FROM read_parquet('{street_path}')
                 WHERE latitude IS NOT NULL
-                  AND (property_street_name != '{tp[0]}' OR property_locality != '{tp[1]}')
-                GROUP BY property_street_name, property_locality
-                ORDER BY dist
-                LIMIT 5
             """
             result = conn.execute(neighbors_sql)
-            columns = [desc[0] for desc in result.description]
-            neighbors_raw = result.fetchall()
+            all_streets = result.fetchall()
 
-            cluster_neighbors = []
-            for n in neighbors_raw:
-                stat_sql = f"""
-                    SELECT street_name, suburb, avg_cagr
-                    FROM read_parquet('{street_path}')
-                    WHERE street_name = '{n[0]}' AND suburb = '{n[1]}'
-                    LIMIT 1
-                """
-                stat = conn.execute(stat_sql).fetchone()
-                if stat:
-                    cluster_neighbors.append(
-                        {
-                            "name": f"{stat[0]}, {stat[1]}",
-                            "lat": n[2],
-                            "lon": n[3],
-                            "cagr": stat[2],
-                        }
-                    )
+            neighbors = sorted(
+                [
+                    {
+                        "name": f"{r[0]}, {r[1]}",
+                        "lat": r[2],
+                        "lon": r[3],
+                        "cagr": r[4],
+                    }
+                    for r in all_streets
+                ],
+                key=lambda n: (n["lat"] - lat) ** 2 + (n["lon"] - lon) ** 2,
+            )[:5]
 
             clusters.append(
                 {
-                    "id": f"{tp[0]}_{tp[1]}",
-                    "name": f"{tp[0]}, {tp[1]}",
-                    "lat": target[0],
-                    "lon": target[1],
-                    "cagr": tp[2],
+                    "id": f"{street}, {suburb}",
+                    "name": f"{street}, {suburb}",
+                    "lat": lat,
+                    "lon": lon,
+                    "cagr": cagr,
                     "rank": i + 1,
-                    "neighbors": cluster_neighbors,
+                    "neighbors": neighbors,
                 }
             )
 
         conn.close()
         return {"clusters": clusters}
 
-    conn.close()
     return {"clusters": []}

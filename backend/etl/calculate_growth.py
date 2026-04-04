@@ -126,6 +126,8 @@ def _calc_street_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
         .agg(
             unique_properties=("property_id", "nunique"),
             total_sales=("property_id", "count"),
+            latitude=("latitude", "mean"),
+            longitude=("longitude", "mean"),
         )
         .reset_index()
     )
@@ -236,6 +238,8 @@ def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
         .agg(
             unique_properties=("property_id", "nunique"),
             total_sales=("property_id", "count"),
+            latitude=("latitude", "mean"),
+            longitude=("longitude", "mean"),
         )
         .reset_index()
     )

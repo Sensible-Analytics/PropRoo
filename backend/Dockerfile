@@ -11,6 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code
 COPY . .
 
+# Create data directory for parquet files
+RUN mkdir -p /data
+
 # Expose port
 EXPOSE 8000
 

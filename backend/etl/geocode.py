@@ -18,10 +18,10 @@ import json
 import logging
 import urllib.request
 import urllib.error
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-import psycopg2
 
 logger = logging.getLogger(__name__)
 
@@ -92,74 +92,64 @@ def build_lookup(df: pd.DataFrame) -> tuple[dict, dict]:
     return suburb_lookup, postcode_lookup
 
 
-def run_geocode(database_url: str) -> None:
-    if not database_url:
-        raise ValueError("DATABASE_URL is required")
+def run_geocode(data_dir: str = None) -> None:
+    if data_dir is None:
+        data_dir = str(Path(__file__).resolve().parent.parent / "data")
+    data_path = Path(data_dir)
+    sales_path = data_path / "sales.parquet"
+
+    if not sales_path.exists():
+        raise FileNotFoundError(f"Sales parquet not found at {sales_path}")
 
     logger.info("Starting geocoding ETL...")
     postcode_df = download_postcodes()
     suburb_lookup, postcode_lookup = build_lookup(postcode_df)
 
-    conn = psycopg2.connect(database_url)
-    conn.autocommit = False
-    cur = conn.cursor()
+    sales_df = pd.read_parquet(sales_path)
 
-    cur.execute(
-        "SELECT COUNT(*) FROM sales WHERE latitude IS NULL OR longitude IS NULL"
-    )
-    missing = cur.fetchone()[0]
-    logger.info(f"Records needing coordinates: {missing:,}")
+    missing_mask = sales_df["latitude"].isna() | sales_df["longitude"].isna()
+    missing_count = missing_mask.sum()
+    logger.info(f"Records needing coordinates: {missing_count:,}")
 
-    if missing == 0:
+    if missing_count == 0:
         logger.info("All records already geocoded. Nothing to do.")
-        conn.close()
         return
 
-    updated = 0
-    no_match = 0
+    # Vectorized geocoding
+    sales_df["latitude"] = sales_df["latitude"].astype(float)
+    sales_df["longitude"] = sales_df["longitude"].astype(float)
 
-    cur.execute(
-        """
-        SELECT id, property_locality, property_post_code
-        FROM sales
-        WHERE latitude IS NULL OR longitude IS NULL
-        """
-    )
-    rows = cur.fetchall()
+    # Build suburb lookup key: (locality_stripped, postcode_int)
+    locality_clean = sales_df["property_locality"].astype(str).str.strip()
+    postcode_clean = pd.to_numeric(sales_df["property_post_code"], errors="coerce")
 
-    batch_updates = []
-    for sale_id, locality, postcode in rows:
-        if not locality and not postcode:
-            no_match += 1
-            continue
+    # Suburb match: (locality, postcode) -> (lat, lng)
+    suburb_lats = {k: v[0] for k, v in suburb_lookup.items()}
+    suburb_lngs = {k: v[1] for k, v in suburb_lookup.items()}
+    suburb_keys = locality_clean + "|" + postcode_clean.astype("Int64").astype(str)
+    suburb_key_map = {f"{k[0]}|{k[1]}": v for k, v in suburb_lats.items()}
+    suburb_lng_map = {f"{k[0]}|{k[1]}": v for k, v in suburb_lngs.items()}
 
-        lat, lng = None, None
+    matched_lat = suburb_key_map.get
+    matched_lng = suburb_lng_map.get
 
-        if locality and postcode:
-            key = (str(locality).strip(), int(postcode))
-            lat, lng = suburb_lookup.get(key)
+    lat_from_suburb = suburb_keys.map(matched_lat)
+    lng_from_suburb = suburb_keys.map(matched_lng)
 
-        if lat is None and postcode:
-            lat, lng = postcode_lookup.get(int(postcode))
+    # Postcode-only fallback
+    pc_lats = {k: v[0] for k, v in postcode_lookup.items()}
+    pc_lngs = {k: v[1] for k, v in postcode_lookup.items()}
+    lat_from_pc = postcode_clean.map(pc_lats)
+    lng_from_pc = postcode_clean.map(pc_lngs)
 
-        if lat is not None and lng is not None:
-            batch_updates.append((lat, lng, sale_id))
-        else:
-            no_match += 1
+    # Prefer suburb match, fall back to postcode
+    sales_df["latitude"] = lat_from_suburb.fillna(lat_from_pc)
+    sales_df["longitude"] = lng_from_suburb.fillna(lng_from_pc)
 
-        if len(batch_updates) >= CHUNK_SIZE:
-            _flush_batch(cur, batch_updates)
-            updated += len(batch_updates)
-            batch_updates = []
-            logger.info(f"  Progress: {updated:,} updated, {no_match:,} unmatched")
+    updated = sales_df["latitude"].notna().sum() - (~missing_mask).sum()
+    no_match = missing_count - max(updated, 0)
 
-    if batch_updates:
-        _flush_batch(cur, batch_updates)
-        updated += len(batch_updates)
-
-    conn.commit()
-    cur.close()
-    conn.close()
+    sales_df.to_parquet(sales_path, index=False, engine="pyarrow")
 
     logger.info(f"Geocoding complete: {updated:,} updated, {no_match:,} no match")
     if no_match > 0:
@@ -169,19 +159,19 @@ def run_geocode(database_url: str) -> None:
         )
 
 
-def _flush_batch(cur, batch):
-    cur.executemany(
-        "UPDATE sales SET latitude = %s, longitude = %s WHERE id = %s",
-        batch,
-    )
-
-
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s: %(message)s",
     )
-    import os
+    import argparse
 
-    db_url = os.environ.get("DATABASE_URL", "")
-    run_geocode(db_url)
+    parser = argparse.ArgumentParser(description="Geocode NSW property sales data")
+    parser.add_argument(
+        "--data-dir",
+        type=str,
+        default=None,
+        help="Data directory (default: script's parent/data)",
+    )
+    args = parser.parse_args()
+    run_geocode(data_dir=args.data_dir)

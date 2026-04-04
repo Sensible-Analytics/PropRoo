@@ -23,3 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Test artifacts
+playwright-report/
+test-results/
+test-results.json/
+*.log
+
+# Test artifacts
+playwright-report/
+test-results/
+test-results.json/
+*.log

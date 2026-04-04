@@ -26,7 +26,7 @@ interface SaleRecord {
   property_house_number?: string;
   property_name?: string;
   purchase_price: number;
-  contract_date: string;
+  contract_date: Date | string;
   primary_purpose: string;
   latitude: number;
   longitude: number;
@@ -40,8 +40,8 @@ interface SuburbSummary {
   avg_cagr: number;
   unique_properties: number;
   total_sales: number;
-  lat: number;
-  lng: number;
+  latitude: number;
+  longitude: number;
 }
 
 interface StreetSummary {
@@ -50,8 +50,18 @@ interface StreetSummary {
   avg_cagr: number;
   unique_properties: number;
   total_sales: number;
-  lat: number;
-  lng: number;
+  latitude: number;
+  longitude: number;
+}
+
+interface StreetSummary {
+  street_name: string;
+  suburb: string;
+  avg_cagr: number;
+  unique_properties: number;
+  total_sales: number;
+  latitude: number;
+  longitude: number;
 }
 
 interface H3Cell {
@@ -144,6 +154,7 @@ export default function Dashboard() {
   const [initError, setInitError] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState<Record<string, number>>({});
   const [isInitialized, setIsInitialized] = useState(false);
+  const [webglError, setWebglError] = useState<string | null>(null);
 
   // Filters
   const [selectedYear, setSelectedYear] = useState(2024);
@@ -200,8 +211,8 @@ export default function Dashboard() {
       try {
         // 1. Fetch suburb leaderboard
         try {
-          const sql = `SELECT suburb, avg_cagr, unique_properties, total_sales, lat, lng 
-                       FROM suburb_summary 
+          const sql = `SELECT suburb, avg_cagr, unique_properties, total_sales, latitude, longitude
+                       FROM suburb_summary
                        ORDER BY avg_cagr DESC LIMIT 10`;
           const suburbs = await cachedQuery<SuburbSummary>(sql);
           if (!cancelled) setSuburbLeaderboard(suburbs);
@@ -212,8 +223,8 @@ export default function Dashboard() {
 
         // 2. Fetch street leaderboard
         try {
-          const sql = `SELECT street_name, suburb, avg_cagr, unique_properties, total_sales, lat, lng
-                       FROM street_summary 
+          const sql = `SELECT street_name, suburb, avg_cagr, unique_properties, total_sales, latitude, longitude
+                       FROM street_summary
                        ORDER BY avg_cagr DESC LIMIT 10`;
           const streets = await cachedQuery<StreetSummary>(sql);
           if (!cancelled) setStreetLeaderboard(streets);
@@ -332,8 +343,8 @@ export default function Dashboard() {
       if (suburb) {
         setViewState(prev => ({
           ...prev,
-          longitude: suburb.lng,
-          latitude: suburb.lat,
+          longitude: suburb.longitude,
+          latitude: suburb.latitude,
           zoom: 12,
           pitch: 45,
           transitionDuration: 1500,
@@ -347,8 +358,8 @@ export default function Dashboard() {
       if (street) {
         setViewState(prev => ({
           ...prev,
-          longitude: street.lng,
-          latitude: street.lat,
+          longitude: street.longitude,
+          latitude: street.latitude,
           zoom: 14,
           pitch: 45,
           transitionDuration: 1500,
@@ -493,7 +504,7 @@ export default function Dashboard() {
                 <div style="font-weight: bold; margin-bottom: 4px;">${d.object.property_house_number || ''} ${d.object.property_street_name || ''}</div>
                 <div>${d.object.property_locality}</div>
                 <div>Price: ${formatPrice(d.object.purchase_price || 0)}</div>
-                <div>Date: ${d.object.contract_date}</div>
+                <div>Date: ${d.object.contract_date instanceof Date ? d.object.contract_date.toISOString().split('T')[0] : d.object.contract_date}</div>
               </div>
             `,
           },
@@ -663,46 +674,32 @@ export default function Dashboard() {
           </div>
 
           {/* DeckGL Map */}
-          <DeckGL
-            viewState={viewState}
-            onViewStateChange={({ viewState: vs }) => {
-              setViewState(vs);
-              setMapZoom(Math.round(vs.zoom));
-            }}
-            controller={true}
-            layers={layers}
-            onClick={handleMapClick}
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-          >
-            <Map
-              mapStyle={CARTO_BASEMAP}
-              style={{ width: '100%', height: '100%' }}
-            />
-          </DeckGL>
+          <ErrorBoundary fallback={<div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-sm">Map rendering unavailable</div>}>
+            <DeckGL
+              viewState={viewState}
+              onViewStateChange={({ viewState: vs }) => {
+                setViewState(vs);
+                setMapZoom(Math.round(vs.zoom));
+              }}
+              controller={true}
+              layers={layers}
+              onClick={handleMapClick}
+              onError={(err: Error) => {
+                console.warn('DeckGL error:', err.message);
+                setWebglError(err.message);
+              }}
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+            >
+              <Map
+                mapStyle={CARTO_BASEMAP}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </DeckGL>
+          </ErrorBoundary>
         </div>
 
         {/* Analytical Charts (30% width) */}
         <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 h-full">
-          <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
-            <h4 className="flex items-center gap-2 text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-4">
-              <TrendingUp size={14} /> CAGR % PERFORMANCE
-            </h4>
-            <div className="flex-grow">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={cagrData} layout="vertical">
-                  <XAxis type="number" hide domain={[0, 'dataMax + 2']} />
-                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} width={60} />
-                  <Tooltip cursor={{ fill: '#ffffff05' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
-                    {cagrData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={CLUSTER_COLORS[index % CLUSTER_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
           <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
             <h4 className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-4">
               <Home size={14} /> TRANSACTION COUNT
@@ -746,7 +743,7 @@ export default function Dashboard() {
                   >
                     <td className="px-8 py-4">
                       <p className="font-bold text-sm group-hover:text-blue-400 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
-                      <p className="text-[9px] text-slate-600 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date}</p>
+                      <p className="text-[9px] text-slate-600 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date instanceof Date ? s.contract_date.toISOString().split('T')[0] : s.contract_date}</p>
                     </td>
                     <td className="px-8 py-4 text-center">
                       <p className="font-mono text-base font-black text-slate-200 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>

@@ -78,7 +78,7 @@ const Dashboard = () => {
         try {
             // 1. Fetch Leaderboards (Top 5)
             try {
-                const lbRes = await axios.get(`${API_URL}/stats/top_performers`, {
+                const lbRes = await axios.get(`${API_URL}/sales/stats/top_performers`, {
                     params: { year: selectedYear, property_type: propertyType || undefined }
                 });
                 setLeaderboards(lbRes.data || { growth: { suburbs: [], streets: [] }, activity: { suburbs: [], streets: [] } });
@@ -89,7 +89,7 @@ const Dashboard = () => {
 
             // 2. Fetch Unified Map Data (Clusters + Neighbors)
             try {
-                const mapRes = await axios.get(`${API_URL}/stats/unified_map`, {
+                const mapRes = await axios.get(`${API_URL}/sales/stats/unified_map`, {
                     params: { level: viewLevel === 'state' ? 'suburb' : viewLevel === 'suburb' ? 'street' : 'suburb', year: selectedYear }
                 });
                 setUnifiedData(mapRes.data || { clusters: [] });

@@ -37,7 +37,8 @@ jobs:
         working-directory: frontend
 
       - name: Copy Pages Functions to dist
-        run: cp -r functions dist/functions
+        run: mkdir -p dist/functions && cp -r ../functions/* dist/functions/
+        working-directory: frontend
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

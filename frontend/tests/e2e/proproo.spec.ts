@@ -210,6 +210,8 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
         if (!err.message.includes('NetworkError') &&
             !err.message.includes('Failed to fetch') &&
             !err.message.includes('ReadableStream')) {
+          console.error('PAGE ERROR:', err.message);
+          console.error('ERROR STACK:', err.stack);
           errors.push(err.message);
         }
       });

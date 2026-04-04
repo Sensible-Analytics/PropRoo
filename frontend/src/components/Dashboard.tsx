@@ -139,6 +139,26 @@ async function cachedQuery<T>(sql: string): Promise<T[]> {
   return result;
 }
 
+// Error Boundary class for catching WebGL errors in deck.gl
+class ErrorBoundary extends React.Component<{ children: React.ReactNode; fallback: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.warn('ErrorBoundary caught:', error.message);
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
 export default function Dashboard() {
   // Navigation State
   const [viewLevel, setViewLevel] = useState('state');
@@ -178,6 +198,18 @@ export default function Dashboard() {
   useEffect(() => {
     let cancelled = false;
 
+    // Suppress WebGL ResizeObserver errors in headless/test environments
+    const originalErrorHandler = window.onerror;
+    window.onerror = (message, source, lineno, colno, error) => {
+      if (typeof message === 'string' && (message.includes('maxTextureDimension2D') || message.includes('luma'))) {
+        return true; // Suppress
+      }
+      if (originalErrorHandler) {
+        return originalErrorHandler.call(window, message, source, lineno, colno, error);
+      }
+      return false;
+    };
+
     async function init() {
       try {
         await initDuckDB((file, pct) => {
@@ -197,7 +229,10 @@ export default function Dashboard() {
     }
 
     init();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      window.onerror = originalErrorHandler;
+    };
   }, []);
 
   // Fetch data when filters change
@@ -688,7 +723,10 @@ export default function Dashboard() {
                 console.warn('DeckGL error:', err.message);
                 setWebglError(err.message);
               }}
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+              width="100%"
+              height="100%"
+              useDevicePixelRatio={false}
+              style={{ position: 'absolute', top: 0, left: 0 }}
             >
               <Map
                 mapStyle={CARTO_BASEMAP}

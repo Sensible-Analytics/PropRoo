@@ -3,13 +3,17 @@ from typing import Optional
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import sales, stats, map as map_router
-from .database import get_duck_conn, parquet_path
+from .database import get_duck_conn, parquet_path, download_parquet_from_r2
 import os
 import logging
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+logger.info("Downloading parquet files from R2...")
+download_parquet_from_r2()
+logger.info("Parquet files ready")
 
 print("[MAIN] Creating FastAPI app...")
 app = FastAPI(title="NSW Property Sales Analysis API")

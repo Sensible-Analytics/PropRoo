@@ -1,37 +1,43 @@
 import duckdb
 import os
+import boto3
 
-DATA_DIR = os.environ.get(
-    "DATA_DIR", os.path.join(os.path.dirname(__file__), "..", "data")
-)
+DATA_DIR = os.environ.get("DATA_DIR", "/tmp")
 
 R2_BUCKET = os.environ.get("R2_BUCKET_NAME")
 R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID")
 R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
 R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT")
 
+PARQUET_FILES = [
+    "sales.parquet",
+    "property_growth.parquet",
+    "street_summary.parquet",
+    "suburb_summary.parquet",
+]
 
-def _configure_r2(conn):
-    if R2_BUCKET and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY and R2_ENDPOINT_URL:
-        conn.execute("INSTALL httpfs")
-        conn.execute("LOAD httpfs")
-        conn.execute(f"SET s3_region='auto'")
-        conn.execute(f"SET s3_access_key_id='{R2_ACCESS_KEY_ID}'")
-        conn.execute(f"SET s3_secret_access_key='{R2_SECRET_ACCESS_KEY}'")
-        conn.execute(f"SET s3_endpoint='{R2_ENDPOINT_URL.replace('https://', '')}'")
-        conn.execute(f"SET s3_url_style='path'")
-        conn.execute(f"SET s3_use_ssl='true'")
+
+def download_parquet_from_r2():
+    if not all([R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT_URL]):
+        return
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=R2_ENDPOINT_URL,
+        aws_access_key_id=R2_ACCESS_KEY_ID,
+        aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+        region_name="auto",
+    )
+    os.makedirs(DATA_DIR, exist_ok=True)
+    for f in PARQUET_FILES:
+        local = os.path.join(DATA_DIR, f)
+        s3.download_file(R2_BUCKET, f, local)
 
 
 def get_duck_conn():
-    conn = duckdb.connect(database=":memory:")
-    _configure_r2(conn)
-    return conn
+    return duckdb.connect(database=":memory:")
 
 
 def parquet_path(filename: str) -> str:
-    if R2_BUCKET and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY and R2_ENDPOINT_URL:
-        return f"s3://{R2_BUCKET}/{filename}"
     return os.path.join(DATA_DIR, filename)
 
 

@@ -9,3 +9,5 @@ venv
 .venv
 *.log
 .env
+data/
+data/

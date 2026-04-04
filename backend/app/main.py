@@ -30,6 +30,16 @@ app.include_router(map_router.router, prefix="/api/map", tags=["map"])
 @app.get("/health")
 def health_check():
     path = parquet_path("sales.parquet")
+    if path.startswith("s3://"):
+        try:
+            conn = get_duck_conn()
+            result = conn.execute(
+                f"SELECT COUNT(*) FROM read_parquet('{path}')"
+            ).fetchone()
+            conn.close()
+            return {"status": "ok", "record_count": result[0]}
+        except Exception:
+            return {"status": "ok", "record_count": 0}
     if not os.path.exists(path):
         return {"status": "ok", "record_count": 0}
     try:
@@ -44,6 +54,16 @@ def health_check():
 @app.get("/api/health")
 async def api_health_check():
     path = parquet_path("sales.parquet")
+    if path.startswith("s3://"):
+        try:
+            conn = get_duck_conn()
+            result = conn.execute(
+                f"SELECT COUNT(*) FROM read_parquet('{path}')"
+            ).fetchone()
+            conn.close()
+            return {"status": "ok", "record_count": result[0]}
+        except Exception:
+            return {"status": "ok", "record_count": 0}
     if not os.path.exists(path):
         return {"status": "ok", "record_count": 0}
     try:
@@ -125,7 +145,7 @@ def trigger_analytics(background_tasks: BackgroundTasks):
 @app.get("/admin/db-stats")
 def get_db_stats():
     path = parquet_path("sales.parquet")
-    if not os.path.exists(path):
+    if not path.startswith("s3://") and not os.path.exists(path):
         return {"sales_count": 0, "years_available": 0}
     try:
         conn = get_duck_conn()

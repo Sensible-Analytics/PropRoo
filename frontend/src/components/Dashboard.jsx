@@ -111,7 +111,7 @@ const Dashboard = () => {
             // 4. Detailed level data
             if (viewLevel === 'state') {
                 try {
-                    const res = await axios.get(`${API_URL}/sales`, { params: baseParams });
+                    const res = await axios.get(`${API_URL}/sales/sales`, { params: baseParams });
                     setSales(res.data || []);
                 } catch (e) {
                     console.warn('Sales fetch failed:', e.message);
@@ -121,7 +121,7 @@ const Dashboard = () => {
                 setMapZoom(11);
             } else if (viewLevel === 'suburb') {
                 try {
-                    const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
+                    const res = await axios.get(`${API_URL}/sales/sales`, { params: { ...baseParams, suburb: selection.suburb } });
                     setSales(res.data || []);
                     if (res.data?.length > 0) {
                         setMapCenter([res.data[0].latitude, res.data[0].longitude]);
@@ -133,7 +133,7 @@ const Dashboard = () => {
                 }
             } else if (viewLevel === 'street') {
                 try {
-                    const res = await axios.get(`${API_URL}/sales`, { params: { ...baseParams, suburb: selection.suburb } });
+                    const res = await axios.get(`${API_URL}/sales/sales`, { params: { ...baseParams, suburb: selection.suburb } });
                     const streetSales = (res.data || []).filter(s => s.property_street_name === selection.street);
                     setSales(streetSales);
                     if (streetSales.length > 0) {
@@ -146,7 +146,7 @@ const Dashboard = () => {
                 }
             } else if (viewLevel === 'property') {
                 try {
-                    const histRes = await axios.get(`${API_URL}/property/${selection.propertyId}/history`);
+                    const histRes = await axios.get(`${API_URL}/sales/property/${selection.propertyId}/history`);
                     setSales(histRes.data || []);
                     if (histRes.data?.length > 0) {
                         setMapCenter([histRes.data[0].latitude, histRes.data[0].longitude]);

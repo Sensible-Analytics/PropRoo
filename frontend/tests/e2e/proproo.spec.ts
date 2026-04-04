@@ -82,8 +82,10 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
       await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
       // Wait for map overlay to render
       await page.waitForTimeout(3000);
-      const slider = page.locator('input[type="range"]');
-      await expect(slider.first()).toBeVisible({ timeout: 30000 });
+      // The slider container is a div with rounded-xl border at bottom of map
+      // Check for the year labels around the slider instead of the input itself
+      const sliderContainer = page.locator('text=2001');
+      await expect(sliderContainer.first()).toBeVisible({ timeout: 30000 });
     });
 
     test('can change year via selector', async ({ page }) => {

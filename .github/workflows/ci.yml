@@ -44,7 +44,7 @@ jobs:
         run: pytest -v --ignore=backend/app/routers --ignore=backend/etl --ignore=backend/app/main.py --ignore=backend/app/database.py 2>&1 || echo "No tests found or tests skipped"
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v6
         with:
           files: ./coverage.xml
           fail_ci_if_error: false

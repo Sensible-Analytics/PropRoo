@@ -1,0 +1,28 @@
+@layer base {
+  :root {
+    /* OKLCH Color Tokens */
+    --proproo-bg: oklch(0.145 0 0);
+    --proproo-surface: oklch(0.205 0 0);
+    --proproo-surface-elevated: oklch(0.269 0 0);
+    --proproo-border: oklch(1 0 0 / 10%);
+
+    /* Brand */
+    --proproo-primary: oklch(0.546 0.245 262.88);
+    --proproo-primary-hover: oklch(0.488 0.243 264.376);
+
+    /* Financial */
+    --proproo-up: oklch(0.627 0.194 149.21);
+    --proproo-down: oklch(0.577 0.245 27.325);
+    --proproo-neutral: oklch(0.708 0 0);
+
+    /* Property types */
+    --proproo-residence: oklch(0.546 0.245 262.88);
+    --proproo-strata: oklch(0.769 0.188 70.08);
+    --proproo-vacant: oklch(0.627 0.265 303.9);
+
+    /* Text hierarchy */
+    --proproo-text-primary: oklch(0.985 0 0);
+    --proproo-text-secondary: oklch(0.708 0 0);
+    --proproo-text-tertiary: oklch(0.556 0 0);
+  }
+}

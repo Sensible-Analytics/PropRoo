@@ -17,6 +17,103 @@ import { FlyToInterpolator } from '@deck.gl/core';
 import nswSuburbsRaw from '../data/nsw_suburbs.geojson?raw';
 const nswSuburbsGeoJSON = JSON.parse(nswSuburbsRaw);
 
+// Australian state boundaries GeoJSON (simplified polygons)
+const australiaStatesGeoJSON = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      properties: { name: 'New South Wales', abbr: 'NSW' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [140.9993, -37.5000], [140.9993, -28.1500], [141.0000, -28.1500],
+          [149.9993, -28.1500], [153.6393, -28.1500], [153.6393, -37.5000],
+          [150.0000, -37.5000], [140.9993, -37.5000]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Victoria', abbr: 'VIC' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [140.9993, -39.1500], [140.9993, -37.5000], [150.0000, -37.5000],
+          [150.0000, -39.1500], [140.9993, -39.1500]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Queensland', abbr: 'QLD' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [137.9993, -28.1500], [137.9993, -10.7000], [153.6393, -10.7000],
+          [153.6393, -28.1500], [149.9993, -28.1500], [141.0000, -28.1500],
+          [137.9993, -28.1500]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'South Australia', abbr: 'SA' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [129.0000, -38.0000], [129.0000, -26.0000], [140.9993, -26.0000],
+          [140.9993, -38.0000], [129.0000, -38.0000]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Western Australia', abbr: 'WA' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [112.9000, -35.0000], [112.9000, -13.7000], [129.0000, -13.7000],
+          [129.0000, -35.0000], [112.9000, -35.0000]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Tasmania', abbr: 'TAS' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [143.8000, -43.6000], [143.8000, -40.7000], [148.5000, -40.7000],
+          [148.5000, -43.6000], [143.8000, -43.6000]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Northern Territory', abbr: 'NT' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [129.0000, -26.0000], [129.0000, -10.7000], [137.9993, -10.7000],
+          [137.9993, -26.0000], [129.0000, -26.0000]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: { name: 'Australian Capital Territory', abbr: 'ACT' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [148.7000, -35.9000], [148.7000, -35.1000], [149.4000, -35.1000],
+          [149.4000, -35.9000], [148.7000, -35.9000]
+        ]]
+      }
+    }
+  ]
+};
+
 // DuckDB + Cache services
 import { initDuckDB, query, isInitialized } from '../services/duckdb';
 import { get as cacheGet, set as cacheSet } from '../services/cache';
@@ -40,16 +137,6 @@ interface SaleRecord {
 }
 
 interface SuburbSummary {
-  suburb: string;
-  avg_cagr: number;
-  unique_properties: number;
-  total_sales: number;
-  latitude: number;
-  longitude: number;
-}
-
-interface StreetSummary {
-  street_name: string;
   suburb: string;
   avg_cagr: number;
   unique_properties: number;
@@ -467,6 +554,29 @@ export default function Dashboard() {
   const layers = useMemo(() => {
     const result: any[] = [];
 
+    // State boundaries layer (visible at zoom 4-8)
+    if (mapZoom >= 4 && mapZoom <= 8) {
+      result.push(
+        new GeoJsonLayer({
+          id: 'state-boundaries',
+          data: australiaStatesGeoJSON as any,
+          stroked: true,
+          filled: true,
+          getFillColor: [30, 41, 59, 80],
+          getLineColor: [100, 140, 255, 200],
+          lineWidthMinPixels: 2,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [100, 140, 255, 40],
+          getTooltip: (d: any) => d.properties && {
+            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+              <div style="font-weight: bold;">${d.properties.name} (${d.properties.abbr})</div>
+            </div>`,
+          },
+        })
+      );
+    }
+
     // H3 Hexagon Layer
     if (showH3 && h3Cells.length > 0) {
       const maxPrice = Math.max(...h3Cells.map(c => c.median_price || 0), 1);
@@ -562,6 +672,26 @@ export default function Dashboard() {
               </div>
             `,
           },
+        })
+      );
+    }
+
+    // Price labels on pins at zoom >= 14
+    if (showPins && viewState.zoom >= 14 && sales.length > 0) {
+      const maxPrice = Math.max(...sales.map(s => s.purchase_price || 0), 1);
+      result.push(
+        new TextLayer({
+          id: 'price-labels',
+          data: sales.filter(d => d.latitude && d.longitude),
+          getPosition: (d: SaleRecord) => [d.longitude, d.latitude],
+          getText: (d: SaleRecord) => formatPrice(d.purchase_price || 0),
+          getSize: 12,
+          getColor: [255, 255, 255, 220],
+          getPixelOffset: [0, -15],
+          fontFamily: 'Inter, system-ui, sans-serif',
+          fontWeight: 700,
+          outlineWidth: 2,
+          outlineColor: [0, 0, 0, 255],
         })
       );
     }
@@ -678,57 +808,51 @@ export default function Dashboard() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans">
-      {/* Header */}
-      <div className="h-20 shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 flex justify-between items-center z-50">
-        <div className="flex items-center gap-6">
+      {/* Header: h-14 */}
+      <header className="h-14 shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 flex justify-between items-center z-50">
+        {/* Left: breadcrumb + back button */}
+        <div className="flex items-center gap-4">
           {viewLevel !== 'state' && (
             <button onClick={handleBack} className="p-2 hover:bg-slate-800 rounded-full transition-all border border-slate-700 bg-slate-900 shadow-lg group">
-              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             </button>
           )}
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2 mb-0.5">
-              <button
-                onClick={navigateToState}
-                className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'state' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
-              >
-                NSW
-              </button>
-              {viewLevel !== 'state' && (
-                <>
-                  <ChevronRight size={10} className="text-slate-600" />
-                  <button
-                    onClick={navigateToSuburb}
-                    className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'suburb' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
-                  >
-                    {selection.suburb}
-                  </button>
-                </>
-              )}
-              {viewLevel === 'street' && (
-                <>
-                  <ChevronRight size={10} className="text-slate-600" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">
-                    {selection.street}
-                  </span>
-                </>
-              )}
-            </div>
-            <p className="text-lg font-black tracking-tight text-white leading-none">
-              {viewLevel === 'state' ? 'STATE OVERVIEW' :
-                viewLevel === 'suburb' ? selection.suburb :
-                  viewLevel === 'street' ? selection.street :
-                    `ANALYSIS`}
-            </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={navigateToState}
+              className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'state' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
+            >
+              NSW
+            </button>
+            {viewLevel !== 'state' && (
+              <>
+                <ChevronRight size={10} className="text-slate-600" />
+                <button
+                  onClick={navigateToSuburb}
+                  className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'suburb' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
+                >
+                  {selection.suburb}
+                </button>
+              </>
+            )}
+            {viewLevel === 'street' && (
+              <>
+                <ChevronRight size={10} className="text-slate-600" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">
+                  {selection.street}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="w-56 flex flex-col gap-1">
+        {/* Right: filters (price, category) */}
+        <div className="flex items-center gap-4">
+          <div className="w-48 flex flex-col gap-0.5">
             <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">PRICE RANGE</label>
             <DualRangeSlider min={0} max={10000000} onChange={setPriceRange} />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
             <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">CATEGORY</label>
             <div className="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
               <select value={propertyType} onChange={e => setPropertyType(e.target.value)} className="bg-transparent text-xs font-bold focus:outline-none cursor-pointer">
@@ -739,12 +863,12 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Visual Workspace */}
-      <div className="shrink-0 p-4 grid grid-cols-12 gap-4" style={{ height: '600px' }}>
-        {/* Map Area (80% width) */}
-        <div className="col-span-12 lg:col-span-10 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
+      {/* Main workspace: flex-1, horizontal split 80/20 */}
+      <div className="flex-1 flex min-h-0">
+        {/* Map Area: flex-1 (80%) */}
+        <div className="flex-1 relative bg-slate-900">
           {/* Layer Toggles */}
           <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
             <div className="bg-slate-950/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] font-bold tracking-widest text-slate-300 backdrop-blur-sm flex items-center gap-2">
@@ -830,13 +954,14 @@ export default function Dashboard() {
           </ErrorBoundary>
         </div>
 
-        {/* Analytical Charts (20% width) */}
-        <div className="col-span-12 lg:col-span-2 flex flex-col gap-4 h-full">
-          <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
+        {/* Sidebar: w-80 (20%), scrollable */}
+        <aside className="w-80 border-l border-slate-800 bg-slate-900/50 flex flex-col overflow-y-auto">
+          {/* CAGR Chart */}
+          <div className="shrink-0 p-4 border-b border-slate-800">
             <h4 className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-4">
               <Home size={14} /> TOP CAGR
             </h4>
-            <div className="flex-grow">
+            <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={cagrData} layout="vertical">
                   <XAxis type="number" hide />
@@ -847,23 +972,19 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Bottom Entity Table */}
-      <div className="flex-grow p-4 min-h-0 bg-slate-950">
-        <div className="h-full bg-slate-900/20 border border-slate-800/40 rounded-3xl flex flex-col overflow-hidden">
-          <div className="px-8 py-4 border-b border-slate-800/40 flex justify-between items-center bg-slate-950/40">
-            <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Spatial Entity Archive</p>
-          </div>
-          <div className="flex-grow overflow-auto custom-scrollbar">
+          {/* Sales Table (scrollable within sidebar) */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-4 py-3 border-b border-slate-800/40">
+              <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Spatial Entity Archive</p>
+            </div>
             <table className="w-full text-left">
-              <thead className="sticky top-0 bg-slate-950/90 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 z-10 border-b border-slate-800/40">
+              <thead className="sticky top-0 bg-slate-900/95 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 z-10 border-b border-slate-800/40">
                 <tr>
-                  <th className="px-8 py-4">Contextual Address</th>
-                  <th className="px-8 py-4 text-center">Market Valuation</th>
-                  <th className="px-8 py-4">Growth performance</th>
-                  <th className="px-8 py-4 text-right">Actions</th>
+                  <th className="px-4 py-3">Address</th>
+                  <th className="px-4 py-3 text-center">Price</th>
+                  <th className="px-4 py-3">CAGR</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/30">
@@ -873,25 +994,25 @@ export default function Dashboard() {
                     onClick={() => drillDown(viewLevel === 'state' ? 'suburb' : 'street', viewLevel === 'state' ? s.property_locality : s.property_street_name)}
                     className="hover:bg-blue-600/5 group cursor-pointer transition-all"
                   >
-                    <td className="px-8 py-4">
-                      <p className="font-bold text-sm group-hover:text-blue-400 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
+                    <td className="px-4 py-3">
+                      <p className="font-bold text-xs group-hover:text-blue-400 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
                       <p className="text-[9px] text-slate-600 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date instanceof Date ? s.contract_date.toISOString().split('T')[0] : s.contract_date}</p>
                     </td>
-                    <td className="px-8 py-4 text-center">
-                      <p className="font-mono text-base font-black text-slate-200 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
+                    <td className="px-4 py-3 text-center">
+                      <p className="font-mono text-sm font-black text-slate-200 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
                     </td>
-                    <td className="px-8 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-1 w-20 bg-slate-800 rounded-full overflow-hidden">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-1 w-12 bg-slate-800 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500" style={{ width: `${Math.max(5, Math.min(100, (s.cagr || 0) * 800))}%` }}></div>
                         </div>
-                        <span className="font-black text-emerald-400 text-xs">{((s.cagr || 0) * 100).toFixed(1)}%</span>
+                        <span className="font-black text-emerald-400 text-[10px]">{((s.cagr || 0) * 100).toFixed(1)}%</span>
                       </div>
                     </td>
-                    <td className="px-8 py-4 text-right">
+                    <td className="px-4 py-3 text-right">
                       <button
                         onClick={(e) => { e.stopPropagation(); drillDown('property', s.property_id); }}
-                        className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white px-5 py-2 rounded-xl text-[9px] font-black tracking-[0.2em] transition-all uppercase border border-blue-500/20"
+                        className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-[9px] font-black tracking-[0.2em] transition-all uppercase border border-blue-500/20"
                       >
                         EXPLORE
                       </button>
@@ -901,12 +1022,12 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
-        </div>
+        </aside>
       </div>
 
       {/* Property Detail Popup */}
       {selectedProperty && (
-        <div className="absolute top-24 right-4 z-[1000] w-80 bg-slate-900 rounded-xl border border-slate-700 shadow-2xl overflow-hidden">
+        <div className="absolute top-16 right-84 z-[1000] w-80 bg-slate-900 rounded-xl border border-slate-700 shadow-2xl overflow-hidden">
           <div className="p-4">
             <div className="flex justify-between items-start mb-3">
               <div>

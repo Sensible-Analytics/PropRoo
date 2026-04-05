@@ -14,4 +14,8 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@deck.gl/geo-layers', '@deck.gl/aggregation-layers', '@deck.gl/layers', '@deck.gl/react', '@deck.gl/core'],
   },
+  assetsInclude: ['**/*.geojson'],
+  json: {
+    namedExports: true,
+  },
 })

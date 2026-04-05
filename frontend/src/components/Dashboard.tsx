@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Search, Home, TrendingUp, Loader, ArrowLeft, ChevronRight, Calendar, Map as MapIcon, Layers } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Home, Loader, ArrowLeft, ChevronRight, Calendar, Layers } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import DualRangeSlider from './DualRangeSlider';
 import { latLngToCell, cellToLatLng } from 'h3-js';
 
@@ -10,8 +10,12 @@ import { Map } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import { HeatmapLayer, ContourLayer } from '@deck.gl/aggregation-layers';
-import { ScatterplotLayer, TextLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, TextLayer, GeoJsonLayer } from '@deck.gl/layers';
 import { FlyToInterpolator } from '@deck.gl/core';
+
+// GeoJSON data
+import nswSuburbsRaw from '../data/nsw_suburbs.geojson?raw';
+const nswSuburbsGeoJSON = JSON.parse(nswSuburbsRaw);
 
 // DuckDB + Cache services
 import { initDuckDB, query, isInitialized } from '../services/duckdb';
@@ -122,6 +126,11 @@ function formatPrice(price: number): string {
   if (price >= 1000000) return `$${(price / 1000000).toFixed(1)}M`;
   if (price >= 1000) return `$${(price / 1000).toFixed(0)}K`;
   return `$${price}`;
+}
+
+function formatDate(date: Date | string): string {
+  if (date instanceof Date) return date.toISOString().split('T')[0];
+  return String(date);
 }
 
 // Cached query helper
@@ -369,6 +378,16 @@ export default function Dashboard() {
     }
   }, [viewLevel]);
 
+  const navigateToState = useCallback(() => {
+    setViewLevel('state');
+    setSelection({ suburb: null, street: null, propertyId: null });
+  }, []);
+
+  const navigateToSuburb = useCallback(() => {
+    setViewLevel('suburb');
+    setSelection(prev => ({ ...prev, street: null, propertyId: null }));
+  }, []);
+
   const drillDown = useCallback((type: string, value: string) => {
     if (type === 'suburb') {
       setSelection({ suburb: value, street: null, propertyId: null });
@@ -547,8 +566,57 @@ export default function Dashboard() {
       );
     }
 
+    // Suburb boundary layer (visible at zoom 8-13)
+    if (mapZoom >= 8 && mapZoom < 13) {
+      result.push(
+        new GeoJsonLayer({
+          id: 'suburb-boundaries',
+          data: nswSuburbsGeoJSON as any,
+          stroked: true,
+          filled: false,
+          lineWidthMinPixels: 1.5,
+          getLineColor: [100, 140, 255, 180],
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [100, 140, 255, 80],
+          getTooltip: (d: any) => d.properties && {
+            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+              <div style="font-weight: bold;">${d.properties.suburb_name}</div>
+              <div>Postcode: ${d.properties.postcode}</div>
+            </div>`,
+          },
+        })
+      );
+    }
+
+    // Suburb labels (visible at zoom 6-14)
+    if (mapZoom >= 6 && mapZoom < 14) {
+      const labelData = (nswSuburbsGeoJSON as any).features.map((f: any) => ({
+        name: f.properties.suburb_name,
+        position: f.geometry.coordinates[0].reduce(
+          (acc: number[], coord: number[]) => [acc[0] + coord[0], acc[1] + coord[1]],
+          [0, 0]
+        ).map((v: number, _i: number, arr: number[]) => v / (arr.length / 2)),
+      }));
+      result.push(
+        new TextLayer({
+          id: 'suburb-labels',
+          data: labelData,
+          getPosition: (d: any) => d.position,
+          getText: (d: any) => d.name,
+          getSize: 14,
+          getColor: [200, 220, 255, 220],
+          getPixelOffset: [0, -10],
+          fontFamily: 'Inter, system-ui, sans-serif',
+          fontWeight: 600,
+          outlineWidth: 2,
+          outlineColor: [0, 0, 0, 255],
+        })
+      );
+    }
+
     return result;
-  }, [showH3, showHeatmap, showContours, showPins, h3Cells, heatmapData, sales, viewState.zoom]);
+  }, [showH3, showHeatmap, showContours, showPins, h3Cells, heatmapData, sales, viewState.zoom, mapZoom]);
 
   // Loading overlay
   if (initError) {
@@ -619,8 +687,32 @@ export default function Dashboard() {
             </button>
           )}
           <div className="flex flex-col">
-            <div className="flex items-center gap-2 text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] mb-0.5">
-              NSW UNIFIED SPATIAL <ChevronRight size={10} /> {viewLevel}
+            <div className="flex items-center gap-2 mb-0.5">
+              <button
+                onClick={navigateToState}
+                className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'state' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
+              >
+                NSW
+              </button>
+              {viewLevel !== 'state' && (
+                <>
+                  <ChevronRight size={10} className="text-slate-600" />
+                  <button
+                    onClick={navigateToSuburb}
+                    className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'suburb' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
+                  >
+                    {selection.suburb}
+                  </button>
+                </>
+              )}
+              {viewLevel === 'street' && (
+                <>
+                  <ChevronRight size={10} className="text-slate-600" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">
+                    {selection.street}
+                  </span>
+                </>
+              )}
             </div>
             <p className="text-lg font-black tracking-tight text-white leading-none">
               {viewLevel === 'state' ? 'STATE OVERVIEW' :
@@ -646,22 +738,13 @@ export default function Dashboard() {
               </select>
             </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">YEAR</label>
-            <div className="bg-blue-600/20 px-3 py-1.5 rounded-xl border border-blue-500/30 flex items-center gap-2">
-              <Calendar size={12} className="text-blue-400" />
-              <select value={selectedYear} onChange={e => setSelectedYear(parseInt(e.target.value))} className="bg-transparent text-xs font-bold focus:outline-none cursor-pointer text-blue-300">
-                {availableYears.map(y => <option key={y} value={y} className="bg-slate-950 font-sans">{y}</option>)}
-              </select>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Main Visual Workspace */}
-      <div className="h-[520px] shrink-0 p-4 grid grid-cols-12 gap-4">
-        {/* Map Area (70% width) */}
-        <div className="col-span-12 lg:col-span-8 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
+      <div className="h-[600px] shrink-0 p-4 grid grid-cols-12 gap-4">
+        {/* Map Area (80% width) */}
+        <div className="col-span-12 lg:col-span-10 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
           {/* Layer Toggles */}
           <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
             <div className="bg-slate-950/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] font-bold tracking-widest text-slate-300 backdrop-blur-sm flex items-center gap-2">
@@ -708,6 +791,17 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Data Attribution Overlay */}
+          <div className="absolute bottom-20 right-4 z-[1000] bg-slate-950/80 px-3 py-2 rounded-lg text-[9px] text-slate-400 backdrop-blur-sm border border-slate-800/50">
+            <div className="font-bold text-slate-300 mb-1">Data Sources</div>
+            <div className="flex items-center gap-1">
+              <span>NSW Valuer General</span>
+              <span className="text-slate-600">·</span>
+              <span>2001-2024</span>
+              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline ml-1">↗</a>
+            </div>
+          </div>
+
           {/* DeckGL Map */}
           <ErrorBoundary fallback={<div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-sm">Map rendering unavailable</div>}>
             <DeckGL
@@ -736,19 +830,19 @@ export default function Dashboard() {
           </ErrorBoundary>
         </div>
 
-        {/* Analytical Charts (30% width) */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 h-full">
+        {/* Analytical Charts (20% width) */}
+        <div className="col-span-12 lg:col-span-2 flex flex-col gap-4 h-full">
           <div className="flex-1 bg-slate-900/50 border border-slate-800 rounded-3xl p-5 overflow-hidden flex flex-col">
             <h4 className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-4">
-              <Home size={14} /> TRANSACTION COUNT
+              <Home size={14} /> TOP CAGR
             </h4>
             <div className="flex-grow">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={activityData} layout="vertical">
+                <BarChart data={cagrData} layout="vertical">
                   <XAxis type="number" hide />
                   <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} width={60} />
                   <Tooltip cursor={{ fill: '#ffffff05' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} fill="#3b82f6" />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} fill="#10b981" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -809,6 +903,50 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Property Detail Popup */}
+      {selectedProperty && (
+        <div className="absolute top-24 right-4 z-[1000] w-80 bg-slate-900 rounded-xl border border-slate-700 shadow-2xl overflow-hidden">
+          <div className="p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="font-bold text-sm text-white">
+                  {selectedProperty.property_house_number} {selectedProperty.property_street_name}
+                </h3>
+                <p className="text-[10px] text-slate-400">{selectedProperty.property_locality}</p>
+              </div>
+              <button onClick={() => setSelectedProperty(null)} className="text-slate-500 hover:text-white">✕</button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs mb-4">
+              <div>
+                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Price</span>
+                <p className="font-mono font-bold text-white">${selectedProperty.purchase_price?.toLocaleString()}</p>
+              </div>
+              <div>
+                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Date</span>
+                <p className="font-bold text-white">{formatDate(selectedProperty.contract_date)}</p>
+              </div>
+              <div>
+                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Type</span>
+                <p className="font-bold text-white">{selectedProperty.primary_purpose}</p>
+              </div>
+              <div>
+                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Area</span>
+                <p className="font-bold text-white">{selectedProperty.area || 'N/A'}</p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-700 text-[9px] text-slate-500">
+              <div>Source: NSW Valuer General</div>
+              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                View original record →
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Loading Overlay */}
       {loading && (

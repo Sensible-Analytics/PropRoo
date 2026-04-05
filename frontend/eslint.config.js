@@ -25,6 +25,11 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'max-lines': ['warn', { 'max': 200, 'skipBlankLines': true, 'skipComments': true }],
+      'max-lines-per-function': ['warn', { 'max': 30, 'skipBlankLines': true, 'skipComments': true }],
+      'complexity': ['warn', { 'max': 8 }],
+      'max-depth': ['warn', 4],
+      'max-params': ['warn', 3],
     },
   },
   // Architecture boundaries

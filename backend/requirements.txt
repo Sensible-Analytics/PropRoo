@@ -5,7 +5,7 @@ uvicorn[standard]==0.42.0
 python-dateutil==2.9.0.post0
 pandas==2.3.3
 pyarrow==23.0.1
-duckdb==0.10.3
+duckdb==1.5.1
 h3==3.7.7
 python-dotenv==1.2.2
 httpx==0.28.1

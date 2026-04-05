@@ -10,7 +10,7 @@ import { Map } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import { HeatmapLayer, ContourLayer } from '@deck.gl/aggregation-layers';
-import { ScatterplotLayer, TextLayer, GeoJsonLayer, IconLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, TextLayer, GeoJsonLayer, IconLayer, LineLayer, PathLayer } from '@deck.gl/layers';
 import { FlyToInterpolator } from '@deck.gl/core';
 
 // GeoJSON data
@@ -203,6 +203,48 @@ const samplePOIs: POI[] = [
   { name: 'Sydney Uni', lat: -33.8885, lng: 151.1873, type: 'school' },
   { name: 'Wynyard Station', lat: -33.8650, lng: 151.2050, type: 'transit' },
 ];
+
+const hospitals = [
+  { name: 'Sydney Hospital', lat: -33.8688, lng: 151.2093 },
+  { name: 'St Vincent Hospital', lat: -33.8790, lng: 151.2210 },
+  { name: 'Royal Prince Alfred', lat: -33.8890, lng: 151.1820 },
+  { name: 'Westmead Hospital', lat: -33.8070, lng: 150.9870 },
+  { name: 'Liverpool Hospital', lat: -33.9200, lng: 150.9230 },
+  { name: 'Nepean Hospital', lat: -33.7470, lng: 150.6940 },
+  { name: 'Blacktown Hospital', lat: -33.7680, lng: 150.9060 },
+  { name: 'Campbelltown Hospital', lat: -34.0650, lng: 150.8190 },
+];
+
+// Train stations dataset
+const trainStations = [
+  { name: 'Central Station', lat: -33.8835, lng: 151.2065 },
+  { name: 'Town Hall Station', lat: -33.8730, lng: 151.2060 },
+  { name: 'Wynyard Station', lat: -33.8650, lng: 151.2050 },
+  { name: 'Circular Quay', lat: -33.8615, lng: 151.2110 },
+  { name: 'Strathfield Station', lat: -33.8710, lng: 151.0830 },
+  { name: 'Parramatta Station', lat: -33.8150, lng: 151.0030 },
+  { name: 'Chatswood Station', lat: -33.7970, lng: 151.1800 },
+  { name: 'Bondi Junction Station', lat: -33.8910, lng: 151.2500 },
+];
+
+// Major roads GeoJSON for Sydney
+const majorRoads = {
+  type: 'FeatureCollection' as const,
+  features: [
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2093, -33.8688], [151.2300, -33.8900], [151.2500, -33.9100]] }, properties: { name: 'M1 Princes Motorway' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2093, -33.8688], [151.1800, -33.8500], [151.1500, -33.8300]] }, properties: { name: 'M2 Hills Motorway' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2093, -33.8688], [151.1500, -33.8700], [151.0800, -33.8750], [151.0030, -33.8150]] }, properties: { name: 'M4 Western Motorway' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2093, -33.8688], [151.2100, -33.9000], [151.2200, -33.9400], [151.2300, -33.9700]] }, properties: { name: 'M5 South Western Motorway' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.0030, -33.8150], [150.9500, -33.8200], [150.9060, -33.7680], [150.8500, -33.7400]] }, properties: { name: 'M7 Westlink' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2093, -33.8688], [151.2200, -33.8600], [151.2400, -33.8500]] }, properties: { name: 'Eastern Distributor' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2060, -33.8730], [151.2050, -33.8650], [151.2110, -33.8615]] }, properties: { name: 'Cahill Expressway' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.1820, -33.8890], [151.1900, -33.8850], [151.2000, -33.8800], [151.2093, -33.8688]] }, properties: { name: 'City West Link' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2093, -33.8688], [151.2050, -33.8400], [151.2000, -33.8100], [151.1950, -33.7800]] }, properties: { name: 'Warringah Freeway' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.1800, -33.7970], [151.1700, -33.7800], [151.1600, -33.7600], [151.1500, -33.7400]] }, properties: { name: 'Pacific Highway' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.2500, -33.8910], [151.2600, -33.8950], [151.2700, -33.9000], [151.2800, -33.9100]] }, properties: { name: 'Old South Head Road' } },
+    { type: 'Feature', geometry: { type: 'LineString', coordinates: [[151.0830, -33.8710], [151.1000, -33.8600], [151.1200, -33.8500], [151.1400, -33.8400]] }, properties: { name: 'Great Western Highway' } },
+  ]
+};
 
 const poiColorMap: Record<string, [number, number, number, number]> = {
   hospital: [239, 68, 68, 220],
@@ -905,6 +947,72 @@ export default function Dashboard() {
       );
     }
 
+    // Hospitals Layer
+    if (showPOI && mapZoom >= 8) {
+      result.push(
+        new ScatterplotLayer({
+          id: 'hospitals',
+          data: hospitals,
+          getPosition: (d: { lat: number; lng: number }) => [d.lng, d.lat],
+          getRadius: 20,
+          getFillColor: [239, 68, 68, 240],
+          getLineColor: [255, 255, 255, 220],
+          lineWidthMinPixels: 2,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [59, 130, 246, 120],
+          getTooltip: (d: { object: { name: string } }) => d.object && {
+            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+              <div style="font-weight: bold;">🏥 ${d.object.name}</div>
+            </div>`,
+          },
+        })
+      );
+    }
+
+    // Train Stations Layer
+    if (showPOI && mapZoom >= 9) {
+      result.push(
+        new ScatterplotLayer({
+          id: 'train-stations',
+          data: trainStations,
+          getPosition: (d: { lat: number; lng: number }) => [d.lng, d.lat],
+          getRadius: 16,
+          getFillColor: [16, 185, 129, 240],
+          getLineColor: [255, 255, 255, 220],
+          lineWidthMinPixels: 2,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [59, 130, 246, 120],
+          getTooltip: (d: { object: { name: string } }) => d.object && {
+            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+              <div style="font-weight: bold;">🚂 ${d.object.name}</div>
+            </div>`,
+          },
+        })
+      );
+    }
+
+    // Major Roads Layer
+    if (showStreets && mapZoom >= 7) {
+      result.push(
+        new PathLayer({
+          id: 'major-roads',
+          data: majorRoads as any,
+          getPath: (d: any) => d.geometry.coordinates,
+          getColor: [100, 116, 139, 180],
+          getWidth: 3,
+          widthMinPixels: 2,
+          pickable: true,
+          getTooltip: (d: any) => d.properties && {
+            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+              <div style="font-weight: bold;">🛣️ ${d.properties.name}</div>
+            </div>`,
+          },
+        })
+      );
+    }
+
     // POI Layer
     if (showPOI && mapZoom >= 8) {
       result.push(
@@ -930,7 +1038,7 @@ export default function Dashboard() {
     }
 
     return result;
-  }, [showH3, showHeatmap, showContours, showPins, showSuburbs, showPOI, showChoropleth, h3Cells, heatmapData, sales, viewState.zoom, mapZoom, suburbLeaderboard]);
+  }, [showH3, showHeatmap, showContours, showPins, showStreets, showSuburbs, showPOI, showChoropleth, h3Cells, heatmapData, sales, viewState.zoom, mapZoom, suburbLeaderboard]);
 
   // Loading overlay
   if (initError) {
@@ -1091,6 +1199,18 @@ export default function Dashboard() {
               <Map
                 mapStyle={CARTO_BASEMAP}
                 style={{ width: '100%', height: '100%' }}
+                transformStyle={(style) => {
+                  const modified = { ...style };
+                  if (modified.layers) {
+                    modified.layers = modified.layers.map((layer: any) => {
+                      if (layer.type === 'symbol' && (layer.id?.includes('label') || layer.id?.includes('place') || layer.id?.includes('road'))) {
+                        return { ...layer, layout: { ...layer.layout, visibility: showStreets ? 'visible' : 'none' } };
+                      }
+                      return layer;
+                    });
+                  }
+                  return modified;
+                }}
               />
             </DeckGL>
           </ErrorBoundary>

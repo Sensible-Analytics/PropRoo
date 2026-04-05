@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Home, Loader, ArrowLeft, ChevronRight, Calendar, Layers } from 'lucide-react';
+import { Home, Loader, ArrowLeft, ChevronRight, Calendar, Layers, Tag, SlidersHorizontal, Building2, Hospital, ShoppingBag, GraduationCap, Train } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import DualRangeSlider from './DualRangeSlider';
 import { latLngToCell, cellToLatLng } from 'h3-js';
@@ -10,7 +10,7 @@ import { Map } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import { HeatmapLayer, ContourLayer } from '@deck.gl/aggregation-layers';
-import { ScatterplotLayer, TextLayer, GeoJsonLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, TextLayer, GeoJsonLayer, IconLayer } from '@deck.gl/layers';
 import { FlyToInterpolator } from '@deck.gl/core';
 
 // GeoJSON data
@@ -164,8 +164,15 @@ interface H3Cell {
   avg_cagr: number;
 }
 
+interface POI {
+  name: string;
+  lat: number;
+  lng: number;
+  type: 'hospital' | 'mall' | 'school' | 'transit';
+}
+
 // Constants
-const CARTO_BASEMAP = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+const CARTO_BASEMAP = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 const INITIAL_VIEW_STATE = {
   longitude: 151.2093,
   latitude: -33.8688,
@@ -180,6 +187,29 @@ const CLUSTER_COLORS = [
 ];
 
 const availableYears = Array.from({ length: 24 }, (_, i) => 2024 - i);
+
+// Sample POI data around Sydney
+const samplePOIs: POI[] = [
+  { name: 'Sydney Hospital', lat: -33.8688, lng: 151.2093, type: 'hospital' },
+  { name: 'Westfield Sydney', lat: -33.8700, lng: 151.2100, type: 'mall' },
+  { name: 'Sydney Grammar', lat: -33.8650, lng: 151.2050, type: 'school' },
+  { name: 'Central Station', lat: -33.8835, lng: 151.2065, type: 'transit' },
+  { name: 'St Vincent Hospital', lat: -33.8790, lng: 151.2210, type: 'hospital' },
+  { name: 'Broadway Shopping Centre', lat: -33.8840, lng: 151.1930, type: 'mall' },
+  { name: 'UTS', lat: -33.8830, lng: 151.2000, type: 'school' },
+  { name: 'Town Hall Station', lat: -33.8730, lng: 151.2060, type: 'transit' },
+  { name: 'Royal Prince Alfred', lat: -33.8890, lng: 151.1820, type: 'hospital' },
+  { name: 'Queen Victoria Building', lat: -33.8720, lng: 151.2065, type: 'mall' },
+  { name: 'Sydney Uni', lat: -33.8885, lng: 151.1873, type: 'school' },
+  { name: 'Wynyard Station', lat: -33.8650, lng: 151.2050, type: 'transit' },
+];
+
+const poiColorMap: Record<string, [number, number, number, number]> = {
+  hospital: [239, 68, 68, 220],
+  mall: [245, 158, 11, 220],
+  school: [59, 130, 246, 220],
+  transit: [16, 185, 129, 220],
+};
 
 // CAGR color scale: red (negative) → gray (neutral) → green (positive)
 function cagrToColor(cagr: number): [number, number, number, number] {
@@ -222,16 +252,10 @@ function formatDate(date: Date | string): string {
 
 // Cached query helper
 async function cachedQuery<T>(sql: string): Promise<T[]> {
-  // Try cache first
   const cached = await cacheGet<T[]>(sql);
   if (cached) return cached;
-
-  // Run query
   const result = await query<T>(sql);
-
-  // Cache result
   await cacheSet(sql, result);
-
   return result;
 }
 
@@ -286,19 +310,26 @@ export default function Dashboard() {
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showContours, setShowContours] = useState(false);
   const [showPins, setShowPins] = useState(false);
+  const [showStreets, setShowStreets] = useState(true);
+  const [showSuburbs, setShowSuburbs] = useState(false);
+  const [showPOI, setShowPOI] = useState(false);
+  const [showChoropleth, setShowChoropleth] = useState(false);
 
   // Selected property for popup
   const [selectedProperty, setSelectedProperty] = useState<SaleRecord | null>(null);
+
+  // Map-table sync
+  const [selectedSuburb, setSelectedSuburb] = useState<string | null>(null);
+  const [highlightedPropertyId, setHighlightedPropertyId] = useState<string | null>(null);
 
   // Initialize DuckDB on mount
   useEffect(() => {
     let cancelled = false;
 
-    // Suppress WebGL ResizeObserver errors in headless/test environments
     const originalErrorHandler = window.onerror;
     window.onerror = (message, source, lineno, colno, error) => {
       if (typeof message === 'string' && (message.includes('maxTextureDimension2D') || message.includes('luma'))) {
-        return true; // Suppress
+        return true;
       }
       if (originalErrorHandler) {
         return originalErrorHandler.call(window, message, source, lineno, colno, error);
@@ -376,7 +407,6 @@ export default function Dashboard() {
             LIMIT 100000
           `;
           const rows = await cachedQuery<{ latitude: number; longitude: number; purchase_price: number }>(sql);
-          // Compute H3 cells client-side
           const cellMap = new Map<string, { prices: number[]; latSum: number; lngSum: number; count: number }>();
           for (const row of rows) {
             const h3Index = latLngToCell(row.latitude, row.longitude, resolution);
@@ -425,7 +455,9 @@ export default function Dashboard() {
             sql += ` AND purchase_price <= ${priceRange.max}`;
           }
 
-          if (viewLevel === 'suburb' && selection.suburb) {
+          if (selectedSuburb) {
+            sql += ` AND property_locality = '${selectedSuburb}'`;
+          } else if (viewLevel === 'suburb' && selection.suburb) {
             sql += ` AND property_locality = '${selection.suburb}'`;
           } else if (viewLevel === 'street' && selection.suburb && selection.street) {
             sql += ` AND property_locality = '${selection.suburb}' AND property_street_name = '${selection.street}'`;
@@ -449,7 +481,7 @@ export default function Dashboard() {
 
     fetchData();
     return () => { cancelled = true; };
-  }, [isInitialized, viewLevel, selection, selectedYear, propertyType, priceRange, mapZoom]);
+  }, [isInitialized, viewLevel, selection, selectedYear, propertyType, priceRange, mapZoom, selectedSuburb]);
 
   // Navigation handlers
   const handleBack = useCallback(() => {
@@ -479,7 +511,7 @@ export default function Dashboard() {
     if (type === 'suburb') {
       setSelection({ suburb: value, street: null, propertyId: null });
       setViewLevel('suburb');
-      // Fly to suburb
+      setSelectedSuburb(value);
       const suburb = suburbLeaderboard.find(s => s.suburb === value);
       if (suburb) {
         setViewState(prev => ({
@@ -517,7 +549,10 @@ export default function Dashboard() {
     if (info.object) {
       const { object } = info;
       if (object.properties) {
-        // H3 cell clicked - drill down
+        const suburbName = object.properties.suburb_name;
+        if (suburbName) {
+          setSelectedSuburb(suburbName);
+        }
         setViewState(prev => ({
           ...prev,
           longitude: object.geometry.coordinates[0][0][0],
@@ -528,6 +563,22 @@ export default function Dashboard() {
           transitionInterpolator: new FlyToInterpolator(),
         }));
       }
+    }
+  }, []);
+
+  const handleRowClick = useCallback((sale: SaleRecord) => {
+    if (sale.latitude && sale.longitude) {
+      setViewState(prev => ({
+        ...prev,
+        longitude: sale.longitude,
+        latitude: sale.latitude,
+        zoom: Math.max(prev.zoom, 14),
+        pitch: 45,
+        transitionDuration: 1000,
+        transitionInterpolator: new FlyToInterpolator(),
+      }));
+      setHighlightedPropertyId(sale.property_id);
+      setTimeout(() => setHighlightedPropertyId(null), 3000);
     }
   }, []);
 
@@ -554,16 +605,31 @@ export default function Dashboard() {
   const layers = useMemo(() => {
     const result: any[] = [];
 
-    // State boundaries layer (visible at zoom 4-8)
-    if (mapZoom >= 4 && mapZoom <= 8) {
+    // National boundary (zoom 1-4)
+    if (mapZoom >= 1 && mapZoom <= 4) {
+      result.push(
+        new GeoJsonLayer({
+          id: 'national-boundary',
+          data: australiaStatesGeoJSON as any,
+          stroked: true,
+          filled: false,
+          getLineColor: [100, 140, 255, 150],
+          lineWidthMinPixels: 2,
+          pickable: false,
+        })
+      );
+    }
+
+    // State boundaries layer (zoom 1-6)
+    if (mapZoom >= 1 && mapZoom <= 6) {
       result.push(
         new GeoJsonLayer({
           id: 'state-boundaries',
           data: australiaStatesGeoJSON as any,
           stroked: true,
           filled: true,
-          getFillColor: [30, 41, 59, 80],
-          getLineColor: [100, 140, 255, 200],
+          getFillColor: [241, 245, 249, 120],
+          getLineColor: [100, 140, 255, 180],
           lineWidthMinPixels: 2,
           pickable: true,
           autoHighlight: true,
@@ -571,6 +637,86 @@ export default function Dashboard() {
           getTooltip: (d: any) => d.properties && {
             html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
               <div style="font-weight: bold;">${d.properties.name} (${d.properties.abbr})</div>
+            </div>`,
+          },
+        })
+      );
+    }
+
+    // Postcode boundaries (zoom 6-10)
+    if (mapZoom >= 6 && mapZoom <= 10) {
+      result.push(
+        new GeoJsonLayer({
+          id: 'postcode-boundaries',
+          data: nswSuburbsGeoJSON as any,
+          stroked: true,
+          filled: false,
+          getLineColor: [148, 163, 184, 100],
+          lineWidthMinPixels: 1,
+          pickable: false,
+        })
+      );
+    }
+
+    // Choropleth layer (zoom 8-13)
+    if (showChoropleth && mapZoom >= 8 && mapZoom <= 13) {
+      result.push(
+        new GeoJsonLayer({
+          id: 'suburb-choropleth',
+          data: nswSuburbsGeoJSON as any,
+          filled: true,
+          stroked: true,
+          lineWidthMinPixels: 1,
+          getFillColor: (d: any) => {
+            const suburb = suburbLeaderboard.find(s => s.suburb === d.properties?.suburb_name);
+            return cagrToColor(suburb?.avg_cagr || 0);
+          },
+          getLineColor: [100, 100, 100, 100],
+          opacity: 0.6,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [59, 130, 246, 80],
+          onClick: (info: any) => {
+            if (info.object?.properties?.suburb_name) {
+              setSelectedSuburb(info.object.properties.suburb_name);
+            }
+          },
+          getTooltip: (d: any) => {
+            const suburb = suburbLeaderboard.find(s => s.suburb === d.properties?.suburb_name);
+            return d.properties && {
+              html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+                <div style="font-weight: bold;">${d.properties.suburb_name}</div>
+                <div>Postcode: ${d.properties.postcode}</div>
+                ${suburb ? `<div>Avg CAGR: ${(suburb.avg_cagr * 100).toFixed(1)}%</div>` : ''}
+              </div>`,
+            };
+          },
+        })
+      );
+    }
+
+    // Suburb boundaries (zoom 8-13)
+    if ((showSuburbs || !showChoropleth) && mapZoom >= 8 && mapZoom < 13) {
+      result.push(
+        new GeoJsonLayer({
+          id: 'suburb-boundaries',
+          data: nswSuburbsGeoJSON as any,
+          stroked: true,
+          filled: false,
+          lineWidthMinPixels: 1.5,
+          getLineColor: [100, 140, 255, 180],
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [100, 140, 255, 80],
+          onClick: (info: any) => {
+            if (info.object?.properties?.suburb_name) {
+              setSelectedSuburb(info.object.properties.suburb_name);
+            }
+          },
+          getTooltip: (d: any) => d.properties && {
+            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+              <div style="font-weight: bold;">${d.properties.suburb_name}</div>
+              <div>Postcode: ${d.properties.postcode}</div>
             </div>`,
           },
         })
@@ -588,13 +734,27 @@ export default function Dashboard() {
           getHexagon: (d: H3Cell) => d.h3_index,
           getElevation: (d: H3Cell) => priceToElevation(d.median_price || 0, maxPrice),
           getFillColor: (d: H3Cell) => cagrToColor(d.avg_cagr || 0),
-          getLineColor: [255, 255, 255, 40],
+          getLineColor: [100, 116, 139, 60],
           lineWidthMinPixels: 0.5,
           elevationScale: 100,
           pickable: true,
           autoHighlight: true,
-          highlightColor: [255, 255, 255, 80],
+          highlightColor: [59, 130, 246, 80],
           transitions: { getFillColor: 600, getElevation: 600 },
+          onClick: (info: any) => {
+            if (info.object) {
+              const { lat, lng } = info.object;
+              setViewState(prev => ({
+                ...prev,
+                longitude: lng,
+                latitude: lat,
+                zoom: Math.min(prev.zoom + 2, 15),
+                pitch: 45,
+                transitionDuration: 1500,
+                transitionInterpolator: new FlyToInterpolator(),
+              }));
+            }
+          },
           getTooltip: (d: { object: H3Cell }) => d.object && {
             html: `
               <div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
@@ -635,7 +795,7 @@ export default function Dashboard() {
           getWeight: (d: SaleRecord) => d.purchase_price / 1000000,
           cellSize: 500,
           contourStrokeWidth: 2,
-          contourColor: [100, 200, 255, 180],
+          contourColor: [59, 130, 246, 180],
           opacity: 0.6,
         })
       );
@@ -655,7 +815,7 @@ export default function Dashboard() {
           lineWidthMinPixels: 1,
           pickable: true,
           autoHighlight: true,
-          highlightColor: [255, 255, 255, 80],
+          highlightColor: [59, 130, 246, 120],
           transitions: { getFillColor: 600, getRadius: 600 },
           onClick: (info: any) => {
             if (info.object) {
@@ -678,7 +838,6 @@ export default function Dashboard() {
 
     // Price labels on pins at zoom >= 14
     if (showPins && viewState.zoom >= 14 && sales.length > 0) {
-      const maxPrice = Math.max(...sales.map(s => s.purchase_price || 0), 1);
       result.push(
         new TextLayer({
           id: 'price-labels',
@@ -686,35 +845,12 @@ export default function Dashboard() {
           getPosition: (d: SaleRecord) => [d.longitude, d.latitude],
           getText: (d: SaleRecord) => formatPrice(d.purchase_price || 0),
           getSize: 12,
-          getColor: [255, 255, 255, 220],
+          getColor: [30, 41, 59, 220],
           getPixelOffset: [0, -15],
           fontFamily: 'Inter, system-ui, sans-serif',
           fontWeight: 700,
           outlineWidth: 2,
-          outlineColor: [0, 0, 0, 255],
-        })
-      );
-    }
-
-    // Suburb boundary layer (visible at zoom 8-13)
-    if (mapZoom >= 8 && mapZoom < 13) {
-      result.push(
-        new GeoJsonLayer({
-          id: 'suburb-boundaries',
-          data: nswSuburbsGeoJSON as any,
-          stroked: true,
-          filled: false,
-          lineWidthMinPixels: 1.5,
-          getLineColor: [100, 140, 255, 180],
-          pickable: true,
-          autoHighlight: true,
-          highlightColor: [100, 140, 255, 80],
-          getTooltip: (d: any) => d.properties && {
-            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
-              <div style="font-weight: bold;">${d.properties.suburb_name}</div>
-              <div>Postcode: ${d.properties.postcode}</div>
-            </div>`,
-          },
+          outlineColor: [255, 255, 255, 200],
         })
       );
     }
@@ -735,26 +871,50 @@ export default function Dashboard() {
           getPosition: (d: any) => d.position,
           getText: (d: any) => d.name,
           getSize: 14,
-          getColor: [200, 220, 255, 220],
+          getColor: [51, 65, 85, 220],
           getPixelOffset: [0, -10],
           fontFamily: 'Inter, system-ui, sans-serif',
           fontWeight: 600,
           outlineWidth: 2,
-          outlineColor: [0, 0, 0, 255],
+          outlineColor: [255, 255, 255, 200],
+        })
+      );
+    }
+
+    // POI Layer
+    if (showPOI && mapZoom >= 10) {
+      result.push(
+        new ScatterplotLayer({
+          id: 'poi-markers',
+          data: samplePOIs,
+          getPosition: (d: POI) => [d.lng, d.lat],
+          getRadius: 8,
+          getFillColor: (d: POI) => poiColorMap[d.type] || [100, 100, 100, 200],
+          getLineColor: [255, 255, 255, 150],
+          lineWidthMinPixels: 1,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [59, 130, 246, 120],
+          getTooltip: (d: { object: POI }) => d.object && {
+            html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">
+              <div style="font-weight: bold;">${d.object.name}</div>
+              <div style="text-transform: capitalize;">${d.object.type}</div>
+            </div>`,
+          },
         })
       );
     }
 
     return result;
-  }, [showH3, showHeatmap, showContours, showPins, h3Cells, heatmapData, sales, viewState.zoom, mapZoom]);
+  }, [showH3, showHeatmap, showContours, showPins, showSuburbs, showPOI, showChoropleth, h3Cells, heatmapData, sales, viewState.zoom, mapZoom, suburbLeaderboard]);
 
   // Loading overlay
   if (initError) {
     return (
-      <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans items-center justify-center">
+      <div className="h-screen w-screen flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans items-center justify-center">
         <div className="text-center">
-          <div className="text-red-400 text-2xl font-black mb-4">INITIALIZATION FAILED</div>
-          <p className="text-slate-400 mb-6">{initError}</p>
+          <div className="text-red-500 text-2xl font-black mb-4">INITIALIZATION FAILED</div>
+          <p className="text-slate-600 mb-6">{initError}</p>
           <button
             onClick={() => window.location.reload()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-colors"
@@ -769,7 +929,7 @@ export default function Dashboard() {
   if (!isInitialized) {
     const totalProgress = Object.values(downloadProgress).reduce((a, b) => a + b, 0) / (Object.keys(downloadProgress).length || 1);
     return (
-      <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans items-center justify-center">
+      <div className="h-screen w-screen flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans items-center justify-center">
         <div className="flex flex-col items-center gap-8">
           <div className="relative">
             <div className="h-20 w-20 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
@@ -778,26 +938,26 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="text-center">
-            <p className="text-blue-400 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse mb-4">
+            <p className="text-blue-600 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse mb-4">
               Loading PropRoo Engine...
             </p>
             {Object.keys(downloadProgress).length > 0 && (
               <div className="space-y-2">
                 {Object.entries(downloadProgress).map(([file, pct]) => (
                   <div key={file} className="flex items-center gap-3 text-xs">
-                    <span className="text-slate-400 w-32 text-right">{file}.parquet</span>
-                    <div className="w-48 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <span className="text-slate-500 w-32 text-right">{file}.parquet</span>
+                    <div className="w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-blue-500 transition-all duration-300"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-slate-500 w-12">{pct}%</span>
+                    <span className="text-slate-400 w-12">{pct}%</span>
                   </div>
                 ))}
               </div>
             )}
-            <p className="text-slate-600 text-[10px] mt-4">
+            <p className="text-slate-400 text-[10px] mt-4">
               Total: {Math.round(totalProgress)}%
             </p>
           </div>
@@ -807,127 +967,100 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans">
-      {/* Header: h-14 */}
-      <header className="h-14 shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 flex justify-between items-center z-50">
-        {/* Left: breadcrumb + back button */}
-        <div className="flex items-center gap-4">
-          {viewLevel !== 'state' && (
-            <button onClick={handleBack} className="p-2 hover:bg-slate-800 rounded-full transition-all border border-slate-700 bg-slate-900 shadow-lg group">
-              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            </button>
-          )}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={navigateToState}
-              className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'state' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
-            >
-              NSW
-            </button>
-            {viewLevel !== 'state' && (
-              <>
-                <ChevronRight size={10} className="text-slate-600" />
-                <button
-                  onClick={navigateToSuburb}
-                  className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors ${viewLevel === 'suburb' ? 'text-blue-400' : 'text-slate-400 hover:text-blue-300'}`}
-                >
-                  {selection.suburb}
-                </button>
-              </>
-            )}
-            {viewLevel === 'street' && (
-              <>
-                <ChevronRight size={10} className="text-slate-600" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400">
-                  {selection.street}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Right: filters (price, category) */}
-        <div className="flex items-center gap-4">
-          <div className="w-48 flex flex-col gap-0.5">
-            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">PRICE RANGE</label>
-            <DualRangeSlider min={0} max={10000000} onChange={setPriceRange} />
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1">CATEGORY</label>
-            <div className="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
-              <select value={propertyType} onChange={e => setPropertyType(e.target.value)} className="bg-transparent text-xs font-bold focus:outline-none cursor-pointer">
-                <option value="">ALL PROPERTIES</option>
-                <option value="Residence">RESIDENCE</option>
-                <option value="Strata Unit">STRATA UNIT</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="h-screen w-screen flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans">
       {/* Main workspace: flex-1, horizontal split 80/20 */}
       <div className="flex-1 flex min-h-0">
         {/* Map Area: flex-1 (80%) */}
-        <div className="flex-1 relative bg-slate-900">
-          {/* Layer Toggles */}
-          <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
-            <div className="bg-slate-950/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] font-bold tracking-widest text-slate-300 backdrop-blur-sm flex items-center gap-2">
-              <Layers size={12} className="text-blue-500" /> LAYERS
-            </div>
-            <div className="bg-slate-950/90 px-3 py-2 rounded-xl border border-slate-800 backdrop-blur-sm space-y-1.5">
-              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
-                <input type="checkbox" checked={showH3} onChange={e => setShowH3(e.target.checked)} className="accent-blue-500" />
-                H3 HEXAGONS
-              </label>
-              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
-                <input type="checkbox" checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} className="accent-blue-500" />
-                HEATMAP
-              </label>
-              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
-                <input type="checkbox" checked={showContours} onChange={e => setShowContours(e.target.checked)} className="accent-blue-500" />
-                CONTOURS
-              </label>
-              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-300 cursor-pointer">
-                <input type="checkbox" checked={showPins} onChange={e => setShowPins(e.target.checked)} className="accent-blue-500" />
-                PROPERTY PINS
-              </label>
-            </div>
+        <div className="flex-1 relative bg-white">
+          {/* Year Display */}
+          <div className="absolute top-4 right-4 z-[1000] bg-white/90 px-4 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
+            <span className="text-2xl font-black text-blue-600">{selectedYear}</span>
           </div>
 
-          {/* Year Display */}
-          <div className="absolute top-4 right-4 z-[1000] bg-slate-950/90 px-4 py-2 rounded-xl border border-slate-800 backdrop-blur-sm">
-            <span className="text-2xl font-black text-blue-400">{selectedYear}</span>
+          {/* Layers Panel — bottom-left */}
+          <div className="absolute bottom-20 left-4 z-[1000] flex flex-col gap-2">
+            <div className="bg-white/90 px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] font-bold tracking-widest text-slate-600 backdrop-blur-sm shadow-sm flex items-center gap-2">
+              <Layers size={12} className="text-blue-600" /> LAYERS
+            </div>
+            <div className="bg-white/90 px-3 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm space-y-1.5">
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showH3} onChange={e => setShowH3(e.target.checked)} className="accent-blue-600" />
+                H3 HEXAGONS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} className="accent-blue-600" />
+                HEATMAP
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showContours} onChange={e => setShowContours(e.target.checked)} className="accent-blue-600" />
+                CONTOURS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showPins} onChange={e => setShowPins(e.target.checked)} className="accent-blue-600" />
+                PROPERTY PINS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showStreets} onChange={e => setShowStreets(e.target.checked)} className="accent-blue-600" />
+                STREETS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showSuburbs} onChange={e => setShowSuburbs(e.target.checked)} className="accent-blue-600" />
+                SUBURBS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showPOI} onChange={e => setShowPOI(e.target.checked)} className="accent-blue-600" />
+                POI
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showChoropleth} onChange={e => setShowChoropleth(e.target.checked)} className="accent-blue-600" />
+                CHOROPLETH
+              </label>
+            </div>
           </div>
 
           {/* Time Slider */}
-          <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-slate-950/90 px-4 py-3 rounded-xl border border-slate-800 backdrop-blur-sm">
+          <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-white/90 px-4 py-3 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
             <div className="flex items-center gap-4">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">2001</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2001</span>
               <input
                 type="range"
                 min={2001}
                 max={2024}
                 value={selectedYear}
                 onChange={e => setSelectedYear(parseInt(e.target.value))}
-                className="flex-1 h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-blue-500"
+                className="flex-1 h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
               />
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">2024</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2024</span>
             </div>
           </div>
 
           {/* Data Attribution Overlay */}
-          <div className="absolute bottom-20 right-4 z-[1000] bg-slate-950/80 px-3 py-2 rounded-lg text-[9px] text-slate-400 backdrop-blur-sm border border-slate-800/50">
-            <div className="font-bold text-slate-300 mb-1">Data Sources</div>
+          <div className="absolute bottom-20 right-4 z-[1000] bg-white/80 px-3 py-2 rounded-lg text-[9px] text-slate-500 backdrop-blur-sm border border-slate-200/50 shadow-sm">
+            <div className="font-bold text-slate-700 mb-1">Data Sources</div>
             <div className="flex items-center gap-1">
               <span>NSW Valuer General</span>
-              <span className="text-slate-600">·</span>
+              <span className="text-slate-400">·</span>
               <span>2001-2024</span>
-              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline ml-1">↗</a>
+              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">↗</a>
             </div>
           </div>
 
+          {/* Selected Suburb Indicator */}
+          {selectedSuburb && (
+            <div className="absolute top-4 left-4 z-[1000] bg-white/90 px-3 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm flex items-center gap-2">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Suburb:</span>
+              <span className="text-xs font-black text-blue-600">{selectedSuburb}</span>
+              <button
+                onClick={() => setSelectedSuburb(null)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* DeckGL Map */}
-          <ErrorBoundary fallback={<div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 text-sm">Map rendering unavailable</div>}>
+          <ErrorBoundary fallback={<div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-500 text-sm">Map rendering unavailable</div>}>
             <DeckGL
               viewState={viewState}
               onViewStateChange={({ viewState: vs }) => {
@@ -955,18 +1088,65 @@ export default function Dashboard() {
         </div>
 
         {/* Sidebar: w-80 (20%), scrollable */}
-        <aside className="w-80 border-l border-slate-800 bg-slate-900/50 flex flex-col overflow-y-auto">
+        <aside className="w-80 border-l border-slate-200 bg-white flex flex-col overflow-y-auto">
+          {/* Filters Section — TOP of sidebar */}
+          <div className="shrink-0 p-4 border-b border-slate-200 space-y-4">
+            {/* Filter Header */}
+            <div className="flex items-center gap-2 text-slate-700">
+              <SlidersHorizontal size={14} className="text-blue-600" />
+              <h4 className="text-[10px] font-black uppercase tracking-widest">Filters</h4>
+            </div>
+
+            {/* Price Range */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-slate-600">
+                <Tag size={10} className="text-blue-600" />
+                <label className="text-[9px] font-bold uppercase tracking-widest">Price Range</label>
+              </div>
+              <DualRangeSlider min={0} max={10000000} onChange={setPriceRange} />
+              <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+                <span>{formatPrice(priceRange.min)}</span>
+                <span>{formatPrice(priceRange.max)}</span>
+              </div>
+            </div>
+
+            {/* Category Selector — Compact Button Group */}
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Property Type</label>
+              <div className="flex gap-1">
+                {[
+                  { label: 'All', value: '', icon: Home },
+                  { label: 'Residence', value: 'Residence', icon: Home },
+                  { label: 'Strata Unit', value: 'Strata Unit', icon: Building2 },
+                ].map(({ label, value, icon: Icon }) => (
+                  <button
+                    key={label}
+                    onClick={() => setPropertyType(value)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                      propertyType === value
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <Icon size={10} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* CAGR Chart */}
-          <div className="shrink-0 p-4 border-b border-slate-800">
-            <h4 className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-4">
+          <div className="shrink-0 p-4 border-b border-slate-200">
+            <h4 className="flex items-center gap-2 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-4">
               <Home size={14} /> TOP CAGR
             </h4>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={cagrData} layout="vertical">
                   <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#94a3b8' }} width={60} />
-                  <Tooltip cursor={{ fill: '#ffffff05' }} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#64748b' }} width={60} />
+                  <Tooltip cursor={{ fill: '#00000005' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '10px', color: '#0f172a' }} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} fill="#10b981" />
                 </BarChart>
               </ResponsiveContainer>
@@ -975,11 +1155,11 @@ export default function Dashboard() {
 
           {/* Sales Table (scrollable within sidebar) */}
           <div className="flex-1 overflow-y-auto">
-            <div className="px-4 py-3 border-b border-slate-800/40">
-              <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Spatial Entity Archive</p>
+            <div className="px-4 py-3 border-b border-slate-200/60">
+              <p className="text-[10px] font-black tracking-[0.4em] text-slate-400 uppercase">Spatial Entity Archive</p>
             </div>
             <table className="w-full text-left">
-              <thead className="sticky top-0 bg-slate-900/95 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 z-10 border-b border-slate-800/40">
+              <thead className="sticky top-0 bg-white/95 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 z-10 border-b border-slate-200/60">
                 <tr>
                   <th className="px-4 py-3">Address</th>
                   <th className="px-4 py-3 text-center">Price</th>
@@ -987,32 +1167,37 @@ export default function Dashboard() {
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/30">
+              <tbody className="divide-y divide-slate-100">
                 {sales.map(s => (
                   <tr
                     key={s.id}
-                    onClick={() => drillDown(viewLevel === 'state' ? 'suburb' : 'street', viewLevel === 'state' ? s.property_locality : s.property_street_name)}
-                    className="hover:bg-blue-600/5 group cursor-pointer transition-all"
+                    onClick={() => {
+                      handleRowClick(s);
+                      drillDown(viewLevel === 'state' ? 'suburb' : 'street', viewLevel === 'state' ? s.property_locality : s.property_street_name);
+                    }}
+                    className={`hover:bg-blue-50 group cursor-pointer transition-all ${
+                      highlightedPropertyId === s.property_id ? 'bg-blue-50 ring-1 ring-blue-200' : ''
+                    }`}
                   >
                     <td className="px-4 py-3">
-                      <p className="font-bold text-xs group-hover:text-blue-400 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
-                      <p className="text-[9px] text-slate-600 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date instanceof Date ? s.contract_date.toISOString().split('T')[0] : s.contract_date}</p>
+                      <p className="font-bold text-xs group-hover:text-blue-600 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
+                      <p className="text-[9px] text-slate-400 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date instanceof Date ? s.contract_date.toISOString().split('T')[0] : s.contract_date}</p>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <p className="font-mono text-sm font-black text-slate-200 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
+                      <p className="font-mono text-sm font-black text-slate-700 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="h-1 w-12 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-1 w-12 bg-slate-200 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500" style={{ width: `${Math.max(5, Math.min(100, (s.cagr || 0) * 800))}%` }}></div>
                         </div>
-                        <span className="font-black text-emerald-400 text-[10px]">{((s.cagr || 0) * 100).toFixed(1)}%</span>
+                        <span className="font-black text-emerald-600 text-[10px]">{((s.cagr || 0) * 100).toFixed(1)}%</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={(e) => { e.stopPropagation(); drillDown('property', s.property_id); }}
-                        className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-[9px] font-black tracking-[0.2em] transition-all uppercase border border-blue-500/20"
+                        className="bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white px-3 py-1.5 rounded-lg text-[9px] font-black tracking-[0.2em] transition-all uppercase border border-blue-200"
                       >
                         EXPLORE
                       </button>
@@ -1027,40 +1212,40 @@ export default function Dashboard() {
 
       {/* Property Detail Popup */}
       {selectedProperty && (
-        <div className="absolute top-16 right-84 z-[1000] w-80 bg-slate-900 rounded-xl border border-slate-700 shadow-2xl overflow-hidden">
+        <div className="absolute top-4 right-84 z-[1000] w-80 bg-white rounded-xl border border-slate-200 shadow-2xl overflow-hidden">
           <div className="p-4">
             <div className="flex justify-between items-start mb-3">
               <div>
-                <h3 className="font-bold text-sm text-white">
+                <h3 className="font-bold text-sm text-slate-900">
                   {selectedProperty.property_house_number} {selectedProperty.property_street_name}
                 </h3>
-                <p className="text-[10px] text-slate-400">{selectedProperty.property_locality}</p>
+                <p className="text-[10px] text-slate-500">{selectedProperty.property_locality}</p>
               </div>
-              <button onClick={() => setSelectedProperty(null)} className="text-slate-500 hover:text-white">✕</button>
+              <button onClick={() => setSelectedProperty(null)} className="text-slate-400 hover:text-slate-600">✕</button>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs mb-4">
               <div>
-                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Price</span>
-                <p className="font-mono font-bold text-white">${selectedProperty.purchase_price?.toLocaleString()}</p>
+                <span className="text-slate-400 text-[9px] uppercase tracking-wider">Price</span>
+                <p className="font-mono font-bold text-slate-900">${selectedProperty.purchase_price?.toLocaleString()}</p>
               </div>
               <div>
-                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Date</span>
-                <p className="font-bold text-white">{formatDate(selectedProperty.contract_date)}</p>
+                <span className="text-slate-400 text-[9px] uppercase tracking-wider">Date</span>
+                <p className="font-bold text-slate-900">{formatDate(selectedProperty.contract_date)}</p>
               </div>
               <div>
-                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Type</span>
-                <p className="font-bold text-white">{selectedProperty.primary_purpose}</p>
+                <span className="text-slate-400 text-[9px] uppercase tracking-wider">Type</span>
+                <p className="font-bold text-slate-900">{selectedProperty.primary_purpose}</p>
               </div>
               <div>
-                <span className="text-slate-500 text-[9px] uppercase tracking-wider">Area</span>
-                <p className="font-bold text-white">{selectedProperty.area || 'N/A'}</p>
+                <span className="text-slate-400 text-[9px] uppercase tracking-wider">Area</span>
+                <p className="font-bold text-slate-900">{selectedProperty.area || 'N/A'}</p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-700 text-[9px] text-slate-500">
+            <div className="pt-3 border-t border-slate-200 text-[9px] text-slate-400">
               <div>Source: NSW Valuer General</div>
-              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                 View original record →
               </a>
             </div>
@@ -1071,7 +1256,7 @@ export default function Dashboard() {
 
       {/* Loading Overlay */}
       {loading && (
-        <div className="absolute inset-0 z-[10000] bg-slate-950/80 backdrop-blur-2xl flex items-center justify-center">
+        <div className="absolute inset-0 z-[10000] bg-slate-50/80 backdrop-blur-2xl flex items-center justify-center">
           <div className="flex flex-col items-center gap-8">
             <div className="relative">
               <div className="h-20 w-20 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin"></div>
@@ -1079,7 +1264,7 @@ export default function Dashboard() {
                 <Loader className="text-blue-500 animate-pulse" size={24} />
               </div>
             </div>
-            <p className="text-blue-400 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse">Orchestrating Unified Intelligence...</p>
+            <p className="text-blue-600 font-black uppercase tracking-[0.5em] text-[10px] animate-pulse">Orchestrating Unified Intelligence...</p>
           </div>
         </div>
       )}

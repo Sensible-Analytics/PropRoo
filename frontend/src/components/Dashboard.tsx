@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Home, Loader, ArrowLeft, ChevronRight, Calendar, Layers, Tag, SlidersHorizontal, Building2, Hospital, ShoppingBag, GraduationCap, Train } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import DualRangeSlider from './DualRangeSlider';
 import { latLngToCell, cellToLatLng } from 'h3-js';
 
@@ -307,14 +307,13 @@ export default function Dashboard() {
 
   // Layer Toggles
   const [showH3, setShowH3] = useState(true);
-  const [showHeatmap, setShowHeatmap] = useState(true);
-  const [showContours, setShowContours] = useState(true);
-  const [showPins, setShowPins] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showContours, setShowContours] = useState(false);
+  const [showPins, setShowPins] = useState(false);
   const [showStreets, setShowStreets] = useState(true);
-  const [showSuburbs, setShowSuburbs] = useState(true);
-  const [showPOI, setShowPOI] = useState(true);
-  const [showChoropleth, setShowChoropleth] = useState(true);
-  const [layersExpanded, setLayersExpanded] = useState(true);
+  const [showSuburbs, setShowSuburbs] = useState(false);
+  const [showPOI, setShowPOI] = useState(false);
+  const [showChoropleth, setShowChoropleth] = useState(false);
 
   // Selected property for popup
   const [selectedProperty, setSelectedProperty] = useState<SaleRecord | null>(null);
@@ -322,9 +321,6 @@ export default function Dashboard() {
   // Map-table sync
   const [selectedSuburb, setSelectedSuburb] = useState<string | null>(null);
   const [highlightedPropertyId, setHighlightedPropertyId] = useState<string | null>(null);
-
-  // Table sorting
-  const [tableSort, setTableSort] = useState<{ field: string; direction: 'asc' | 'desc' }>({ field: 'cagr', direction: 'desc' });
 
   // Initialize DuckDB on mount
   useEffect(() => {
@@ -605,26 +601,6 @@ export default function Dashboard() {
     }));
   }, [suburbLeaderboard, streetLeaderboard, viewLevel]);
 
-  const sortedSales = useMemo(() => {
-    const sorted = [...sales].sort((a, b) => {
-      const dir = tableSort.direction === 'asc' ? 1 : -1;
-      if (tableSort.field === 'cagr') return ((a.cagr || 0) - (b.cagr || 0)) * dir;
-      if (tableSort.field === 'price') return ((a.purchase_price || 0) - (b.purchase_price || 0)) * dir;
-      if (tableSort.field === 'address') {
-        const aAddr = viewLevel === 'state' ? (a.property_locality || '') : `${a.property_house_number} ${a.property_street_name}`;
-        const bAddr = viewLevel === 'state' ? (b.property_locality || '') : `${b.property_house_number} ${b.property_street_name}`;
-        return aAddr.localeCompare(bAddr) * dir;
-      }
-      return 0;
-    });
-    return sorted.map(s => ({
-      ...s,
-      houseCount: s.primary_purpose === 'Residence' ? 1 : 0,
-      unitCount: s.primary_purpose === 'Strata Unit' ? 1 : 0,
-      totalTransactions: 1,
-    }));
-  }, [sales, tableSort, viewLevel]);
-
   // deck.gl layers
   const layers = useMemo(() => {
     const result: any[] = [];
@@ -644,16 +620,16 @@ export default function Dashboard() {
       );
     }
 
-    // State boundaries layer (zoom 1-8)
-    if (mapZoom >= 1 && mapZoom <= 8) {
+    // State boundaries layer (zoom 1-6)
+    if (mapZoom >= 1 && mapZoom <= 6) {
       result.push(
         new GeoJsonLayer({
           id: 'state-boundaries',
           data: australiaStatesGeoJSON as any,
           stroked: true,
           filled: true,
-          getFillColor: [241, 245, 249, 80],
-          getLineColor: [100, 140, 255, 200],
+          getFillColor: [241, 245, 249, 120],
+          getLineColor: [100, 140, 255, 180],
           lineWidthMinPixels: 2,
           pickable: true,
           autoHighlight: true,
@@ -667,16 +643,16 @@ export default function Dashboard() {
       );
     }
 
-    // Suburb/postcode boundaries (zoom 6-14)
-    if (mapZoom >= 6 && mapZoom <= 14) {
+    // Postcode boundaries (zoom 6-10)
+    if (mapZoom >= 6 && mapZoom <= 10) {
       result.push(
         new GeoJsonLayer({
           id: 'postcode-boundaries',
           data: nswSuburbsGeoJSON as any,
           stroked: true,
           filled: false,
-          getLineColor: [148, 163, 184, 150],
-          lineWidthMinPixels: 1.5,
+          getLineColor: [148, 163, 184, 100],
+          lineWidthMinPixels: 1,
           pickable: false,
         })
       );
@@ -719,8 +695,8 @@ export default function Dashboard() {
       );
     }
 
-    // Suburb boundaries (zoom 6-15)
-    if (showSuburbs && mapZoom >= 6 && mapZoom < 15) {
+    // Suburb boundaries (zoom 8-13)
+    if ((showSuburbs || !showChoropleth) && mapZoom >= 8 && mapZoom < 13) {
       result.push(
         new GeoJsonLayer({
           id: 'suburb-boundaries',
@@ -906,16 +882,16 @@ export default function Dashboard() {
     }
 
     // POI Layer
-    if (showPOI && mapZoom >= 8) {
+    if (showPOI && mapZoom >= 10) {
       result.push(
         new ScatterplotLayer({
           id: 'poi-markers',
           data: samplePOIs,
           getPosition: (d: POI) => [d.lng, d.lat],
-          getRadius: 12,
+          getRadius: 8,
           getFillColor: (d: POI) => poiColorMap[d.type] || [100, 100, 100, 200],
-          getLineColor: [255, 255, 255, 200],
-          lineWidthMinPixels: 1.5,
+          getLineColor: [255, 255, 255, 150],
+          lineWidthMinPixels: 1,
           pickable: true,
           autoHighlight: true,
           highlightColor: [59, 130, 246, 120],
@@ -996,51 +972,66 @@ export default function Dashboard() {
       <div className="flex-1 flex min-h-0">
         {/* Map Area: flex-1 (80%) */}
         <div className="flex-1 relative bg-white">
+          {/* Year Display */}
+          <div className="absolute top-4 right-4 z-[1000] bg-white/90 px-4 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
+            <span className="text-2xl font-black text-blue-600">{selectedYear}</span>
+          </div>
+
           {/* Layers Panel — bottom-left */}
           <div className="absolute bottom-20 left-4 z-[1000] flex flex-col gap-2">
-            <button
-              onClick={() => setLayersExpanded(!layersExpanded)}
-              className="bg-white/90 px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] font-bold tracking-widest text-slate-600 backdrop-blur-sm shadow-sm flex items-center gap-2 cursor-pointer hover:bg-white transition-colors"
-            >
+            <div className="bg-white/90 px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] font-bold tracking-widest text-slate-600 backdrop-blur-sm shadow-sm flex items-center gap-2">
               <Layers size={12} className="text-blue-600" /> LAYERS
-              <ChevronRight size={12} className={`transition-transform ${layersExpanded ? 'rotate-90' : ''}`} />
-            </button>
-            {layersExpanded && (
-              <div className="bg-white/90 px-3 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm space-y-1.5">
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showH3} onChange={e => setShowH3(e.target.checked)} className="accent-blue-600" />
-                  Property Zones
-                </label>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} className="accent-blue-600" />
-                  Price Density
-                </label>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showContours} onChange={e => setShowContours(e.target.checked)} className="accent-blue-600" />
-                  Price Contours
-                </label>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showPins} onChange={e => setShowPins(e.target.checked)} className="accent-blue-600" />
-                  Properties
-                </label>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showStreets} onChange={e => setShowStreets(e.target.checked)} className="accent-blue-600" />
-                  Street Names
-                </label>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showSuburbs} onChange={e => setShowSuburbs(e.target.checked)} className="accent-blue-600" />
-                  Suburb Boundaries
-                </label>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showPOI} onChange={e => setShowPOI(e.target.checked)} className="accent-blue-600" />
-                  Points of Interest
-                </label>
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
-                  <input type="checkbox" checked={showChoropleth} onChange={e => setShowChoropleth(e.target.checked)} className="accent-blue-600" />
-                  Growth Map
-                </label>
-              </div>
-            )}
+            </div>
+            <div className="bg-white/90 px-3 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm space-y-1.5">
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showH3} onChange={e => setShowH3(e.target.checked)} className="accent-blue-600" />
+                H3 HEXAGONS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} className="accent-blue-600" />
+                HEATMAP
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showContours} onChange={e => setShowContours(e.target.checked)} className="accent-blue-600" />
+                CONTOURS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showPins} onChange={e => setShowPins(e.target.checked)} className="accent-blue-600" />
+                PROPERTY PINS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showStreets} onChange={e => setShowStreets(e.target.checked)} className="accent-blue-600" />
+                STREETS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showSuburbs} onChange={e => setShowSuburbs(e.target.checked)} className="accent-blue-600" />
+                SUBURBS
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showPOI} onChange={e => setShowPOI(e.target.checked)} className="accent-blue-600" />
+                POI
+              </label>
+              <label className="flex items-center gap-2 text-[10px] font-bold text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={showChoropleth} onChange={e => setShowChoropleth(e.target.checked)} className="accent-blue-600" />
+                CHOROPLETH
+              </label>
+            </div>
+          </div>
+
+          {/* Time Slider */}
+          <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-white/90 px-4 py-3 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2001</span>
+              <input
+                type="range"
+                min={2001}
+                max={2024}
+                value={selectedYear}
+                onChange={e => setSelectedYear(parseInt(e.target.value))}
+                className="flex-1 h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+              />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2024</span>
+            </div>
           </div>
 
           {/* Data Attribution Overlay */}
@@ -1050,7 +1041,7 @@ export default function Dashboard() {
               <span>NSW Valuer General</span>
               <span className="text-slate-400">·</span>
               <span>2001-2024</span>
-              <a href="https://www.valuergeneral.nsw.gov.au/property-sales-data" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">↗</a>
+              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">↗</a>
             </div>
           </div>
 
@@ -1100,33 +1091,47 @@ export default function Dashboard() {
         <aside className="w-80 border-l border-slate-200 bg-white flex flex-col overflow-y-auto">
           {/* Filters Section — TOP of sidebar */}
           <div className="shrink-0 p-4 border-b border-slate-200 space-y-4">
-            {/* Year Slider */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2001</span>
-                <span className="text-xl font-black text-blue-600">{selectedYear}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2024</span>
-              </div>
-              <input
-                type="range"
-                min={2001}
-                max={2024}
-                value={selectedYear}
-                onChange={e => setSelectedYear(parseInt(e.target.value))}
-                className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
-              />
+            {/* Filter Header */}
+            <div className="flex items-center gap-2 text-slate-700">
+              <SlidersHorizontal size={14} className="text-blue-600" />
+              <h4 className="text-[10px] font-black uppercase tracking-widest">Filters</h4>
             </div>
 
             {/* Price Range */}
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-slate-600">
                 <Tag size={10} className="text-blue-600" />
-                <label className="text-[9px] font-bold uppercase tracking-widest">Price</label>
+                <label className="text-[9px] font-bold uppercase tracking-widest">Price Range</label>
               </div>
               <DualRangeSlider min={0} max={10000000} onChange={setPriceRange} />
               <div className="flex justify-between text-[9px] text-slate-400 font-mono">
                 <span>{formatPrice(priceRange.min)}</span>
                 <span>{formatPrice(priceRange.max)}</span>
+              </div>
+            </div>
+
+            {/* Category Selector — Compact Button Group */}
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Property Type</label>
+              <div className="flex gap-1">
+                {[
+                  { label: 'All', value: '', icon: Home },
+                  { label: 'Residence', value: 'Residence', icon: Home },
+                  { label: 'Strata Unit', value: 'Strata Unit', icon: Building2 },
+                ].map(({ label, value, icon: Icon }) => (
+                  <button
+                    key={label}
+                    onClick={() => setPropertyType(value)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                      propertyType === value
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <Icon size={10} />
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -1142,9 +1147,7 @@ export default function Dashboard() {
                   <XAxis type="number" hide />
                   <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#64748b' }} width={60} />
                   <Tooltip cursor={{ fill: '#00000005' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '10px', color: '#0f172a' }} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} fill="#10b981">
-                    <LabelList dataKey="value" position="right" formatter={(v: number) => `${v}%`} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#059669' }} />
-                  </Bar>
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} fill="#10b981" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -1152,19 +1155,23 @@ export default function Dashboard() {
 
           {/* Sales Table (scrollable within sidebar) */}
           <div className="flex-1 overflow-y-auto">
+            <div className="px-4 py-3 border-b border-slate-200/60">
+              <p className="text-[10px] font-black tracking-[0.4em] text-slate-400 uppercase">Spatial Entity Archive</p>
+            </div>
             <table className="w-full text-left">
               <thead className="sticky top-0 bg-white/95 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 z-10 border-b border-slate-200/60">
                 <tr>
-                  <th className="px-4 py-3 cursor-pointer hover:text-slate-600 transition-colors" onClick={() => { if (tableSort.field === 'address') setTableSort({ field: 'address', direction: tableSort.direction === 'asc' ? 'desc' : 'asc' }); else setTableSort({ field: 'address', direction: 'asc' }); }}>Address {tableSort.field === 'address' ? (tableSort.direction === 'asc' ? '↑' : '↓') : ''}</th>
-                  <th className="px-4 py-3 cursor-pointer hover:text-slate-600 transition-colors" onClick={() => { if (tableSort.field === 'cagr') setTableSort({ field: 'cagr', direction: tableSort.direction === 'asc' ? 'desc' : 'asc' }); else setTableSort({ field: 'cagr', direction: 'desc' }); }}>CAGR {tableSort.field === 'cagr' ? (tableSort.direction === 'asc' ? '↑' : '↓') : ''}</th>
-                  <th className="px-4 py-3 text-center cursor-pointer hover:text-slate-600 transition-colors" onClick={() => { if (tableSort.field === 'price') setTableSort({ field: 'price', direction: tableSort.direction === 'asc' ? 'desc' : 'asc' }); else setTableSort({ field: 'price', direction: 'desc' }); }}>Price {tableSort.field === 'price' ? (tableSort.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                  <th className="px-4 py-3">Address</th>
+                  <th className="px-4 py-3 text-center">Price</th>
+                  <th className="px-4 py-3">CAGR</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {sortedSales.map(s => (
+                {sales.map(s => (
                   <tr
                     key={s.id}
-                    onDoubleClick={() => {
+                    onClick={() => {
                       handleRowClick(s);
                       drillDown(viewLevel === 'state' ? 'suburb' : 'street', viewLevel === 'state' ? s.property_locality : s.property_street_name);
                     }}
@@ -1174,11 +1181,10 @@ export default function Dashboard() {
                   >
                     <td className="px-4 py-3">
                       <p className="font-bold text-xs group-hover:text-blue-600 transition-colors uppercase tracking-tight">{viewLevel === 'state' ? s.property_locality : `${s.property_house_number} ${s.property_street_name}`}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="flex items-center gap-0.5 text-[9px] text-slate-500"><Home size={9} className="text-slate-400" /> {s.houseCount || 0}</span>
-                        <span className="flex items-center gap-0.5 text-[9px] text-slate-500"><Building2 size={9} className="text-slate-400" /> {s.unitCount || 0}</span>
-                      </div>
-                      <p className="text-[9px] text-slate-400 mt-0.5">{s.totalTransactions || 0} large transactions recorded</p>
+                      <p className="text-[9px] text-slate-400 font-black tracking-[0.1em] mt-0.5">{s.primary_purpose} &bull; {s.contract_date instanceof Date ? s.contract_date.toISOString().split('T')[0] : s.contract_date}</p>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <p className="font-mono text-sm font-black text-slate-700 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -1188,8 +1194,13 @@ export default function Dashboard() {
                         <span className="font-black text-emerald-600 text-[10px]">{((s.cagr || 0) * 100).toFixed(1)}%</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-center">
-                      <p className="font-mono text-sm font-black text-slate-700 tracking-tighter">${s.purchase_price?.toLocaleString()}</p>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); drillDown('property', s.property_id); }}
+                        className="bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white px-3 py-1.5 rounded-lg text-[9px] font-black tracking-[0.2em] transition-all uppercase border border-blue-200"
+                      >
+                        EXPLORE
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -1234,7 +1245,7 @@ export default function Dashboard() {
 
             <div className="pt-3 border-t border-slate-200 text-[9px] text-slate-400">
               <div>Source: NSW Valuer General</div>
-              <a href={`https://www.valuergeneral.nsw.gov.au/property-sales-data?property_id=${selectedProperty.property_id}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              <a href="https://www.valuergeneral.nsw.gov.au" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                 View original record →
               </a>
             </div>

@@ -342,7 +342,7 @@ def _calc_h3_tiles(sales_df: pd.DataFrame, data_path: Path) -> None:
 
     for resolution in range(5, 15):
         df["h3_index"] = df.apply(
-            lambda row: h3.latlng_to_cell(
+            lambda row: h3.geo_to_h3(
                 float(row["latitude"]), float(row["longitude"]), resolution
             ),
             axis=1,

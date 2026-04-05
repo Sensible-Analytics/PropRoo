@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Home, Loader, Calendar, Layers, Tag, SlidersHorizontal, Building2, Hospital, ShoppingBag, GraduationCap, Train } from 'lucide-react';
+import { Home, Loader, ArrowLeft, ChevronRight, Calendar, Layers, Tag, SlidersHorizontal, Building2, Hospital, ShoppingBag, GraduationCap, Train } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import DualRangeSlider from './DualRangeSlider';
 import { latLngToCell, cellToLatLng } from 'h3-js';
@@ -10,7 +10,7 @@ import { Map } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import { HeatmapLayer, ContourLayer } from '@deck.gl/aggregation-layers';
-import { ScatterplotLayer, TextLayer, GeoJsonLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, TextLayer, GeoJsonLayer, IconLayer } from '@deck.gl/layers';
 import { FlyToInterpolator } from '@deck.gl/core';
 
 // GeoJSON data

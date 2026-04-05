@@ -18,12 +18,12 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
       await expect(progressBar.first()).toBeVisible({ timeout: 30000 });
     });
 
-    test('app transitions from loading to main UI', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+    test('app transitions from loading to main UI with NSW breadcrumb', async ({ page }) => {
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
     });
 
-    test('header displays STATE OVERVIEW', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+    test('header displays NSW breadcrumb', async ({ page }) => {
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
     });
   });
 
@@ -41,7 +41,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('year display shows current year', async ({ page }) => {
       // The year display is a large blue number in the map overlay
       // Wait for the main UI first, then check for any year text
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       // Year display uses text-2xl font-black text-blue-400 class
       const yearDisplay = page.locator('.text-2xl.font-black.text-blue-400');
       await expect(yearDisplay.first()).toBeVisible({ timeout: 30000 });
@@ -52,25 +52,25 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
   test.describe('3. UI Controls', () => {
     test('year selector is visible and interactive', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       const yearSelect = page.locator('select').last();
       await expect(yearSelect).toBeVisible({ timeout: 30000 });
       await expect(yearSelect).toHaveValue('2024');
     });
 
     test('category filter dropdown exists', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       const categorySelect = page.locator('select').filter({ hasText: /ALL PROPERTIES|RESIDENCE|STRATA/ });
       await expect(categorySelect.first()).toBeVisible({ timeout: 30000 });
     });
 
     test('price range label is visible', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await expect(page.locator('text=PRICE RANGE')).toBeVisible({ timeout: 30000 });
     });
 
     test('layer toggles are visible', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await expect(page.locator('text=LAYERS')).toBeVisible({ timeout: 30000 });
       await expect(page.locator('text=H3 HEXAGONS')).toBeVisible({ timeout: 30000 });
       await expect(page.locator('text=HEATMAP')).toBeVisible({ timeout: 30000 });
@@ -79,7 +79,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('time slider is visible', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       // Wait for map overlay to render
       await page.waitForTimeout(3000);
       // The slider uses input[type="range"] inside a container with year labels
@@ -89,7 +89,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('can change year via selector', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       const yearSelect = page.locator('select').last();
       await yearSelect.selectOption('2023');
       await expect(yearSelect).toHaveValue('2023', { timeout: 10000 });
@@ -102,7 +102,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('recharts wrappers render for charts', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       const charts = page.locator('.recharts-wrapper');
       await expect(charts.first()).toBeVisible({ timeout: 30000 });
       const count = await charts.count();
@@ -111,7 +111,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('sales table displays data rows', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       // Wait for data to load — DuckDB queries take time
       await page.waitForTimeout(15000);
       const tableRows = page.locator('tbody tr');
@@ -120,7 +120,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('table headers are visible', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await expect(page.locator('text=Contextual Address')).toBeVisible({ timeout: 30000 });
       await expect(page.locator('text=Market Valuation')).toBeVisible({ timeout: 30000 });
       await expect(page.locator('text=Actions')).toBeVisible({ timeout: 30000 });
@@ -130,7 +130,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
   test.describe('5. Navigation & Drill-Down', () => {
     test('clicking table row triggers drill-down', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       const firstRow = page.locator('tbody tr').first();
       const rowCount = await firstRow.count();
@@ -145,7 +145,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('back button returns to state level', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       const firstRow = page.locator('tbody tr').first();
       const rowCount = await firstRow.count();
@@ -157,13 +157,13 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
       await expect(backButton).toBeVisible({ timeout: 10000 });
       await backButton.click({ force: true });
       await page.waitForTimeout(3000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 10000 });
     });
   });
 
   test.describe('6. Layer Toggles', () => {
     test('can toggle H3 hexagons layer', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
       const h3Checkbox = page.locator('label:has-text("H3 HEXAGONS") input[type="checkbox"]');
       await expect(h3Checkbox).toBeChecked({ timeout: 10000 });
@@ -172,7 +172,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('can toggle heatmap layer', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
       const heatmapCheckbox = page.locator('label:has-text("HEATMAP") input[type="checkbox"]');
       await expect(heatmapCheckbox).not.toBeChecked({ timeout: 10000 });
@@ -181,7 +181,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('can toggle contours layer', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
       const contourCheckbox = page.locator('label:has-text("CONTOURS") input[type="checkbox"]');
       await expect(contourCheckbox).not.toBeChecked({ timeout: 10000 });
@@ -232,7 +232,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('clicking on map triggers drill-down to area', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Click center of map to trigger area drill-down
@@ -250,7 +250,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('H3 hexagon click navigates to that area', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Verify H3 layer is enabled
@@ -272,7 +272,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('panning map reveals new data for viewport', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const canvas = page.locator('canvas').first();
@@ -294,7 +294,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('zoom level changes aggregation (res 5 → 7 → 9)', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const canvas = page.locator('canvas').first();
@@ -318,7 +318,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('map-driven navigation shows back button after drill-down', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Click on map to drill down
@@ -341,7 +341,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('map pan/zoom triggers progressive data disclosure', async ({ page }) => {
       // At state level (zoom 10), H3 hexagons show aggregated data
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Verify H3 hexagons are visible at state level
@@ -358,7 +358,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('H3 hexagon tooltips show investment metrics on hover', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Hover over the map center to trigger tooltip
@@ -378,7 +378,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('clicking EXPLORE button on table row drills into property', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Find the first EXPLORE button
@@ -397,7 +397,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('table row click drills down to suburb level', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const firstRow = page.locator('tbody tr').first();
@@ -414,7 +414,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('drill-down changes visible data scope (suburb-specific sales)', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Get initial sales count
@@ -433,7 +433,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('back button navigates up the hierarchy', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const firstRow = page.locator('tbody tr').first();
@@ -448,12 +448,12 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
       await backButton.click({ force: true });
       await page.waitForTimeout(8000);
 
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 15000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 15000 });
     });
 
     test('full hierarchy navigation: state → suburb → street → back', async ({ page }) => {
       test.setTimeout(180000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Step 1: State → Suburb
@@ -479,7 +479,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
       // Should still have a back button (not at state level)
       const stillHasBack = await backButton.isVisible().catch(() => false);
       if (!stillHasBack) {
-        await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 15000 });
+        await expect(page.locator('text=NSW')).toBeVisible({ timeout: 15000 });
       }
     });
   });
@@ -489,7 +489,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // Visualized through CAGR colors on H3 hexagons, growth indicators
 
     test('CAGR growth data is visible in leaderboard', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       await expect(page.locator('text=TRANSACTION COUNT')).toBeVisible({ timeout: 30000 });
@@ -508,7 +508,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('top performing suburbs display growth metrics', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Verify chart shows suburb names and growth data, not just chart count
@@ -525,7 +525,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('property pins show price-proportional sizing at high zoom', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Enable property pins layer
@@ -548,7 +548,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('sales table shows investment growth indicators', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Table should have "Growth performance" column
@@ -562,7 +562,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('heatmap layer visualizes price density', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Enable heatmap
@@ -576,7 +576,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('contour layer shows price boundaries', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Enable contours
@@ -595,7 +595,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // "How is this street performance compared to the suburb it's in?"
 
     test('state level shows suburb leaderboard', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       await expect(page.locator('text=TRANSACTION COUNT')).toBeVisible({ timeout: 10000 });
@@ -615,7 +615,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('property type filter changes data scope', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Change property type filter
@@ -635,7 +635,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // Time slider 2001→2024 as core exploration tool
 
     test('time slider changes displayed year', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Get initial year display
@@ -655,7 +655,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('year selector dropdown changes data', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Get initial sales count
@@ -673,7 +673,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('time slider shows full year range (2001-2024)', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Slider should have min=2001 and max=2024
@@ -686,7 +686,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('changing year triggers data refresh (loading state)', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Change year
@@ -707,7 +707,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // User should explore via map, not just filters
 
     test('map is interactive (pan/zoom controls work)', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       const canvas = page.locator('canvas').first();
@@ -723,7 +723,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('H3 hexagons layer is enabled by default', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       const h3Checkbox = page.locator('label:has-text("H3 HEXAGONS") input[type="checkbox"]');
@@ -731,7 +731,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('multiple layers can be active simultaneously', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Enable multiple layers
@@ -750,7 +750,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('disabling H3 layer removes hexagons from map', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Disable H3
@@ -768,7 +768,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // Ensure data loads correctly and queries return valid results
 
     test('sales table shows valid price data', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const tableBody = page.locator('tbody');
@@ -779,7 +779,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('sales table shows locality/suburb names', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const tableBody = page.locator('tbody');
@@ -791,7 +791,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('chart data contains numeric values', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const charts = page.locator('.recharts-wrapper');
@@ -808,7 +808,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('DuckDB queries return non-empty results', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const rows = await page.locator('tbody tr').count();
@@ -824,7 +824,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('map takes 80% width on desktop', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       // Check that the map container has the lg:col-span-10 class (80% width)
       const mapContainer = page.locator('[class*="col-span-10"]');
@@ -834,7 +834,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('sidebar is visible on desktop', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       // Sidebar chart title is "TOP CAGR" in new UI
       await expect(page.locator('text=TOP CAGR')).toBeVisible({ timeout: 10000 });
@@ -842,7 +842,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('data attribution overlay is visible on map', async ({ page }) => {
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       await expect(page.locator('text=Data Sources')).toBeVisible({ timeout: 10000 });
       await expect(page.locator('text=NSW Valuer General')).toBeVisible({ timeout: 10000 });
@@ -850,7 +850,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('attribution links to NSW Valuer General website', async ({ page }) => {
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       const link = page.locator('a[href*="valuergeneral"]');
       await expect(link.first()).toBeVisible({ timeout: 10000 });
@@ -859,7 +859,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('map height is increased (600px)', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       // Check the workspace container has 600px height via inline style
       const workspace = page.locator('[style*="height: 600px"]');
@@ -870,7 +870,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('sidebar is visible on desktop', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       // Sidebar should contain the leaderboard chart
       await expect(page.locator('text=TRANSACTION COUNT')).toBeVisible({ timeout: 10000 });
@@ -878,7 +878,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('data attribution overlay is visible on map', async ({ page }) => {
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       // Attribution should show "Data Sources" and "NSW Valuer General"
       await expect(page.locator('text=Data Sources')).toBeVisible({ timeout: 10000 });
@@ -887,7 +887,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('attribution links to NSW Valuer General website', async ({ page }) => {
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       // Link should point to valuergeneral.nsw.gov.au
       const link = page.locator('a[href*="valuergeneral"]');
@@ -897,7 +897,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('map height is increased (600px)', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
       // Map canvas should be at least 580px tall
       const canvas = page.locator('canvas').first();
@@ -912,7 +912,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('works on mobile viewport (375x667)', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       const canvas = page.locator('canvas');
       await expect(canvas.first()).toBeVisible({ timeout: 60000 });
     });
@@ -920,14 +920,14 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('works on tablet viewport (768x1024)', async ({ page }) => {
       await page.setViewportSize({ width: 768, height: 1024 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
     });
 
     test('works on desktop viewport (1920x1080)', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page.goto('/');
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
     });
   });
 
@@ -936,7 +936,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // Users discover investment opportunities by viewing colored hexagons
 
     test('H3 hexagon tooltip shows investment metrics on hover', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Hover over map center to trigger H3 tooltip
@@ -956,7 +956,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('H3 hexagon colors reflect CAGR growth data', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // H3 hexagons should be visible on the map (colored by CAGR)
@@ -973,7 +973,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('H3 resolution changes with zoom level', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Get initial zoom level (should be ~10, H3 res 5)
@@ -994,7 +994,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('H3 tooltip closes when mouse moves away', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const canvas = page.locator('canvas').first();
@@ -1015,7 +1015,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('clicking H3 hexagon triggers map zoom-in', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const canvas = page.locator('canvas').first();
@@ -1036,7 +1036,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // CAGR colors, growth bars, price formatting
 
     test('CAGR leaderboard displays growth percentages', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Chart should show CAGR data with percentage values
@@ -1055,7 +1055,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('growth performance bars display in sales table', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Table should have "Growth performance" column header
@@ -1070,7 +1070,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('price data uses correct formatting ($K/$M)', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Table should show formatted prices
@@ -1083,7 +1083,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('property pins layer can be enabled and shows on map', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(10000);
 
       // Enable property pins
@@ -1106,7 +1106,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('top performers section highlights high-growth areas', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Charts should show top performers (suburb leaderboard)
@@ -1125,7 +1125,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // Compare metrics across aggregation levels
 
     test('state level shows suburb-level leaderboard', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Should show suburb leaderboard with CAGR data
@@ -1138,7 +1138,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('suburb level shows street-level leaderboard', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Drill down to suburb level
@@ -1160,7 +1160,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('property type filter refines data scope', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Get initial row count
@@ -1178,7 +1178,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('price range filter narrows results', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Price range label should be visible
@@ -1196,7 +1196,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // NEW: True cross-level comparison test
     test('cross-level comparison: street CAGR vs suburb CAGR', async ({ page }) => {
       test.setTimeout(180000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Step 1: Capture suburb-level CAGR data
@@ -1231,12 +1231,12 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
       expect(returnChartCount).toBeGreaterThanOrEqual(1);
 
       // Verify STATE OVERVIEW is visible again
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 10000 });
     });
 
     // NEW: Investability verification - CAGR values are numeric percentages
     test('CAGR values in chart are numeric percentages', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const charts = page.locator('.recharts-wrapper');
@@ -1253,7 +1253,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     // NEW: Top performers show suburbs with positive growth
     test('top performers section shows suburbs with positive growth', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       const charts = page.locator('.recharts-wrapper');
@@ -1270,7 +1270,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     // NEW: Growth performance bars show green for positive growth
     test('growth performance bars show green for positive growth', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Verify Growth performance column exists
@@ -1286,7 +1286,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     // NEW: User can identify investable properties from the UI
     test('user can identify investable properties from the UI', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Verify key investability indicators are present:
@@ -1319,7 +1319,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('changing year via slider updates displayed year', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Get initial year display
@@ -1339,7 +1339,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('year dropdown and slider stay synchronized', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Change year via dropdown
@@ -1355,7 +1355,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('changing year triggers data refresh in sales table', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Get initial table content
@@ -1374,7 +1374,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('charts update when year changes', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Get initial chart data
@@ -1399,7 +1399,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('app handles rapid year changes without crashing', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Rapidly change year multiple times
@@ -1418,7 +1418,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('map remains responsive during data loading', async ({ page }) => {
       test.setTimeout(90000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Trigger data refresh by changing year
@@ -1436,7 +1436,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
 
     test('layer toggles persist across drill-down navigation', async ({ page }) => {
       test.setTimeout(120000);
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Enable heatmap layer
@@ -1456,7 +1456,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('empty table state displays gracefully', async ({ page }) => {
-      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=NSW')).toBeVisible({ timeout: 60000 });
       await page.waitForTimeout(15000);
 
       // Set extreme price filter that might return no results

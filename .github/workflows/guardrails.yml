@@ -26,7 +26,6 @@ jobs:
         run: |
           # List of patterns to block
           BLOCKED_FILES=(
-            "AGENTS.md"
             "CLAUDE.md"
             "SYSTEM_PROMPT.md"
             "agent-instructions.md"

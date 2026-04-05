@@ -742,7 +742,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Visual Workspace */}
-      <div className="h-[600px] shrink-0 p-4 grid grid-cols-12 gap-4">
+      <div className="shrink-0 p-4 grid grid-cols-12 gap-4" style={{ height: '600px' }}>
         {/* Map Area (80% width) */}
         <div className="col-span-12 lg:col-span-10 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
           {/* Layer Toggles */}

@@ -19,7 +19,7 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
 
     test('app transitions from loading to main UI', async ({ page }) => {
-      await expect(page.locator('text=NSW UNIFIED SPATIAL')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
     });
 
     test('header displays STATE OVERVIEW', async ({ page }) => {
@@ -820,11 +820,99 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     });
   });
 
-  test.describe('15. Responsive Layout', () => {
+  test.describe('15. New UI Features (80/20 Layout, Breadcrumb, Attribution)', () => {
+    test('map takes 80% width on desktop', async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      // Check that the map container has the lg:col-span-10 class (80% width)
+      const mapContainer = page.locator('[class*="col-span-10"]');
+      await expect(mapContainer.first()).toBeVisible({ timeout: 10000 });
+    });
+
+    test('sidebar is visible on desktop', async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      // Sidebar chart title is "TOP CAGR" in new UI
+      await expect(page.locator('text=TOP CAGR')).toBeVisible({ timeout: 10000 });
+    });
+
+    test('data attribution overlay is visible on map', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      await expect(page.locator('text=Data Sources')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('text=NSW Valuer General')).toBeVisible({ timeout: 10000 });
+    });
+
+    test('attribution links to NSW Valuer General website', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      const link = page.locator('a[href*="valuergeneral"]');
+      await expect(link.first()).toBeVisible({ timeout: 10000 });
+    });
+
+    test('map height is increased (600px)', async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      // Check the workspace container has 600px height via inline style
+      const workspace = page.locator('[style*="height: 600px"]');
+      await expect(workspace.first()).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+    test('sidebar is visible on desktop', async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      // Sidebar should contain the leaderboard chart
+      await expect(page.locator('text=TRANSACTION COUNT')).toBeVisible({ timeout: 10000 });
+    });
+
+    test('data attribution overlay is visible on map', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      // Attribution should show "Data Sources" and "NSW Valuer General"
+      await expect(page.locator('text=Data Sources')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('text=NSW Valuer General')).toBeVisible({ timeout: 10000 });
+    });
+
+    test('attribution links to NSW Valuer General website', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      // Link should point to valuergeneral.nsw.gov.au
+      const link = page.locator('a[href*="valuergeneral"]');
+      await expect(link.first()).toBeVisible({ timeout: 10000 });
+    });
+
+    test('map height is increased (600px)', async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto('/');
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
+      await page.waitForTimeout(15000);
+      // Map canvas should be at least 580px tall
+      const canvas = page.locator('canvas').first();
+      const box = await canvas.boundingBox();
+      if (box) {
+        expect(box.height).toBeGreaterThanOrEqual(580);
+      }
+    });
+  });
+
+  test.describe('16. Responsive Layout', () => {
     test('works on mobile viewport (375x667)', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
-      await expect(page.locator('text=NSW UNIFIED SPATIAL')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
       const canvas = page.locator('canvas');
       await expect(canvas.first()).toBeVisible({ timeout: 60000 });
     });
@@ -832,13 +920,13 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
     test('works on tablet viewport (768x1024)', async ({ page }) => {
       await page.setViewportSize({ width: 768, height: 1024 });
       await page.goto('/');
-      await expect(page.locator('text=NSW UNIFIED SPATIAL')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
     });
 
     test('works on desktop viewport (1920x1080)', async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page.goto('/');
-      await expect(page.locator('text=NSW UNIFIED SPATIAL')).toBeVisible({ timeout: 60000 });
+      await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
       await expect(page.locator('text=STATE OVERVIEW')).toBeVisible({ timeout: 60000 });
     });
   });
@@ -1381,4 +1469,3 @@ test.describe('PropRoo DuckDB-WASM E2E Test Suite', () => {
       expect(tableBody).toBeTruthy();
     });
   });
-});

@@ -2,6 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
+import h3
 import pandas as pd
 
 # Add backend to path so we can import calculate_cagr
@@ -11,7 +12,7 @@ from app.analytics import calculate_cagr
 logger = logging.getLogger(__name__)
 
 
-def run_all(data_dir: str = None) -> None:
+def run_all(data_dir: str | None = None) -> None:
     if data_dir is None:
         data_dir = str(Path(__file__).resolve().parent.parent / "data")
     data_path = Path(data_dir)
@@ -28,6 +29,15 @@ def run_all(data_dir: str = None) -> None:
     _calc_property_growth(sales_df, data_path)
     _calc_street_summary(sales_df, data_path)
     _calc_suburb_summary(sales_df, data_path)
+
+    # H3 pre-computation for zoom levels 5-14
+    _calc_h3_tiles(sales_df, data_path)
+
+    # Additional pre-computed tables for common query patterns
+    _calc_suburb_year_stats(sales_df, data_path)
+    _calc_street_year_stats(sales_df, data_path)
+    _calc_property_history(sales_df, data_path)
+    _calc_top_performers(sales_df, data_path)
 
     logger.info("Growth calculation complete.")
 
@@ -300,6 +310,256 @@ def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
     output_path = data_path / "suburb_summary.parquet"
     suburb_stats.to_parquet(output_path, index=False, engine="pyarrow")
     logger.info(f"Suburb summary: {len(suburb_stats)} records written to {output_path}")
+
+
+def _calc_h3_tiles(sales_df: pd.DataFrame, data_path: Path) -> None:
+    logger.info("Pre-computing H3 tiles for zoom levels 5-14...")
+
+    df = sales_df.copy()
+    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
+    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
+    df = df.dropna(subset=["latitude", "longitude", "purchase_price"])
+    df = df[df["purchase_price"] > 0]
+
+    valid_df = df.dropna(subset=["contract_date"])
+    valid_df = valid_df.sort_values(by=["property_id", "contract_date"])
+
+    cagr_map = {}
+    for prop_id, group in valid_df.groupby("property_id"):
+        if len(group) < 2:
+            continue
+        first = group.iloc[0]
+        last = group.iloc[-1]
+        years = (last["contract_date"] - first["contract_date"]).days / 365.25
+        cagr, _ = calculate_cagr(
+            float(first["purchase_price"]),
+            float(last["purchase_price"]),
+            years,
+        )
+        cagr_map[prop_id] = cagr
+
+    df["h3_cagr"] = df["property_id"].map(cagr_map)
+
+    for resolution in range(5, 15):
+        df["h3_index"] = df.apply(
+            lambda row: h3.latlng_to_cell(
+                float(row["latitude"]), float(row["longitude"]), resolution
+            ),
+            axis=1,
+        )
+
+        h3_stats = (
+            df.groupby("h3_index")
+            .agg(
+                median_price=("purchase_price", "median"),
+                avg_cagr=("h3_cagr", "mean"),
+                sale_count=("property_id", "count"),
+                centroid_lat=("latitude", "mean"),
+                centroid_lng=("longitude", "mean"),
+            )
+            .reset_index()
+        )
+
+        h3_stats["avg_cagr"] = h3_stats["avg_cagr"].fillna(0.0)
+
+        output_path = data_path / f"h3_zoom_{resolution}.parquet"
+        h3_stats.to_parquet(output_path, index=False, engine="pyarrow")
+        logger.info(
+            f"H3 zoom {resolution}: {len(h3_stats)} tiles written to {output_path}"
+        )
+
+
+def _calc_suburb_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
+    logger.info("Pre-computing suburb year stats...")
+
+    df = sales_df.copy()
+    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
+    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
+    df = df.dropna(subset=["purchase_price", "contract_date"])
+    df = df[df["purchase_price"] > 0]
+    df["year"] = df["contract_date"].dt.year
+
+    valid_df = df.sort_values(by=["property_id", "contract_date"])
+
+    cagr_map = {}
+    for prop_id, group in valid_df.groupby("property_id"):
+        if len(group) < 2:
+            continue
+        first = group.iloc[0]
+        last = group.iloc[-1]
+        years = (last["contract_date"] - first["contract_date"]).days / 365.25
+        cagr, _ = calculate_cagr(
+            float(first["purchase_price"]),
+            float(last["purchase_price"]),
+            years,
+        )
+        cagr_map[prop_id] = cagr
+
+    df["cagr"] = df["property_id"].map(cagr_map)
+
+    suburb_year = (
+        df.groupby(["property_locality", "year"])
+        .agg(
+            avg_price=("purchase_price", "mean"),
+            median_price=("purchase_price", "median"),
+            sale_count=("property_id", "count"),
+            avg_cagr=("cagr", "mean"),
+        )
+        .reset_index()
+    )
+
+    suburb_year = suburb_year.rename(columns={"property_locality": "suburb"})
+    suburb_year["avg_cagr"] = suburb_year["avg_cagr"].fillna(0.0)
+
+    output_path = data_path / "suburb_year_stats.parquet"
+    suburb_year.to_parquet(output_path, index=False, engine="pyarrow")
+    logger.info(
+        f"Suburb year stats: {len(suburb_year)} records written to {output_path}"
+    )
+
+
+def _calc_street_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
+    logger.info("Pre-computing street year stats...")
+
+    df = sales_df.copy()
+    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
+    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
+    df = df.dropna(subset=["purchase_price", "contract_date"])
+    df = df[df["purchase_price"] > 0]
+    df["year"] = df["contract_date"].dt.year
+
+    valid_df = df.sort_values(by=["property_id", "contract_date"])
+
+    cagr_map = {}
+    for prop_id, group in valid_df.groupby("property_id"):
+        if len(group) < 2:
+            continue
+        first = group.iloc[0]
+        last = group.iloc[-1]
+        years = (last["contract_date"] - first["contract_date"]).days / 365.25
+        cagr, _ = calculate_cagr(
+            float(first["purchase_price"]),
+            float(last["purchase_price"]),
+            years,
+        )
+        cagr_map[prop_id] = cagr
+
+    df["cagr"] = df["property_id"].map(cagr_map)
+
+    street_year = (
+        df.groupby(["property_street_name", "property_locality", "year"])
+        .agg(
+            avg_price=("purchase_price", "mean"),
+            median_price=("purchase_price", "median"),
+            sale_count=("property_id", "count"),
+            avg_cagr=("cagr", "mean"),
+        )
+        .reset_index()
+    )
+
+    street_year = street_year.rename(
+        columns={"property_street_name": "street_name", "property_locality": "suburb"}
+    )
+    street_year["avg_cagr"] = street_year["avg_cagr"].fillna(0.0)
+
+    output_path = data_path / "street_year_stats.parquet"
+    street_year.to_parquet(output_path, index=False, engine="pyarrow")
+    logger.info(
+        f"Street year stats: {len(street_year)} records written to {output_path}"
+    )
+
+
+def _calc_property_history(sales_df: pd.DataFrame, data_path: Path) -> None:
+    logger.info("Pre-computing property history...")
+
+    df = sales_df.copy()
+    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
+    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
+    df = df.dropna(subset=["purchase_price", "contract_date"])
+    df = df[df["purchase_price"] > 0]
+    df = df.sort_values(by=["property_id", "contract_date"])
+
+    results = []
+    for prop_id, group in df.groupby("property_id"):
+        if len(group) < 2:
+            continue
+        first = group.iloc[0]
+        last = group.iloc[-1]
+        years = (last["contract_date"] - first["contract_date"]).days / 365.25
+        cagr, _ = calculate_cagr(
+            float(first["purchase_price"]),
+            float(last["purchase_price"]),
+            years,
+        )
+        results.append(
+            {
+                "property_id": prop_id,
+                "suburb": last["property_locality"],
+                "street_name": last["property_street_name"],
+                "sale_count": len(group),
+                "first_sale_date": first["contract_date"],
+                "first_sale_price": float(first["purchase_price"]),
+                "last_sale_date": last["contract_date"],
+                "last_sale_price": float(last["purchase_price"]),
+                "avg_cagr": round(cagr, 6),
+            }
+        )
+
+    if not results:
+        logger.warning("No property history records to write")
+        return
+
+    history_df = pd.DataFrame(results)
+    output_path = data_path / "property_history.parquet"
+    history_df.to_parquet(output_path, index=False, engine="pyarrow")
+    logger.info(f"Property history: {len(results)} records written to {output_path}")
+
+
+def _calc_top_performers(sales_df: pd.DataFrame, data_path: Path) -> None:
+    logger.info("Pre-computing top performers...")
+
+    df = sales_df.copy()
+    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
+    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
+    df = df.dropna(subset=["purchase_price", "contract_date"])
+    df = df[df["purchase_price"] > 0]
+    df = df.sort_values(by=["property_id", "contract_date"])
+
+    results = []
+    for prop_id, group in df.groupby("property_id"):
+        if len(group) < 2:
+            continue
+        first = group.iloc[0]
+        last = group.iloc[-1]
+        years = (last["contract_date"] - first["contract_date"]).days / 365.25
+        cagr, _ = calculate_cagr(
+            float(first["purchase_price"]),
+            float(last["purchase_price"]),
+            years,
+        )
+        results.append(
+            {
+                "property_id": prop_id,
+                "suburb": last["property_locality"],
+                "street_name": last["property_street_name"],
+                "last_sale_price": float(last["purchase_price"]),
+                "avg_cagr": round(cagr, 6),
+                "years_held": int(max(0, years)),
+            }
+        )
+
+    if not results:
+        logger.warning("No top performer records to write")
+        return
+
+    performers_df = pd.DataFrame(results)
+    performers_df = performers_df.sort_values("avg_cagr", ascending=False).head(100)
+
+    output_path = data_path / "top_performers.parquet"
+    performers_df.to_parquet(output_path, index=False, engine="pyarrow")
+    logger.info(
+        f"Top performers: {len(performers_df)} records written to {output_path}"
+    )
 
 
 if __name__ == "__main__":

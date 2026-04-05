@@ -44,10 +44,10 @@ jobs:
         run: |
           pip install -r backend/requirements.txt
 
-      - name: Step 1 — Ingest NSW Valuer General data
+      - name: Step 1 — Ingest NSW Valuer General data (2001-2024)
         run: |
           mkdir -p ${{ env.DATA_DIR }}
-          python backend/etl/ingest.py
+          python backend/etl/ingest.py --start-year 2001 --end-year 2024
         env:
           DATA_DIR: ${{ env.DATA_DIR }}
 
@@ -60,6 +60,12 @@ jobs:
       - name: Step 3 — Calculate growth metrics
         run: |
           python -c "from backend.etl.calculate_growth import run_all; run_all()"
+        env:
+          DATA_DIR: ${{ env.DATA_DIR }}
+
+      - name: Step 4 — Validate ETL output
+        run: |
+          python backend/etl/validate.py --data-dir ${{ env.DATA_DIR }}
         env:
           DATA_DIR: ${{ env.DATA_DIR }}
 

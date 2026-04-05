@@ -865,17 +865,10 @@ export default function Dashboard() {
         </div>
       </header>
 
-<<<<<<< HEAD
       {/* Main workspace: flex-1, horizontal split 80/20 */}
       <div className="flex-1 flex min-h-0">
         {/* Map Area: flex-1 (80%) */}
         <div className="flex-1 relative bg-slate-900">
-=======
-      {/* Main Visual Workspace */}
-      <div className="shrink-0 p-4 grid grid-cols-12 gap-4" style={{ height: '600px' }}>
-        {/* Map Area (80% width) */}
-        <div className="col-span-12 lg:col-span-10 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
->>>>>>> docs/add-architecture-guardrails
           {/* Layer Toggles */}
           <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
             <div className="bg-slate-950/90 px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] font-bold tracking-widest text-slate-300 backdrop-blur-sm flex items-center gap-2">

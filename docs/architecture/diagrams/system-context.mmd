@@ -1,0 +1,22 @@
+```mermaid
+C4Context
+title System Context Diagram for PropRoo
+
+Person(user, "User", "Property investor or analyst")
+Person(admin, "Administrator", "Manages platform settings")
+
+System_Boundary(prop_roo, "PropRoo Platform") {
+    System(frontend, "PropRoo Frontend", "React web application")
+    System(api, "PropRoo API", "FastAPI Python backend")
+    System(db, "Property Database", "Neon PostgreSQL")
+}
+
+System_Ext(vercel, "Vercel", "Deployment platform")
+System_Ext(cloudflare, "Cloudflare", "CDN and security")
+System_Ext(llm, "OpenAI", "LLM for analysis")
+
+Rel(user, frontend, "Uses")
+Rel(frontend, api, "Calls")
+Rel(api, db, "Reads/Writes")
+Rel(api, llm, "Analyzes with")
+```

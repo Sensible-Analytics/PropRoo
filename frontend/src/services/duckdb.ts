@@ -4,6 +4,7 @@ import mvp_worker_bundled from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.work
 import duckdb_wasm_eh from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url';
 import eh_worker_bundled from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url';
 import { Table } from 'apache-arrow';
+import { getCachedQuery, cacheQueryResult } from './query-cache';
 
 // R2 public bucket (CORS configured for direct browser access)
 const R2_BASE_URL = 'https://pub-1e149224362a4914aecb74b6c2adedbe.r2.dev';
@@ -41,8 +42,7 @@ async function selectBundle(): Promise<duckdb.DuckDBBundle> {
 }
 
 /**
- * Initialize DuckDB-WASM, load all parquet files from R2.
- * Returns a progress callback-compatible init function.
+ * Initialize DuckDB-WASM, load all parquet files from R2 in parallel.
  */
 export async function initDuckDB(onProgress?: ProgressCallback): Promise<{
   db: duckdb.AsyncDuckDB;
@@ -62,52 +62,49 @@ export async function initDuckDB(onProgress?: ProgressCallback): Promise<{
   dbInstance = db;
   connInstance = conn;
 
-  // Register and load each parquet file
-  for (const file of PARQUET_FILES) {
-    onProgress?.(file.name, 0);
+  // Load ALL parquet files in PARALLEL
+  await Promise.all(
+    PARQUET_FILES.map(async ({ name, url }) => {
+      onProgress?.(name, 0);
 
-    // Fetch file to track progress
-    const response = await fetch(file.url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${file.url}: ${response.statusText}`);
-    }
-
-    const contentLength = response.headers.get('content-length');
-    const total = contentLength ? parseInt(contentLength, 10) : 0;
-    let loaded = 0;
-
-    // Read the full response as ArrayBuffer
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error('ReadableStream not supported');
-    }
-
-    const chunks: Uint8Array[] = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      loaded += value.length;
-      if (total > 0) {
-        onProgress?.(file.name, Math.round((loaded / total) * 100));
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
       }
-    }
 
-    const buffer = new Uint8Array(loaded);
-    let offset = 0;
-    for (const chunk of chunks) {
-      buffer.set(chunk, offset);
-      offset += chunk.length;
-    }
+      const contentLength = response.headers.get('content-length');
+      const total = contentLength ? parseInt(contentLength, 10) : 0;
+      let loaded = 0;
 
-    onProgress?.(file.name, 100);
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('ReadableStream not supported');
+      }
 
-    // Register the file with DuckDB
-    await db.registerFileBuffer(file.name, buffer);
+      const chunks: Uint8Array[] = [];
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+        if (total > 0) {
+          onProgress?.(name, Math.round((loaded / total) * 100));
+        }
+      }
 
-    // Create a table from the parquet file
-    await conn.query(`CREATE OR REPLACE TABLE ${file.name} AS SELECT * FROM read_parquet('${file.name}')`);
-  }
+      const buffer = new Uint8Array(loaded);
+      let offset = 0;
+      for (const chunk of chunks) {
+        buffer.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      onProgress?.(name, 100);
+
+      await db!.registerFileBuffer(name, buffer);
+      await conn!.query(`CREATE TABLE IF NOT EXISTS ${name} AS SELECT * FROM read_parquet('${name}')`);
+    })
+  );
 
   initialized = true;
   return { db, conn };
@@ -121,8 +118,17 @@ export async function query<T = Record<string, unknown>>(sql: string): Promise<T
     throw new Error('DuckDB not initialized. Call initDuckDB() first.');
   }
 
+  // Check cache first
+  const cached = await getCachedQuery<T[]>(sql);
+  if (cached) return cached;
+
   const arrowTable: Table = await connInstance.query(sql);
-  return arrowTable.toArray().map((row) => row.toJSON()) as T[];
+  const rows = arrowTable.toArray().map((row) => row.toJSON()) as T[];
+
+  // Cache the result
+  await cacheQueryResult(sql, rows);
+
+  return rows;
 }
 
 /**

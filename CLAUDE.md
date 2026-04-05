@@ -43,9 +43,20 @@ src/adapters/
 - NO circular dependencies
 - All external deps go through interfaces
 
+## Code Size Limits
+
+- **Max 200 lines per file** (warn at 200, error at 300)
+- **Max 30 lines per function** (warn at 30, error at 50)
+- **Complexity ≤ 8** (warn), ≤ 10 (error)
+- **Max nesting depth ≤ 4**
+- **Max 3 parameters per function**
+
+If code exceeds these limits, REFACTOR immediately using Extract Method, Extract Class, or other patterns.
+
 ## Before Generating Code
 
 1. Identify which layer the code belongs to
 2. Check dependency rules
 3. Use ports for external integrations
-4. Run: `npm run lint` before commit
+4. Keep files under 200 lines, functions under 30 lines
+5. Run: `npm run lint` before commit

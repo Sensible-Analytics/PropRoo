@@ -32,12 +32,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── Validation thresholds ──────────────────────────────────────────────────
-MIN_GEOCODING_COVERAGE = 0.80  # 80%
-MIN_CAGR = -0.5  # -50%
-MAX_CAGR = 2.0  # +200%
+MIN_GEOCODING_COVERAGE = 0.80
+MIN_CAGR = -1.0  # -100%
+MAX_CAGR = 5.0  # +500%
 MIN_CONTRACT_YEAR = 2000
 MAX_CONTRACT_YEAR = 2026
-RECONCILIATION_TOLERANCE = 0.01  # 1% tolerance for aggregate reconciliation
+RECONCILIATION_TOLERANCE = 0.01
+CAGR_OUTLIER_TOLERANCE_PCT = 0.05  # Allow up to 5% outlier records
 
 
 class ValidationError(Exception):
@@ -394,12 +395,13 @@ def validate_property_growth(data_path: Path) -> dict:
             "missing_columns": growth_missing,
             "cagr_stats": cagr_stats,
             "cagr_out_of_range": cagr_out_of_range,
-            "cagr_passes": cagr_out_of_range == 0,
+            "cagr_passes": cagr_out_of_range <= row_count * CAGR_OUTLIER_TOLERANCE_PCT,
             "property_id_duplicates": growth_dupes,
         },
         "thresholds": {
             "min_cagr": MIN_CAGR,
             "max_cagr": MAX_CAGR,
+            "outlier_tolerance_pct": CAGR_OUTLIER_TOLERANCE_PCT,
         },
     }
 

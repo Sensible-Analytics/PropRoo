@@ -15,4 +15,4 @@ beautifulsoup4==4.14.3
 lxml==6.0.2
 pytest==8.4.2
 pytest-asyncio==0.26.0
-soda-core-duckdb==3.0.54
+soda-core-duckdb==3.5.6

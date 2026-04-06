@@ -2,10 +2,10 @@ import logging
 import sys
 from pathlib import Path
 
+import duckdb
 import h3
 import pandas as pd
 
-# Add backend to path so we can import calculate_cagr
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.analytics import calculate_cagr
 
@@ -30,10 +30,7 @@ def run_all(data_dir: str | None = None) -> None:
     _calc_street_summary(sales_df, data_path)
     _calc_suburb_summary(sales_df, data_path)
 
-    # H3 pre-computation for zoom levels 5-14
     _calc_h3_tiles(sales_df, data_path)
-
-    # Additional pre-computed tables for common query patterns
     _calc_suburb_year_stats(sales_df, data_path)
     _calc_street_year_stats(sales_df, data_path)
     _calc_property_history(sales_df, data_path)
@@ -45,176 +42,222 @@ def run_all(data_dir: str | None = None) -> None:
 def _calc_property_growth(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Calculating property growth...")
 
-    df = sales_df.copy()
-    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
-    df = df.dropna(subset=["purchase_price", "contract_date"])
-    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
-    df = df[df["purchase_price"] > 0]
-    df = df.sort_values(by=["property_id", "contract_date"])
+    con = duckdb.connect()
+    con.register("sales", sales_df)
 
-    results = []
-    for prop_id, group in df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, total_growth = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        results.append(
-            {
-                "property_id": prop_id,
-                "suburb": last["property_locality"],
-                "street_name": last["property_street_name"],
-                "post_code": int(last["property_post_code"])
-                if pd.notna(last["property_post_code"])
-                else 0,
-                "year": int(last["contract_date"].year),
-                "avg_cagr": round(cagr, 6),
-                "total_growth": round(total_growth, 6),
-                "years_held": int(max(0, years)),
-                "first_sale_price": float(first["purchase_price"]),
-                "last_sale_price": float(last["purchase_price"]),
-                "first_sale_year": int(first["contract_date"].year),
-                "last_sale_year": int(last["contract_date"].year),
-            }
-        )
+    query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            property_post_code,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date,
+            latitude,
+            longitude
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            property_post_code,
+            purchase_price,
+            contract_date,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date DESC) AS rn_last,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            property_locality AS suburb,
+            property_street_name AS street_name,
+            COALESCE(CAST(property_post_code AS INTEGER), 0) AS post_code,
+            CAST(EXTRACT(YEAR FROM last_date) AS INTEGER) AS year,
+            first_price,
+            last_price,
+            first_date,
+            last_date,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1
+    )
+    SELECT
+        property_id,
+        suburb,
+        street_name,
+        post_code,
+        year,
+        first_price AS first_sale_price,
+        last_price AS last_sale_price,
+        CAST(EXTRACT(YEAR FROM first_date) AS INTEGER) AS first_sale_year,
+        CAST(EXTRACT(YEAR FROM last_date) AS INTEGER) AS last_sale_year,
+        days_held,
+        CASE
+            WHEN days_held > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+            ELSE 0.0
+        END AS cagr,
+        CASE
+            WHEN first_price > 0 THEN (last_price - first_price) / first_price
+            ELSE 0.0
+        END AS total_growth
+    FROM property_metrics
+    WHERE days_held > 0
+    """
 
-    if not results:
+    result = con.execute(query).fetchdf()
+    con.close()
+
+    if result.empty:
         logger.warning("No property growth records to write")
         return
 
-    growth_df = pd.DataFrame(results)
+    result.loc[result["days_held"] < 182.625, "cagr"] = 0.0
+    result["years_held"] = result["days_held"].apply(lambda d: int(max(0, d / 365.25)))
+    result["avg_cagr"] = result["cagr"].round(6)
+    result["total_growth"] = result["total_growth"].round(6)
+
+    growth_df = result[
+        [
+            "property_id",
+            "suburb",
+            "street_name",
+            "post_code",
+            "year",
+            "avg_cagr",
+            "total_growth",
+            "years_held",
+            "first_sale_price",
+            "last_sale_price",
+            "first_sale_year",
+            "last_sale_year",
+        ]
+    ]
+
     output_path = data_path / "property_growth.parquet"
     growth_df.to_parquet(output_path, index=False, engine="pyarrow")
-    logger.info(f"Property growth: {len(results)} records written to {output_path}")
+    logger.info(f"Property growth: {len(growth_df)} records written to {output_path}")
 
 
 def _calc_street_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Calculating street summary...")
 
-    df = sales_df.copy()
-    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
-    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
+    con = duckdb.connect()
+    con.register("sales", sales_df)
 
-    # Compute property-level CAGR for joining
-    valid_df = df.dropna(subset=["purchase_price", "contract_date"])
-    valid_df = valid_df[valid_df["purchase_price"] > 0]
-    valid_df = valid_df.sort_values(by=["property_id", "contract_date"])
-
-    cagr_results = []
-    for prop_id, group in valid_df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, _ = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        cagr_results.append(
-            {
-                "property_id": prop_id,
-                "avg_cagr": cagr,
-            }
-        )
-
-    cagr_df = (
-        pd.DataFrame(cagr_results)
-        if cagr_results
-        else pd.DataFrame(columns=["property_id", "avg_cagr"])
+    cagr_query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            property_post_code,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            property_post_code,
+            purchase_price,
+            contract_date,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            property_street_name,
+            property_locality,
+            property_post_code,
+            first_price,
+            last_price,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1 AND DATEDIFF('day', first_date, last_date) > 0
     )
+    SELECT
+        property_street_name AS street_name,
+        property_locality AS suburb,
+        COALESCE(CAST(property_post_code AS INTEGER), 0) AS post_code,
+        property_id,
+        CASE
+            WHEN days_held >= 182 THEN
+                CASE
+                    WHEN first_price > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+                    ELSE 0.0
+                END
+            ELSE 0.0
+        END AS cagr
+    FROM property_metrics
+    """
+
+    cagr_df = con.execute(cagr_query).fetchdf()
 
     # Street-level aggregates from all sales
-    street_stats = (
-        df.groupby(["property_street_name", "property_locality", "property_post_code"])
-        .agg(
-            unique_properties=("property_id", "nunique"),
-            total_sales=("property_id", "count"),
-            latitude=("latitude", "mean"),
-            longitude=("longitude", "mean"),
-        )
-        .reset_index()
-    )
+    street_query = """
+    SELECT
+        property_street_name AS street_name,
+        property_locality AS suburb,
+        COALESCE(CAST(property_post_code AS INTEGER), 0) AS post_code,
+        COUNT(DISTINCT property_id) AS unique_properties,
+        COUNT(property_id) AS total_sales,
+        AVG(latitude) AS latitude,
+        AVG(longitude) AS longitude
+    FROM sales
+    GROUP BY property_street_name, property_locality, property_post_code
+    """
 
-    street_stats = street_stats.rename(
-        columns={
-            "property_street_name": "street_name",
-            "property_locality": "suburb",
-            "property_post_code": "post_code",
-        }
-    )
+    street_stats = con.execute(street_query).fetchdf()
+    con.close()
 
+    # Aggregate CAGR by street
     if not cagr_df.empty:
         street_cagr = (
-            cagr_df.groupby(["property_id"])
-            .agg(avg_cagr=("avg_cagr", "mean"))
-            .reset_index()
-        )
-        # We need to map property_id back to street/suburb/postcode for aggregation
-        # Instead, compute avg_cagr per street directly from cagr_results
-        street_cagr_agg = []
-        for prop_id, group in valid_df.groupby("property_id"):
-            if len(group) < 2:
-                continue
-            first = group.iloc[0]
-            last = group.iloc[-1]
-            years = (last["contract_date"] - first["contract_date"]).days / 365.25
-            cagr, _ = calculate_cagr(
-                float(first["purchase_price"]),
-                float(last["purchase_price"]),
-                years,
+            cagr_df.groupby(["street_name", "suburb", "post_code"])
+            .agg(
+                avg_cagr=("cagr", "mean"),
+                property_count=("cagr", "count"),
             )
-            street_cagr_agg.append(
-                {
-                    "street_name": last["property_street_name"],
-                    "suburb": last["property_locality"],
-                    "post_code": int(last["property_post_code"])
-                    if pd.notna(last["property_post_code"])
-                    else 0,
-                    "avg_cagr": cagr,
-                }
-            )
-
-        if street_cagr_agg:
-            cagr_by_street = pd.DataFrame(street_cagr_agg)
-            street_cagr_mean = (
-                cagr_by_street.groupby(["street_name", "suburb", "post_code"])
-                .agg(avg_cagr=("avg_cagr", "mean"))
-                .reset_index()
-            )
-            street_stats = street_stats.merge(
-                street_cagr_mean,
-                on=["street_name", "suburb", "post_code"],
-                how="left",
-            )
-        else:
-            street_stats["avg_cagr"] = 0.0
-    else:
-        street_stats["avg_cagr"] = 0.0
-
-    # property_count = number of properties with CAGR data
-    if street_cagr_agg:
-        cagr_by_street = pd.DataFrame(street_cagr_agg)
-        property_count = (
-            cagr_by_street.groupby(["street_name", "suburb", "post_code"])
-            .agg(property_count=("avg_cagr", "count"))
             .reset_index()
         )
         street_stats = street_stats.merge(
-            property_count,
+            street_cagr,
             on=["street_name", "suburb", "post_code"],
             how="left",
         )
     else:
+        street_stats["avg_cagr"] = 0.0
         street_stats["property_count"] = 0
 
     street_stats["avg_cagr"] = street_stats["avg_cagr"].fillna(0.0)
+    street_stats["property_count"] = (
+        street_stats["property_count"].fillna(0).astype(int)
+    )
 
     # is_top_performer: 90th percentile threshold
     cagr_threshold = (
@@ -234,61 +277,85 @@ def _calc_street_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
 def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Calculating suburb summary...")
 
-    df = sales_df.copy()
-    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
-    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
+    con = duckdb.connect()
+    con.register("sales", sales_df)
 
-    valid_df = df.dropna(subset=["purchase_price", "contract_date"])
-    valid_df = valid_df[valid_df["purchase_price"] > 0]
-    valid_df = valid_df.sort_values(by=["property_id", "contract_date"])
+    # Compute property-level CAGR
+    cagr_query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            property_locality,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            property_locality,
+            purchase_price,
+            contract_date,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            property_locality,
+            first_price,
+            last_price,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1 AND DATEDIFF('day', first_date, last_date) > 0
+    )
+    SELECT
+        property_locality AS suburb,
+        property_id,
+        CASE
+            WHEN days_held >= 182 THEN
+                CASE
+                    WHEN first_price > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+                    ELSE 0.0
+                END
+            ELSE 0.0
+        END AS cagr
+    FROM property_metrics
+    """
+
+    cagr_df = con.execute(cagr_query).fetchdf()
 
     # Suburb-level aggregates from all sales
-    suburb_stats = (
-        df.groupby(["property_locality"])
-        .agg(
-            unique_properties=("property_id", "nunique"),
-            total_sales=("property_id", "count"),
-            latitude=("latitude", "mean"),
-            longitude=("longitude", "mean"),
-        )
-        .reset_index()
-    )
+    suburb_query = """
+    SELECT
+        property_locality AS suburb,
+        COUNT(DISTINCT property_id) AS unique_properties,
+        COUNT(property_id) AS total_sales,
+        AVG(latitude) AS latitude,
+        AVG(longitude) AS longitude
+    FROM sales
+    GROUP BY property_locality
+    """
 
-    # Compute avg CAGR per suburb
-    suburb_cagr_agg = []
-    for prop_id, group in valid_df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, _ = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        suburb_cagr_agg.append(
-            {
-                "suburb": last["property_locality"],
-                "avg_cagr": cagr,
-            }
-        )
+    suburb_stats = con.execute(suburb_query).fetchdf()
+    con.close()
 
-    suburb_stats = suburb_stats.rename(
-        columns={
-            "property_locality": "suburb",
-        }
-    )
-
-    if suburb_cagr_agg:
-        cagr_by_suburb = pd.DataFrame(suburb_cagr_agg)
-        suburb_cagr_mean = (
-            cagr_by_suburb.groupby(["suburb"])
-            .agg(avg_cagr=("avg_cagr", "mean"))
-            .reset_index()
+    # Aggregate CAGR by suburb
+    if not cagr_df.empty:
+        suburb_cagr = (
+            cagr_df.groupby(["suburb"]).agg(avg_cagr=("cagr", "mean")).reset_index()
         )
         suburb_stats = suburb_stats.merge(
-            suburb_cagr_mean,
+            suburb_cagr,
             on=["suburb"],
             how="left",
         )
@@ -315,29 +382,73 @@ def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
 def _calc_h3_tiles(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Pre-computing H3 tiles for zoom levels 5-14...")
 
+    con = duckdb.connect()
+    con.register("sales", sales_df)
+
+    # Compute property-level CAGR
+    cagr_query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date,
+            latitude,
+            longitude
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND latitude IS NOT NULL
+          AND longitude IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            purchase_price,
+            contract_date,
+            latitude,
+            longitude,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            first_price,
+            last_price,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1 AND DATEDIFF('day', first_date, last_date) > 0
+    )
+    SELECT
+        property_id,
+        CASE
+            WHEN days_held >= 182 THEN
+                CASE
+                    WHEN first_price > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+                    ELSE 0.0
+                END
+            ELSE 0.0
+        END AS cagr
+    FROM property_metrics
+    """
+
+    cagr_df = con.execute(cagr_query).fetchdf()
+    cagr_map = dict(zip(cagr_df["property_id"], cagr_df["cagr"]))
+    con.close()
+
+    # Filter valid records
     df = sales_df.copy()
     df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
     df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
     df = df.dropna(subset=["latitude", "longitude", "purchase_price"])
     df = df[df["purchase_price"] > 0]
-
-    valid_df = df.dropna(subset=["contract_date"])
-    valid_df = valid_df.sort_values(by=["property_id", "contract_date"])
-
-    cagr_map = {}
-    for prop_id, group in valid_df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, _ = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        cagr_map[prop_id] = cagr
-
     df["h3_cagr"] = df["property_id"].map(cagr_map)
 
     for resolution in range(5, 15):
@@ -372,29 +483,67 @@ def _calc_h3_tiles(sales_df: pd.DataFrame, data_path: Path) -> None:
 def _calc_suburb_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Pre-computing suburb year stats...")
 
+    con = duckdb.connect()
+    con.register("sales", sales_df)
+
+    # Compute property-level CAGR
+    cagr_query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            purchase_price,
+            contract_date,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            first_price,
+            last_price,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1 AND DATEDIFF('day', first_date, last_date) > 0
+    )
+    SELECT
+        property_id,
+        CASE
+            WHEN days_held >= 182 THEN
+                CASE
+                    WHEN first_price > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+                    ELSE 0.0
+                END
+            ELSE 0.0
+        END AS cagr
+    FROM property_metrics
+    """
+
+    cagr_df = con.execute(cagr_query).fetchdf()
+    cagr_map = dict(zip(cagr_df["property_id"], cagr_df["cagr"]))
+    con.close()
+
     df = sales_df.copy()
     df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
     df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
     df = df.dropna(subset=["purchase_price", "contract_date"])
     df = df[df["purchase_price"] > 0]
     df["year"] = df["contract_date"].dt.year
-
-    valid_df = df.sort_values(by=["property_id", "contract_date"])
-
-    cagr_map = {}
-    for prop_id, group in valid_df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, _ = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        cagr_map[prop_id] = cagr
-
     df["cagr"] = df["property_id"].map(cagr_map)
 
     suburb_year = (
@@ -421,29 +570,68 @@ def _calc_suburb_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
 def _calc_street_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Pre-computing street year stats...")
 
+    con = duckdb.connect()
+    con.register("sales", sales_df)
+
+    # Compute property-level CAGR
+    cagr_query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            purchase_price,
+            contract_date,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            first_price,
+            last_price,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1 AND DATEDIFF('day', first_date, last_date) > 0
+    )
+    SELECT
+        property_id,
+        CASE
+            WHEN days_held >= 182 THEN
+                CASE
+                    WHEN first_price > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+                    ELSE 0.0
+                END
+            ELSE 0.0
+        END AS cagr
+    FROM property_metrics
+    """
+
+    cagr_df = con.execute(cagr_query).fetchdf()
+    cagr_map = dict(zip(cagr_df["property_id"], cagr_df["cagr"]))
+    con.close()
+
+    # Street year stats
     df = sales_df.copy()
     df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
     df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
     df = df.dropna(subset=["purchase_price", "contract_date"])
     df = df[df["purchase_price"] > 0]
     df["year"] = df["contract_date"].dt.year
-
-    valid_df = df.sort_values(by=["property_id", "contract_date"])
-
-    cagr_map = {}
-    for prop_id, group in valid_df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, _ = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        cagr_map[prop_id] = cagr
-
     df["cagr"] = df["property_id"].map(cagr_map)
 
     street_year = (
@@ -472,87 +660,185 @@ def _calc_street_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
 def _calc_property_history(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Pre-computing property history...")
 
-    df = sales_df.copy()
-    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
-    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
-    df = df.dropna(subset=["purchase_price", "contract_date"])
-    df = df[df["purchase_price"] > 0]
-    df = df.sort_values(by=["property_id", "contract_date"])
+    con = duckdb.connect()
+    con.register("sales", sales_df)
 
-    results = []
-    for prop_id, group in df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, _ = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        results.append(
-            {
-                "property_id": prop_id,
-                "suburb": last["property_locality"],
-                "street_name": last["property_street_name"],
-                "sale_count": len(group),
-                "first_sale_date": first["contract_date"],
-                "first_sale_price": float(first["purchase_price"]),
-                "last_sale_date": last["contract_date"],
-                "last_sale_price": float(last["purchase_price"]),
-                "avg_cagr": round(cagr, 6),
-            }
-        )
+    query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            purchase_price,
+            contract_date,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            COUNT(*) OVER (PARTITION BY property_id) AS sale_count,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            property_locality AS suburb,
+            property_street_name AS street_name,
+            sale_count,
+            first_price,
+            last_price,
+            first_date,
+            last_date,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1
+    )
+    SELECT
+        property_id,
+        suburb,
+        street_name,
+        sale_count,
+        first_date AS first_sale_date,
+        first_price AS first_sale_price,
+        last_date AS last_sale_date,
+        last_price AS last_sale_price,
+        days_held,
+        CASE
+            WHEN days_held > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+            ELSE 0.0
+        END AS cagr
+    FROM property_metrics
+    WHERE sale_count >= 2 AND days_held > 0
+    """
 
-    if not results:
+    result = con.execute(query).fetchdf()
+    con.close()
+
+    if result.empty:
         logger.warning("No property history records to write")
         return
 
-    history_df = pd.DataFrame(results)
+    # Apply CAGR logic: ignore if held < 6 months
+    result.loc[result["days_held"] < 182.625, "cagr"] = 0.0
+    result["avg_cagr"] = result["cagr"].round(6)
+
+    history_df = result[
+        [
+            "property_id",
+            "suburb",
+            "street_name",
+            "sale_count",
+            "first_sale_date",
+            "first_sale_price",
+            "last_sale_date",
+            "last_sale_price",
+            "avg_cagr",
+        ]
+    ]
+
     output_path = data_path / "property_history.parquet"
     history_df.to_parquet(output_path, index=False, engine="pyarrow")
-    logger.info(f"Property history: {len(results)} records written to {output_path}")
+    logger.info(f"Property history: {len(history_df)} records written to {output_path}")
 
 
 def _calc_top_performers(sales_df: pd.DataFrame, data_path: Path) -> None:
     logger.info("Pre-computing top performers...")
 
-    df = sales_df.copy()
-    df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
-    df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
-    df = df.dropna(subset=["purchase_price", "contract_date"])
-    df = df[df["purchase_price"] > 0]
-    df = df.sort_values(by=["property_id", "contract_date"])
+    con = duckdb.connect()
+    con.register("sales", sales_df)
 
-    results = []
-    for prop_id, group in df.groupby("property_id"):
-        if len(group) < 2:
-            continue
-        first = group.iloc[0]
-        last = group.iloc[-1]
-        years = (last["contract_date"] - first["contract_date"]).days / 365.25
-        cagr, _ = calculate_cagr(
-            float(first["purchase_price"]),
-            float(last["purchase_price"]),
-            years,
-        )
-        results.append(
-            {
-                "property_id": prop_id,
-                "suburb": last["property_locality"],
-                "street_name": last["property_street_name"],
-                "last_sale_price": float(last["purchase_price"]),
-                "avg_cagr": round(cagr, 6),
-                "years_held": int(max(0, years)),
-            }
-        )
+    query = """
+    WITH cleaned AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            CAST(purchase_price AS DOUBLE) AS purchase_price,
+            CAST(contract_date AS TIMESTAMP) AS contract_date
+        FROM sales
+        WHERE purchase_price IS NOT NULL
+          AND contract_date IS NOT NULL
+          AND CAST(purchase_price AS DOUBLE) > 0
+    ),
+    ranked AS (
+        SELECT
+            property_id,
+            property_locality,
+            property_street_name,
+            purchase_price,
+            contract_date,
+            ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY contract_date) AS rn_first,
+            FIRST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_price,
+            LAST_VALUE(purchase_price) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_price,
+            FIRST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date) AS first_date,
+            LAST_VALUE(contract_date) OVER (PARTITION BY property_id ORDER BY contract_date
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_date
+        FROM cleaned
+    ),
+    property_metrics AS (
+        SELECT DISTINCT
+            property_id,
+            property_locality AS suburb,
+            property_street_name AS street_name,
+            first_price,
+            last_price,
+            first_date,
+            last_date,
+            DATEDIFF('day', first_date, last_date) AS days_held
+        FROM ranked
+        WHERE rn_first = 1
+    )
+    SELECT
+        property_id,
+        suburb,
+        street_name,
+        last_price AS last_sale_price,
+        days_held,
+        CASE
+            WHEN days_held > 0 THEN POW(last_price / first_price, 365.25 / days_held) - 1
+            ELSE 0.0
+        END AS cagr
+    FROM property_metrics
+    WHERE days_held > 0
+    """
 
-    if not results:
+    result = con.execute(query).fetchdf()
+    con.close()
+
+    if result.empty:
         logger.warning("No top performer records to write")
         return
 
-    performers_df = pd.DataFrame(results)
+    # Apply CAGR logic: ignore if held < 6 months
+    result.loc[result["days_held"] < 182.625, "cagr"] = 0.0
+    result["years_held"] = result["days_held"].apply(lambda d: int(max(0, d / 365.25)))
+    result["avg_cagr"] = result["cagr"].round(6)
+
+    performers_df = result[
+        [
+            "property_id",
+            "suburb",
+            "street_name",
+            "last_sale_price",
+            "avg_cagr",
+            "years_held",
+        ]
+    ]
     performers_df = performers_df.sort_values("avg_cagr", ascending=False).head(100)
 
     output_path = data_path / "top_performers.parquet"

@@ -21,7 +21,7 @@ env:
 jobs:
   etl:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
@@ -63,9 +63,28 @@ jobs:
         env:
           DATA_DIR: ${{ env.DATA_DIR }}
 
-      - name: Step 4 — Validate ETL output
+      - name: Step 4 — Validate ETL output (basic validation)
         run: |
           python backend/etl/validate.py --data-dir ${{ env.DATA_DIR }}
+        env:
+          DATA_DIR: ${{ env.DATA_DIR }}
+
+      - name: Step 5 — Enhanced Data Quality Validation
+        run: |
+          mkdir -p dq-reports
+          python backend/etl/validate.py \
+            --data-dir ${{ env.DATA_DIR }} \
+            --output-dir dq-reports
+        env:
+          DATA_DIR: ${{ env.DATA_DIR }}
+
+      - name: Step 6 — Soda Core Data Quality Scans
+        run: |
+          mkdir -p soda-reports
+          python backend/etl/data_quality/dq_runner.py \
+            --data-dir ${{ env.DATA_DIR }} \
+            --output-dir soda-reports \
+            --vars RUN_DATE=${{ github.event.schedule || 'manual' }}
         env:
           DATA_DIR: ${{ env.DATA_DIR }}
 
@@ -80,7 +99,43 @@ jobs:
             wrangler r2 object put "${{ env.R2_BUCKET }}/$filename" --file="$f" --remote
           done
 
+      - name: Upload Data Quality Reports to R2
+        if: always()
+        run: |
+          RUN_DATE=$(date +%Y-%m-%d)
+          mkdir -p dq-upload
+          
+          # Copy enhanced validation reports
+          if [ -d "dq-reports" ]; then
+            cp dq-reports/*.json dq-upload/ 2>/dev/null || true
+            cp dq-reports/*.html dq-upload/ 2>/dev/null || true
+          fi
+          
+          # Copy Soda scan reports
+          if [ -d "soda-reports" ]; then
+            cp soda-reports/*.json dq-upload/ 2>/dev/null || true
+          fi
+          
+          # Upload to R2 with date hierarchy
+          for f in dq-upload/*; do
+            if [ -f "$f" ]; then
+              filename=$(basename "$f")
+              echo "Uploading DQ report $filename..."
+              wrangler r2 object put "${{ env.R2_BUCKET }}/data-quality/runs/${RUN_DATE}/$filename" --file="$f" --remote
+            fi
+          done
+
+      - name: Upload Data Quality Reports as Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-quality-reports
+          path: |
+            dq-reports/
+            soda-reports/
+
       - name: Clean up
         if: always()
         run: |
           rm -rf ${{ env.DATA_DIR }}/*.zip
+          rm -rf dq-reports soda-reports dq-upload

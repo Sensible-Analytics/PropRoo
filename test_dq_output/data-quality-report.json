@@ -1,0 +1,1565 @@
+{
+  "run_id": "20260406_053241",
+  "timestamp": "2026-04-06T05:32:41.855246+00:00",
+  "data_directory": "data",
+  "version": "2.0",
+  "sales": {
+    "file": "sales.parquet",
+    "row_count": 3,
+    "column_count": 24,
+    "data_profile": {
+      "total_rows": 3,
+      "total_columns": 24,
+      "total_cells": 72,
+      "total_nulls": 15,
+      "overall_null_pct": 20.83,
+      "columns": {
+        "id": {
+          "dtype": "int64",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 1.0,
+          "max": 3.0,
+          "mean": 2.0,
+          "median": 2.0,
+          "std": 1.0,
+          "unique_count": 3,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 3,
+          "percentiles": {
+            "p25": 1.5,
+            "p50": 2.0,
+            "p75": 2.5,
+            "p90": 2.8,
+            "p95": 2.9,
+            "p99": 2.98
+          },
+          "status": "OK"
+        },
+        "property_id": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 4,
+          "max_length": 4,
+          "avg_length": 4.0,
+          "top_values": {
+            "P001": 2,
+            "P002": 1
+          },
+          "status": "OK"
+        },
+        "property_locality": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 7,
+          "max_length": 7,
+          "avg_length": 7.0,
+          "top_values": {
+            "SuburbA": 2,
+            "SuburbB": 1
+          },
+          "status": "OK"
+        },
+        "property_street_name": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 7,
+          "max_length": 7,
+          "avg_length": 7.0,
+          "top_values": {
+            "Street1": 2,
+            "Street2": 1
+          },
+          "status": "OK"
+        },
+        "property_post_code": {
+          "dtype": "int64",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 2000.0,
+          "max": 2001.0,
+          "mean": 2000.3333,
+          "median": 2000.0,
+          "std": 0.5774,
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 3,
+          "percentiles": {
+            "p25": 2000.0,
+            "p50": 2000.0,
+            "p75": 2000.5,
+            "p90": 2000.8,
+            "p95": 2000.9,
+            "p99": 2000.98
+          },
+          "status": "OK"
+        },
+        "purchase_price": {
+          "dtype": "float64",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 500000.0,
+          "max": 750000.0,
+          "mean": 600000.0,
+          "median": 550000.0,
+          "std": 132287.5656,
+          "unique_count": 3,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 3,
+          "percentiles": {
+            "p25": 525000.0,
+            "p50": 550000.0,
+            "p75": 650000.0,
+            "p90": 710000.0,
+            "p95": 730000.0,
+            "p99": 746000.0
+          },
+          "status": "OK"
+        },
+        "contract_date": {
+          "dtype": "datetime64[ns]",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "datetime",
+          "min": "2019-03-10 00:00:00",
+          "max": "2022-06-20 00:00:00",
+          "unique_count": 3,
+          "status": "OK"
+        },
+        "latitude": {
+          "dtype": "float64",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": -33.9,
+          "max": -33.8,
+          "mean": -33.8333,
+          "median": -33.8,
+          "std": 0.0577,
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "zero_count": 0,
+          "negative_count": 3,
+          "positive_count": 0,
+          "percentiles": {
+            "p25": -33.85,
+            "p50": -33.8,
+            "p75": -33.8,
+            "p90": -33.8,
+            "p95": -33.8,
+            "p99": -33.8
+          },
+          "status": "OK"
+        },
+        "longitude": {
+          "dtype": "float64",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 151.1,
+          "max": 151.2,
+          "mean": 151.1667,
+          "median": 151.2,
+          "std": 0.0577,
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 3,
+          "percentiles": {
+            "p25": 151.15,
+            "p50": 151.2,
+            "p75": 151.2,
+            "p90": 151.2,
+            "p95": 151.2,
+            "p99": 151.2
+          },
+          "status": "OK"
+        },
+        "settlement_date": {
+          "dtype": "datetime64[ns]",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "datetime",
+          "min": "2019-04-01 00:00:00",
+          "max": "2022-07-01 00:00:00",
+          "unique_count": 3,
+          "status": "OK"
+        },
+        "area": {
+          "dtype": "float64",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 120.0,
+          "max": 150.0,
+          "mean": 133.3333,
+          "median": 130.0,
+          "std": 15.2753,
+          "unique_count": 3,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 3,
+          "percentiles": {
+            "p25": 125.0,
+            "p50": 130.0,
+            "p75": 140.0,
+            "p90": 146.0,
+            "p95": 148.0,
+            "p99": 149.6
+          },
+          "status": "OK"
+        },
+        "area_type": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 4,
+          "max_length": 5,
+          "avg_length": 4.67,
+          "top_values": {
+            "House": 2,
+            "Unit": 1
+          },
+          "status": "OK"
+        },
+        "zoning": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 2,
+          "max_length": 2,
+          "avg_length": 2.0,
+          "top_values": {
+            "R2": 2,
+            "R3": 1
+          },
+          "status": "OK"
+        },
+        "nature_of_property": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 4,
+          "max_length": 5,
+          "avg_length": 4.67,
+          "top_values": {
+            "House": 2,
+            "Unit": 1
+          },
+          "status": "OK"
+        },
+        "primary_purpose": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 1,
+          "unique_pct": 33.33,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 11,
+          "max_length": 11,
+          "avg_length": 11.0,
+          "top_values": {
+            "residential": 3
+          },
+          "status": "OK"
+        },
+        "strata_lot_number": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 3,
+          "null_pct": 100.0,
+          "non_null_count": 0,
+          "completeness_pct": 0.0,
+          "status": "EMPTY"
+        },
+        "dealing_number": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 3,
+          "unique_pct": 100.0,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 4,
+          "max_length": 4,
+          "avg_length": 4.0,
+          "top_values": {
+            "D001": 1,
+            "D002": 1,
+            "D003": 1
+          },
+          "status": "OK"
+        },
+        "property_legal_description": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 3,
+          "null_pct": 100.0,
+          "non_null_count": 0,
+          "completeness_pct": 0.0,
+          "status": "EMPTY"
+        },
+        "download_datetime": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 1,
+          "unique_pct": 33.33,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 8,
+          "max_length": 8,
+          "avg_length": 8.0,
+          "top_values": {
+            "20240101": 3
+          },
+          "status": "OK"
+        },
+        "sale_counter": {
+          "dtype": "int64",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 1.0,
+          "max": 2.0,
+          "mean": 1.3333,
+          "median": 1.0,
+          "std": 0.5774,
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 3,
+          "percentiles": {
+            "p25": 1.0,
+            "p50": 1.0,
+            "p75": 1.5,
+            "p90": 1.8,
+            "p95": 1.9,
+            "p99": 1.98
+          },
+          "status": "OK"
+        },
+        "district_code": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 3,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 66.67,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 3,
+          "max_length": 3,
+          "avg_length": 3.0,
+          "top_values": {
+            "101": 2,
+            "102": 1
+          },
+          "status": "OK"
+        },
+        "realestate_url": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 3,
+          "null_pct": 100.0,
+          "non_null_count": 0,
+          "completeness_pct": 0.0,
+          "status": "EMPTY"
+        },
+        "domain_url": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 3,
+          "null_pct": 100.0,
+          "non_null_count": 0,
+          "completeness_pct": 0.0,
+          "status": "EMPTY"
+        },
+        "listings_last_checked": {
+          "dtype": "object",
+          "total_rows": 3,
+          "null_count": 3,
+          "null_pct": 100.0,
+          "non_null_count": 0,
+          "completeness_pct": 0.0,
+          "status": "EMPTY"
+        }
+      }
+    },
+    "checks": {
+      "required_columns_present": true,
+      "missing_columns": [],
+      "null_ids": 0,
+      "id_duplicates": 0,
+      "combo_duplicates": 0,
+      "null_property_ids": 0,
+      "null_prices": 0,
+      "null_dates": 0,
+      "geocoding_count": 3,
+      "geocoding_pct": 1.0,
+      "geocoding_passes": true,
+      "non_positive_prices": 0,
+      "null_invalid_prices": 0,
+      "min_year": 2019,
+      "max_year": 2022,
+      "settlement_before_contract": 0
+    },
+    "thresholds": {
+      "min_geocoding_coverage": 0.8,
+      "min_contract_year": 2000,
+      "max_contract_year": 2026
+    }
+  },
+  "growth": {
+    "file": "property_growth.parquet",
+    "row_count": 2,
+    "column_count": 12,
+    "data_profile": {
+      "total_rows": 2,
+      "total_columns": 12,
+      "total_cells": 24,
+      "total_nulls": 0,
+      "overall_null_pct": 0.0,
+      "columns": {
+        "property_id": {
+          "dtype": "object",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 4,
+          "max_length": 4,
+          "avg_length": 4.0,
+          "top_values": {
+            "P001": 1,
+            "P002": 1
+          },
+          "status": "OK"
+        },
+        "suburb": {
+          "dtype": "object",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 7,
+          "max_length": 7,
+          "avg_length": 7.0,
+          "top_values": {
+            "SuburbA": 1,
+            "SuburbB": 1
+          },
+          "status": "OK"
+        },
+        "street_name": {
+          "dtype": "object",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "string",
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "empty_count": 0,
+          "empty_pct": 0.0,
+          "min_length": 7,
+          "max_length": 7,
+          "avg_length": 7.0,
+          "top_values": {
+            "Street1": 1,
+            "Street2": 1
+          },
+          "status": "OK"
+        },
+        "post_code": {
+          "dtype": "int64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 2000.0,
+          "max": 2001.0,
+          "mean": 2000.5,
+          "median": 2000.5,
+          "std": 0.7071,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 2000.25,
+            "p50": 2000.5,
+            "p75": 2000.75,
+            "p90": 2000.9,
+            "p95": 2000.95,
+            "p99": 2000.99
+          },
+          "status": "OK"
+        },
+        "year": {
+          "dtype": "int64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 2019.0,
+          "max": 2022.0,
+          "mean": 2020.5,
+          "median": 2020.5,
+          "std": 2.1213,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 2019.75,
+            "p50": 2020.5,
+            "p75": 2021.25,
+            "p90": 2021.7,
+            "p95": 2021.85,
+            "p99": 2021.97
+          },
+          "status": "OK"
+        },
+        "avg_cagr": {
+          "dtype": "float64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 0.032,
+          "max": 0.045,
+          "mean": 0.0385,
+          "median": 0.0385,
+          "std": 0.0092,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 0.0353,
+            "p50": 0.0385,
+            "p75": 0.0417,
+            "p90": 0.0437,
+            "p95": 0.0444,
+            "p99": 0.0449
+          },
+          "status": "OK"
+        },
+        "total_growth": {
+          "dtype": "float64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 0.08,
+          "max": 0.1,
+          "mean": 0.09,
+          "median": 0.09,
+          "std": 0.0141,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 0.085,
+            "p50": 0.09,
+            "p75": 0.095,
+            "p90": 0.098,
+            "p95": 0.099,
+            "p99": 0.0998
+          },
+          "status": "OK"
+        },
+        "years_held": {
+          "dtype": "int64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 2.0,
+          "max": 5.0,
+          "mean": 3.5,
+          "median": 3.5,
+          "std": 2.1213,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 2.75,
+            "p50": 3.5,
+            "p75": 4.25,
+            "p90": 4.7,
+            "p95": 4.85,
+            "p99": 4.97
+          },
+          "status": "OK"
+        },
+        "first_sale_price": {
+          "dtype": "float64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 500000.0,
+          "max": 750000.0,
+          "mean": 625000.0,
+          "median": 625000.0,
+          "std": 176776.6953,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 562500.0,
+            "p50": 625000.0,
+            "p75": 687500.0,
+            "p90": 725000.0,
+            "p95": 737500.0,
+            "p99": 747500.0
+          },
+          "status": "OK"
+        },
+        "last_sale_price": {
+          "dtype": "float64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 550000.0,
+          "max": 810000.0,
+          "mean": 680000.0,
+          "median": 680000.0,
+          "std": 183847.7631,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 615000.0,
+            "p50": 680000.0,
+            "p75": 745000.0,
+            "p90": 784000.0,
+            "p95": 797000.0,
+            "p99": 807400.0
+          },
+          "status": "OK"
+        },
+        "first_sale_year": {
+          "dtype": "int64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 2019.0,
+          "max": 2020.0,
+          "mean": 2019.5,
+          "median": 2019.5,
+          "std": 0.7071,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 2019.25,
+            "p50": 2019.5,
+            "p75": 2019.75,
+            "p90": 2019.9,
+            "p95": 2019.95,
+            "p99": 2019.99
+          },
+          "status": "OK"
+        },
+        "last_sale_year": {
+          "dtype": "int64",
+          "total_rows": 2,
+          "null_count": 0,
+          "null_pct": 0.0,
+          "non_null_count": 2,
+          "completeness_pct": 100.0,
+          "kind": "numeric",
+          "min": 2019.0,
+          "max": 2022.0,
+          "mean": 2020.5,
+          "median": 2020.5,
+          "std": 2.1213,
+          "unique_count": 2,
+          "unique_pct": 100.0,
+          "zero_count": 0,
+          "negative_count": 0,
+          "positive_count": 2,
+          "percentiles": {
+            "p25": 2019.75,
+            "p50": 2020.5,
+            "p75": 2021.25,
+            "p90": 2021.7,
+            "p95": 2021.85,
+            "p99": 2021.97
+          },
+          "status": "OK"
+        }
+      }
+    },
+    "checks": {
+      "required_columns_present": true,
+      "missing_columns": [],
+      "cagr_stats": {
+        "min": 0.032,
+        "max": 0.045,
+        "mean": 0.0385,
+        "median": 0.0385,
+        "std": 0.009192,
+        "null_count": 0,
+        "out_of_range_count": 0
+      },
+      "cagr_out_of_range": 0,
+      "cagr_passes": true,
+      "property_id_duplicates": 0
+    },
+    "thresholds": {
+      "min_cagr": -0.5,
+      "max_cagr": 2.0
+    }
+  },
+  "summaries": {
+    "street_summary.parquet": {
+      "row_count": 2,
+      "column_count": 10,
+      "data_profile": {
+        "total_rows": 2,
+        "total_columns": 10,
+        "total_cells": 20,
+        "total_nulls": 0,
+        "overall_null_pct": 0.0,
+        "columns": {
+          "street_name": {
+            "dtype": "object",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "string",
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "empty_count": 0,
+            "empty_pct": 0.0,
+            "min_length": 7,
+            "max_length": 7,
+            "avg_length": 7.0,
+            "top_values": {
+              "Street1": 1,
+              "Street2": 1
+            },
+            "status": "OK"
+          },
+          "suburb": {
+            "dtype": "object",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "string",
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "empty_count": 0,
+            "empty_pct": 0.0,
+            "min_length": 7,
+            "max_length": 7,
+            "avg_length": 7.0,
+            "top_values": {
+              "SuburbA": 1,
+              "SuburbB": 1
+            },
+            "status": "OK"
+          },
+          "post_code": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 2000.0,
+            "max": 2001.0,
+            "mean": 2000.5,
+            "median": 2000.5,
+            "std": 0.7071,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 2000.25,
+              "p50": 2000.5,
+              "p75": 2000.75,
+              "p90": 2000.9,
+              "p95": 2000.95,
+              "p99": 2000.99
+            },
+            "status": "OK"
+          },
+          "unique_properties": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "std": 0.0,
+            "unique_count": 1,
+            "unique_pct": 50.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 1.0,
+              "p50": 1.0,
+              "p75": 1.0,
+              "p90": 1.0,
+              "p95": 1.0,
+              "p99": 1.0
+            },
+            "status": "OK"
+          },
+          "total_sales": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 1.0,
+            "max": 2.0,
+            "mean": 1.5,
+            "median": 1.5,
+            "std": 0.7071,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 1.25,
+              "p50": 1.5,
+              "p75": 1.75,
+              "p90": 1.9,
+              "p95": 1.95,
+              "p99": 1.99
+            },
+            "status": "OK"
+          },
+          "latitude": {
+            "dtype": "float64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": -33.9,
+            "max": -33.8,
+            "mean": -33.85,
+            "median": -33.85,
+            "std": 0.0707,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 2,
+            "positive_count": 0,
+            "percentiles": {
+              "p25": -33.875,
+              "p50": -33.85,
+              "p75": -33.825,
+              "p90": -33.81,
+              "p95": -33.805,
+              "p99": -33.801
+            },
+            "status": "OK"
+          },
+          "longitude": {
+            "dtype": "float64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 151.1,
+            "max": 151.2,
+            "mean": 151.15,
+            "median": 151.15,
+            "std": 0.0707,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 151.125,
+              "p50": 151.15,
+              "p75": 151.175,
+              "p90": 151.19,
+              "p95": 151.195,
+              "p99": 151.199
+            },
+            "status": "OK"
+          },
+          "avg_cagr": {
+            "dtype": "float64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 0.032,
+            "max": 0.045,
+            "mean": 0.0385,
+            "median": 0.0385,
+            "std": 0.0092,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 0.0353,
+              "p50": 0.0385,
+              "p75": 0.0417,
+              "p90": 0.0437,
+              "p95": 0.0444,
+              "p99": 0.0449
+            },
+            "status": "OK"
+          },
+          "property_count": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "std": 0.0,
+            "unique_count": 1,
+            "unique_pct": 50.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 1.0,
+              "p50": 1.0,
+              "p75": 1.0,
+              "p90": 1.0,
+              "p95": 1.0,
+              "p99": 1.0
+            },
+            "status": "OK"
+          },
+          "is_top_performer": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 0.0,
+            "max": 1.0,
+            "mean": 0.5,
+            "median": 0.5,
+            "std": 0.7071,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 1,
+            "negative_count": 0,
+            "positive_count": 1,
+            "percentiles": {
+              "p25": 0.25,
+              "p50": 0.5,
+              "p75": 0.75,
+              "p90": 0.9,
+              "p95": 0.95,
+              "p99": 0.99
+            },
+            "status": "OK"
+          }
+        }
+      },
+      "checks": {
+        "has_avg_cagr": true,
+        "has_is_top_performer": true,
+        "null_stats": {
+          "suburb": 0,
+          "unique_properties": 0,
+          "total_sales": 0
+        }
+      }
+    },
+    "suburb_summary.parquet": {
+      "row_count": 2,
+      "column_count": 8,
+      "data_profile": {
+        "total_rows": 2,
+        "total_columns": 8,
+        "total_cells": 16,
+        "total_nulls": 0,
+        "overall_null_pct": 0.0,
+        "columns": {
+          "suburb": {
+            "dtype": "object",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "string",
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "empty_count": 0,
+            "empty_pct": 0.0,
+            "min_length": 7,
+            "max_length": 7,
+            "avg_length": 7.0,
+            "top_values": {
+              "SuburbA": 1,
+              "SuburbB": 1
+            },
+            "status": "OK"
+          },
+          "unique_properties": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "std": 0.0,
+            "unique_count": 1,
+            "unique_pct": 50.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 1.0,
+              "p50": 1.0,
+              "p75": 1.0,
+              "p90": 1.0,
+              "p95": 1.0,
+              "p99": 1.0
+            },
+            "status": "OK"
+          },
+          "total_sales": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 1.0,
+            "max": 2.0,
+            "mean": 1.5,
+            "median": 1.5,
+            "std": 0.7071,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 1.25,
+              "p50": 1.5,
+              "p75": 1.75,
+              "p90": 1.9,
+              "p95": 1.95,
+              "p99": 1.99
+            },
+            "status": "OK"
+          },
+          "latitude": {
+            "dtype": "float64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": -33.9,
+            "max": -33.8,
+            "mean": -33.85,
+            "median": -33.85,
+            "std": 0.0707,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 2,
+            "positive_count": 0,
+            "percentiles": {
+              "p25": -33.875,
+              "p50": -33.85,
+              "p75": -33.825,
+              "p90": -33.81,
+              "p95": -33.805,
+              "p99": -33.801
+            },
+            "status": "OK"
+          },
+          "longitude": {
+            "dtype": "float64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 151.1,
+            "max": 151.2,
+            "mean": 151.15,
+            "median": 151.15,
+            "std": 0.0707,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 151.125,
+              "p50": 151.15,
+              "p75": 151.175,
+              "p90": 151.19,
+              "p95": 151.195,
+              "p99": 151.199
+            },
+            "status": "OK"
+          },
+          "avg_cagr": {
+            "dtype": "float64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 0.032,
+            "max": 0.045,
+            "mean": 0.0385,
+            "median": 0.0385,
+            "std": 0.0092,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 0.0353,
+              "p50": 0.0385,
+              "p75": 0.0417,
+              "p90": 0.0437,
+              "p95": 0.0444,
+              "p99": 0.0449
+            },
+            "status": "OK"
+          },
+          "property_count": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 1.0,
+            "max": 1.0,
+            "mean": 1.0,
+            "median": 1.0,
+            "std": 0.0,
+            "unique_count": 1,
+            "unique_pct": 50.0,
+            "zero_count": 0,
+            "negative_count": 0,
+            "positive_count": 2,
+            "percentiles": {
+              "p25": 1.0,
+              "p50": 1.0,
+              "p75": 1.0,
+              "p90": 1.0,
+              "p95": 1.0,
+              "p99": 1.0
+            },
+            "status": "OK"
+          },
+          "is_top_performer": {
+            "dtype": "int64",
+            "total_rows": 2,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "non_null_count": 2,
+            "completeness_pct": 100.0,
+            "kind": "numeric",
+            "min": 0.0,
+            "max": 1.0,
+            "mean": 0.5,
+            "median": 0.5,
+            "std": 0.7071,
+            "unique_count": 2,
+            "unique_pct": 100.0,
+            "zero_count": 1,
+            "negative_count": 0,
+            "positive_count": 1,
+            "percentiles": {
+              "p25": 0.25,
+              "p50": 0.5,
+              "p75": 0.75,
+              "p90": 0.9,
+              "p95": 0.95,
+              "p99": 0.99
+            },
+            "status": "OK"
+          }
+        }
+      },
+      "checks": {
+        "has_avg_cagr": true,
+        "has_is_top_performer": true,
+        "null_stats": {
+          "suburb": 0,
+          "unique_properties": 0,
+          "total_sales": 0
+        }
+      }
+    }
+  },
+  "reconciliation": {
+    "street_sales_reconciliation": {
+      "source_total": 3,
+      "street_sum": 3,
+      "difference": 0,
+      "difference_pct": 0.0,
+      "passes": true
+    },
+    "suburb_sales_reconciliation": {
+      "source_total": 3,
+      "suburb_sum": 3,
+      "difference": 0,
+      "difference_pct": 0.0,
+      "passes": true
+    },
+    "growth_referential_integrity": {
+      "sales_unique_properties": 2,
+      "growth_unique_properties": 2,
+      "orphan_property_ids": 0,
+      "passes": true
+    },
+    "h3_completeness": {
+      "zoom_levels": {
+        "zoom_5": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_6": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_7": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_8": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_9": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_10": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_11": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_12": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_13": {
+          "exists": false,
+          "row_count": 0
+        },
+        "zoom_14": {
+          "exists": false,
+          "row_count": 0
+        }
+      },
+      "missing_zooms": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "empty_zooms": [],
+      "all_present": false,
+      "all_non_empty": true
+    },
+    "additional_files": {
+      "suburb_year_stats.parquet": {
+        "exists": false,
+        "row_count": 0
+      },
+      "street_year_stats.parquet": {
+        "exists": false,
+        "row_count": 0
+      },
+      "property_history.parquet": {
+        "exists": false,
+        "row_count": 0
+      },
+      "top_performers.parquet": {
+        "exists": false,
+        "row_count": 0
+      }
+    }
+  },
+  "checks_summary": {
+    "sales_required_columns": {
+      "passes": true,
+      "detail": {
+        "missing": []
+      }
+    },
+    "sales_null_ids": {
+      "passes": true,
+      "detail": {
+        "null_count": 0
+      }
+    },
+    "sales_id_uniqueness": {
+      "passes": true,
+      "detail": {
+        "duplicates": 0
+      }
+    },
+    "sales_geocoding_coverage": {
+      "passes": true,
+      "detail": {
+        "coverage_pct": "100.0%"
+      }
+    },
+    "sales_date_range": {
+      "passes": true,
+      "detail": {
+        "min_year": 2019,
+        "max_year": 2022
+      }
+    },
+    "growth_cagr_range": {
+      "passes": true,
+      "detail": {
+        "out_of_range": 0
+      }
+    },
+    "recon_street_sales_reconciliation": {
+      "passes": true,
+      "detail": {
+        "source_total": 3,
+        "street_sum": 3,
+        "difference": 0,
+        "difference_pct": 0.0
+      }
+    },
+    "recon_suburb_sales_reconciliation": {
+      "passes": true,
+      "detail": {
+        "source_total": 3,
+        "suburb_sum": 3,
+        "difference": 0,
+        "difference_pct": 0.0
+      }
+    },
+    "recon_growth_referential_integrity": {
+      "passes": true,
+      "detail": {
+        "sales_unique_properties": 2,
+        "growth_unique_properties": 2,
+        "orphan_property_ids": 0
+      }
+    }
+  },
+  "overall_status": "PASS",
+  "total_checks": 9,
+  "passed_checks": 9,
+  "failed_checks": 0
+}

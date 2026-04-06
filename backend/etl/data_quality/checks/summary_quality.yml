@@ -1,0 +1,28 @@
+data_source proproo_summaries:
+  type: duckdb
+  connection:
+    path: ../data/
+
+checks for street_summary:
+  - row_count > 0
+  - missing_count(street_name) = 0
+  - missing_count(suburb) = 0
+  - missing_count(post_code) < 5%
+  - missing_count(unique_properties) = 0
+  - missing_count(total_sales) = 0
+  - duplicate_count(street_name, suburb, post_code) = 0
+  - avg_cagr > -1
+  - avg_cagr < 3
+  - property_count >= 0
+
+checks for suburb_summary:
+  - row_count > 0
+  - missing_count(suburb) = 0
+  - missing_count(latitude) < 5%
+  - missing_count(longitude) < 5%
+  - missing_count(unique_properties) = 0
+  - missing_count(total_sales) = 0
+  - duplicate_count(suburb) = 0
+  - avg_cagr > -1
+  - avg_cagr < 3
+  - property_count >= 0

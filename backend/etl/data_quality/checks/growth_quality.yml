@@ -1,0 +1,17 @@
+data_source proproo_growth:
+  type: duckdb
+  connection:
+    path: ../data/property_growth.parquet
+
+checks for property_growth:
+  - row_count > 0
+  - missing_count(property_id) = 0
+  - missing_count(avg_cagr) < 5%
+  - missing_count(total_growth) < 5%
+  - duplicate_count(property_id) = 0
+  - avg_cagr > -1
+  - avg_cagr < 3
+  - total_growth > -0.9
+  - total_growth < 10
+  - years_held >= 0
+  - years_held <= 50

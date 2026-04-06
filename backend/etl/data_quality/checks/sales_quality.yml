@@ -1,0 +1,19 @@
+data_source proproo_sales:
+  type: duckdb
+  connection:
+    path: ../data/sales.parquet
+
+checks for sales:
+  - row_count > 0
+  - missing_count(id) = 0
+  - missing_count(property_id) = 0
+  - missing_count(purchase_price) < 5%
+  - missing_count(contract_date) < 5%
+  - duplicate_count(id) = 0
+  - values_in(primary_purpose) = [residential, commercial, industrial, vacant_land]
+  - min(purchase_price) > 0
+  - max(purchase_price) < 50000000
+  - freshness(contract_date) < 365 days
+  - distribution(purchase_price):
+      mean: 800000
+      stdev: 600000

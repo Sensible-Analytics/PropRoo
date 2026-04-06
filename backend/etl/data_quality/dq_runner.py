@@ -123,7 +123,7 @@ def main():
         sys.exit(1)
 
     # Setup paths
-    checks_dir = Path(__file__).parent / "data_quality" / "checks"
+    checks_dir = Path(__file__).parent / "checks"
     output_path = Path(args.output_dir) if args.output_dir else None
 
     if output_path:

@@ -11,6 +11,7 @@ permissions:
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
+    if: false  # Disable dependency review until dependency graph is enabled at org level
     steps:
       - name: Checkout
         uses: actions/checkout@v6

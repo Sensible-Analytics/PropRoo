@@ -19,6 +19,6 @@ jobs:
         uses: actions/dependency-review-action@v4
         with:
           comment-summary-in-pr: on-failure
-          fail-on-severity: moderate
+          fail-on-severity: low
           vulnerability-check: true
           license-check: true

@@ -1,0 +1,24 @@
+[     621ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:26 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[     699ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:27 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[     701ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:27 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[     874ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:27 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    2397ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:8
+[    2639ms] [WARNING] deck: suburb-labels-characters: fontSettings.sdf is required to render outline @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:2495
+[    2732ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:29 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    2732ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:29 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    2852ms] ReferenceError: y is not defined
+    at blob:https://proproo.pages.dev/e30fab45-ad92-4c3a-b292-bac9b4c40a77:1:364
+    at blob:https://proproo.pages.dev/e30fab45-ad92-4c3a-b292-bac9b4c40a77:2:342964
+[    3040ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:29 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    3040ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:29 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    3353ms] [WARNING] H3 cells fetch failed: TypeError: i$ is not a constructor
+    at fetchData (https://proproo.pages.dev/assets/index-C_jlPiN3.js:3340:32) @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3339
+[    3358ms] [WARNING] H3 cells fetch failed: TypeError: i$ is not a constructor
+    at fetchData (https://proproo.pages.dev/assets/index-C_jlPiN3.js:3340:32) @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3339
+[    3647ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:29 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    3648ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:29 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    6021ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:32 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    6021ms] [LOG] {timestamp: Tue Apr 07 2026 20:39:32 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328

@@ -553,6 +553,13 @@ export default function Dashboard() {
     setSelection(prev => ({ ...prev, street: null, propertyId: null }));
   }, []);
 
+  useEffect(() => {
+    if (mapZoom <= 6 && viewLevel !== 'state') {
+      setViewLevel('state');
+      setSelection({ suburb: null, street: null, propertyId: null });
+    }
+  }, [mapZoom, viewLevel]);
+
   const drillDown = useCallback((type: string, value: string) => {
     if (type === 'suburb') {
       setSelection({ suburb: value, street: null, propertyId: null });
@@ -769,11 +776,11 @@ export default function Dashboard() {
           data: nswSuburbsGeoJSON as any,
           stroked: true,
           filled: false,
-          lineWidthMinPixels: 2,
-          getLineColor: [30, 30, 30, 255],
+          lineWidthMinPixels: 3,
+          getLineColor: [20, 20, 20, 255],
           pickable: true,
           autoHighlight: true,
-          highlightColor: [100, 140, 255, 100],
+          highlightColor: [59, 130, 246, 150],
           onClick: (info: any) => {
             if (info.object?.properties?.suburb_name) {
               setSelectedSuburb(info.object.properties.suburb_name);
@@ -1195,19 +1202,40 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Selected Suburb Indicator */}
-          {selectedSuburb && (
-            <div className="absolute top-4 left-4 z-[1000] bg-white/90 px-3 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm flex items-center gap-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Suburb:</span>
-              <span className="text-xs font-black text-blue-600">{selectedSuburb}</span>
-              <button
-                onClick={() => setSelectedSuburb(null)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                ✕
-              </button>
+          {/* Breadcrumb Navigation */}
+          <div className="absolute top-4 left-4 z-[1000] bg-white/90 px-3 py-2 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center gap-1.5 text-[10px]">
+              <button onClick={navigateToState} className="hover:text-blue-600 transition-colors">AUS</button>
+              <ChevronRight size={10} className="text-slate-400" />
+              <span className="font-bold text-blue-600">NSW</span>
+              {selection.suburb && (
+                <>
+                  <ChevronRight size={10} className="text-slate-400" />
+                  <button onClick={navigateToSuburb} className="font-bold text-blue-600 hover:text-blue-800 transition-colors">{selection.suburb}</button>
+                </>
+              )}
+              {selection.street && (
+                <>
+                  <ChevronRight size={10} className="text-slate-400" />
+                  <span className="font-bold text-blue-600">{selection.street}</span>
+                </>
+              )}
+              {selection.propertyId && (
+                <>
+                  <ChevronRight size={10} className="text-slate-400" />
+                  <span className="font-bold text-blue-600">#{selection.propertyId.slice(-4)}</span>
+                </>
+              )}
             </div>
-          )}
+            {viewLevel !== 'state' && (
+              <button
+                onClick={handleBack}
+                className="mt-1.5 text-[9px] text-slate-500 hover:text-blue-600 flex items-center gap-1 transition-colors"
+              >
+                <ArrowLeft size={10} /> Back
+              </button>
+            )}
+          </div>
 
           {/* DeckGL Map */}
           <ErrorBoundary fallback={<div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-500 text-sm">Map rendering unavailable</div>}>

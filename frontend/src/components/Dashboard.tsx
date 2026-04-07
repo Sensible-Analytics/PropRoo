@@ -356,7 +356,7 @@ export default function Dashboard() {
   const [showSuburbs, setShowSuburbs] = useState(true);
   const [showPOI, setShowPOI] = useState(true);
   const [showChoropleth, setShowChoropleth] = useState(true);
-  const [layersExpanded, setLayersExpanded] = useState(true);
+  const [layersExpanded, setLayersExpanded] = useState(false);
 
   // Selected property for popup
   const [selectedProperty, setSelectedProperty] = useState<SaleRecord | null>(null);
@@ -769,11 +769,11 @@ export default function Dashboard() {
           data: nswSuburbsGeoJSON as any,
           stroked: true,
           filled: false,
-          lineWidthMinPixels: 1,
-          getLineColor: [100, 140, 255, 200],
+          lineWidthMinPixels: 2,
+          getLineColor: [30, 30, 30, 255],
           pickable: true,
           autoHighlight: true,
-          highlightColor: [100, 140, 255, 80],
+          highlightColor: [100, 140, 255, 100],
           onClick: (info: any) => {
             if (info.object?.properties?.suburb_name) {
               setSelectedSuburb(info.object.properties.suburb_name);
@@ -1121,8 +1121,24 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Layers Panel — bottom-right */}
-          <div className="absolute bottom-5 right-24 z-[1001] flex flex-col gap-2">
+          {/* Zoom Controls — top-right */}
+          <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-1">
+            <button
+              onClick={() => setViewState(prev => ({ ...prev, zoom: Math.min(prev.zoom + 1, 18), transitionDuration: 300 }))}
+              className="bg-white/90 w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-white flex items-center justify-center backdrop-blur-sm shadow-sm transition-colors"
+            >
+              <span className="text-lg font-bold">+</span>
+            </button>
+            <button
+              onClick={() => setViewState(prev => ({ ...prev, zoom: Math.max(prev.zoom - 1, 4), transitionDuration: 300 }))}
+              className="bg-white/90 w-8 h-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-white flex items-center justify-center backdrop-blur-sm shadow-sm transition-colors"
+            >
+              <span className="text-lg font-bold">−</span>
+            </button>
+          </div>
+
+          {/* Layers Panel — top-right, above zoom controls */}
+          <div className="absolute top-4 right-16 z-[1001] flex flex-col gap-2">
             <button
               onClick={() => setLayersExpanded(!layersExpanded)}
               className="bg-white/90 px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] font-bold tracking-widest text-slate-600 backdrop-blur-sm shadow-sm flex items-center gap-2 cursor-pointer hover:bg-white transition-colors"

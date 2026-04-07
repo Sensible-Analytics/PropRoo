@@ -769,8 +769,8 @@ export default function Dashboard() {
           data: nswSuburbsGeoJSON as any,
           stroked: true,
           filled: false,
-          lineWidthMinPixels: 1.5,
-          getLineColor: [100, 140, 255, 180],
+          lineWidthMinPixels: 1,
+          getLineColor: [100, 140, 255, 60],
           pickable: true,
           autoHighlight: true,
           highlightColor: [100, 140, 255, 80],
@@ -1104,8 +1104,25 @@ export default function Dashboard() {
       <div className="flex-1 flex min-h-0">
         {/* Map Area: flex-1 (80%) */}
         <div className="flex-1 relative bg-white">
-          {/* Layers Panel — bottom-left */}
-          <div className="absolute bottom-20 left-4 z-[1000] flex flex-col gap-2">
+          {/* Year Slider — bottom-left */}
+          <div className="absolute bottom-20 left-4 z-[1000] bg-white/90 px-4 py-3 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold text-slate-400">2001</span>
+              <input
+                type="range"
+                min={2001}
+                max={2024}
+                value={selectedYear}
+                onChange={e => setSelectedYear(parseInt(e.target.value))}
+                className="w-32 h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+              />
+              <span className="text-[10px] font-bold text-slate-400">2024</span>
+              <span className="text-sm font-black text-blue-600 w-8 text-center">{selectedYear}</span>
+            </div>
+          </div>
+
+          {/* Layers Panel — bottom-right */}
+          <div className="absolute bottom-20 right-4 z-[1000] flex flex-col gap-2">
             <button
               onClick={() => setLayersExpanded(!layersExpanded)}
               className="bg-white/90 px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] font-bold tracking-widest text-slate-600 backdrop-blur-sm shadow-sm flex items-center gap-2 cursor-pointer hover:bg-white transition-colors"
@@ -1220,23 +1237,6 @@ export default function Dashboard() {
         <aside className="w-80 border-l border-slate-200 bg-white flex flex-col overflow-y-auto">
           {/* Filters Section — TOP of sidebar */}
           <div className="shrink-0 p-4 border-b border-slate-200 space-y-4">
-            {/* Year Slider */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2001</span>
-                <span className="text-xl font-black text-blue-600">{selectedYear}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">2024</span>
-              </div>
-              <input
-                type="range"
-                min={2001}
-                max={2024}
-                value={selectedYear}
-                onChange={e => setSelectedYear(parseInt(e.target.value))}
-                className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
-              />
-            </div>
-
             {/* Price Range */}
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-slate-600">

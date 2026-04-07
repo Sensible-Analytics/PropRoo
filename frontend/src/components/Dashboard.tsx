@@ -770,7 +770,7 @@ export default function Dashboard() {
           stroked: true,
           filled: false,
           lineWidthMinPixels: 1,
-          getLineColor: [100, 140, 255, 60],
+          getLineColor: [100, 140, 255, 200],
           pickable: true,
           autoHighlight: true,
           highlightColor: [100, 140, 255, 80],
@@ -1104,8 +1104,8 @@ export default function Dashboard() {
       <div className="flex-1 flex min-h-0">
         {/* Map Area: flex-1 (80%) */}
         <div className="flex-1 relative bg-white">
-          {/* Year Slider — bottom-left */}
-          <div className="absolute bottom-20 left-4 z-[1000] bg-white/90 px-4 py-3 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
+          {/* Year Slider — bottom, full width */}
+          <div className="absolute bottom-5 left-4 right-52 z-[1000] bg-white/90 px-4 py-3 rounded-xl border border-slate-200 backdrop-blur-sm shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-[10px] font-bold text-slate-400">2001</span>
               <input
@@ -1114,7 +1114,7 @@ export default function Dashboard() {
                 max={2024}
                 value={selectedYear}
                 onChange={e => setSelectedYear(parseInt(e.target.value))}
-                className="w-32 h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                className="flex-1 h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
               />
               <span className="text-[10px] font-bold text-slate-400">2024</span>
               <span className="text-sm font-black text-blue-600 w-8 text-center">{selectedYear}</span>
@@ -1122,7 +1122,7 @@ export default function Dashboard() {
           </div>
 
           {/* Layers Panel — bottom-right */}
-          <div className="absolute bottom-20 right-4 z-[1000] flex flex-col gap-2">
+          <div className="absolute bottom-5 right-24 z-[1001] flex flex-col gap-2">
             <button
               onClick={() => setLayersExpanded(!layersExpanded)}
               className="bg-white/90 px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] font-bold tracking-widest text-slate-600 backdrop-blur-sm shadow-sm flex items-center gap-2 cursor-pointer hover:bg-white transition-colors"
@@ -1168,8 +1168,8 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Data Attribution Overlay */}
-          <div className="absolute bottom-20 right-4 z-[1000] bg-white/80 px-3 py-2 rounded-lg text-[9px] text-slate-500 backdrop-blur-sm border border-slate-200/50 shadow-sm">
+          {/* Data Attribution Overlay — extreme bottom right */}
+          <div className="absolute bottom-5 right-4 z-[1002] bg-white/90 px-3 py-2 rounded-xl text-[9px] text-slate-600 backdrop-blur-sm border border-slate-200 shadow-sm">
             <div className="font-bold text-slate-700 mb-1">Data Sources</div>
             <div className="flex items-center gap-1">
               <span>NSW Valuer General</span>

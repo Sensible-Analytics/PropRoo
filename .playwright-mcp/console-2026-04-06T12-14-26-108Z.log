@@ -1,0 +1,16 @@
+[     671ms] [LOG] {timestamp: Mon Apr 06 2026 22:14:26 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[     697ms] [LOG] {timestamp: Mon Apr 06 2026 22:14:26 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[     715ms] [LOG] {timestamp: Mon Apr 06 2026 22:14:26 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[     846ms] [LOG] {timestamp: Mon Apr 06 2026 22:14:26 GMT+1000 (Australian Eastern Standard Time), level: 2, origin: 4, topic: 4, event: 4} @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3328
+[    2435ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:8
+[    2578ms] [WARNING] deck: suburb-labels-characters: fontSettings.sdf is required to render outline @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:2495
+[    2775ms] [WARNING] H3 cells fetch failed: TypeError: i$ is not a constructor
+    at fetchData (https://proproo.pages.dev/assets/index-C_jlPiN3.js:3340:32) @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3339
+[    2825ms] [WARNING] H3 cells fetch failed: TypeError: i$ is not a constructor
+    at fetchData (https://proproo.pages.dev/assets/index-C_jlPiN3.js:3340:32) @ https://proproo.pages.dev/assets/index-C_jlPiN3.js:3339
+[    3070ms] ReferenceError: y is not defined
+    at blob:https://proproo.pages.dev/02f90bca-cde4-4253-978d-5443d0d63cf3:1:364
+    at blob:https://proproo.pages.dev/02f90bca-cde4-4253-978d-5443d0d63cf3:2:342964

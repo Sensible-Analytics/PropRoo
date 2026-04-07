@@ -1,0 +1,1602 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - button "LAYERS" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+          - text: LAYERS
+          - img [ref=e21]
+        - generic [ref=e23]:
+          - generic [ref=e24] [cursor=pointer]:
+            - checkbox "Property Zones" [checked] [ref=e25]
+            - text: Property Zones
+          - generic [ref=e26] [cursor=pointer]:
+            - checkbox "Price Density" [checked] [ref=e27]
+            - text: Price Density
+          - generic [ref=e28] [cursor=pointer]:
+            - checkbox "Price Contours" [checked] [ref=e29]
+            - text: Price Contours
+          - generic [ref=e30] [cursor=pointer]:
+            - checkbox "Properties" [checked] [ref=e31]
+            - text: Properties
+          - generic [ref=e32] [cursor=pointer]:
+            - checkbox "Street Names" [checked] [ref=e33]
+            - text: Street Names
+          - generic [ref=e34] [cursor=pointer]:
+            - checkbox "Suburb Boundaries" [checked] [ref=e35]
+            - text: Suburb Boundaries
+          - generic [ref=e36] [cursor=pointer]:
+            - checkbox "Points of Interest" [checked] [ref=e37]
+            - text: Points of Interest
+          - generic [ref=e38] [cursor=pointer]:
+            - checkbox "Growth Map" [checked] [ref=e39]
+            - text: Growth Map
+      - generic [ref=e7]:
+        - generic [ref=e40]: Data Sources
+        - generic [ref=e41]:
+          - generic [ref=e42]: NSW Valuer General
+          - generic [ref=e43]: ·
+          - generic [ref=e44]: 2001-2024
+          - link "↗" [ref=e45] [cursor=pointer]:
+            - /url: https://www.valuergeneral.nsw.gov.au/property-sales-data
+      - generic [ref=e49]:
+        - region "Map" [ref=e50]
+        - group [ref=e51]:
+          - generic "Toggle attribution" [ref=e52] [cursor=pointer]
+          - generic [ref=e53]:
+            - link "MapLibre" [ref=e54] [cursor=pointer]:
+              - /url: https://maplibre.org/
+            - text: "| ©"
+            - link "CARTO" [ref=e55] [cursor=pointer]:
+              - /url: https://carto.com/about-carto/
+            - text: ", ©"
+            - link "OpenStreetMap" [ref=e56] [cursor=pointer]:
+              - /url: http://www.openstreetmap.org/about/
+            - text: contributors
+    - complementary [ref=e58]:
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - generic [ref=e62]: "2001"
+            - generic [ref=e63]: "2024"
+            - generic [ref=e64]: "2024"
+          - slider [ref=e65] [cursor=pointer]: "2024"
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - img [ref=e68]
+            - generic [ref=e71]: Price
+          - generic [ref=e72]:
+            - slider: "0"
+            - slider: "10000000"
+            - generic [ref=e75]:
+              - generic [ref=e76]: $0
+              - generic [ref=e77]: $10.0M
+          - generic [ref=e78]:
+            - generic [ref=e79]: $0
+            - generic [ref=e80]: $10.0M
+      - generic [ref=e81]:
+        - heading "TOP CAGR" [level=4] [ref=e82]:
+          - img [ref=e83]
+          - text: TOP CAGR
+        - application [ref=e89]:
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - generic [ref=e107]: Greenlands
+              - generic [ref=e109]: Upper
+              - generic [ref=e111]: Aratula
+              - generic [ref=e113]: Burcher
+              - generic [ref=e115]: Mount
+            - generic [ref=e2227]:
+              - generic [ref=e2228]: 43375551%
+              - generic [ref=e2229]: 20088969.7%
+              - generic [ref=e2230]: 14242643.2%
+              - generic [ref=e2231]: 7567733%
+              - generic [ref=e2232]: 2133384.2%
+      - table [ref=e117]:
+        - rowgroup [ref=e118]:
+          - row "Address CAGR ↓ Price" [ref=e119]:
+            - columnheader "Address" [ref=e120] [cursor=pointer]
+            - columnheader "CAGR ↓" [ref=e121] [cursor=pointer]
+            - columnheader "Price" [ref=e122] [cursor=pointer]
+        - rowgroup [ref=e123]:
+          - row "Belmont North 1 0 1 large transactions recorded 0.0% $750,000" [ref=e124] [cursor=pointer]:
+            - cell "Belmont North 1 0 1 large transactions recorded" [ref=e125]:
+              - paragraph [ref=e126]: Belmont North
+              - generic [ref=e127]:
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - text: "1"
+                - generic [ref=e132]:
+                  - img [ref=e133]
+                  - text: "0"
+              - paragraph [ref=e137]: 1 large transactions recorded
+            - cell "0.0%" [ref=e138]:
+              - generic [ref=e142]: 0.0%
+            - cell "$750,000" [ref=e143]:
+              - paragraph [ref=e144]: $750,000
+          - row "Belmont North 1 0 1 large transactions recorded 0.0% $960,000" [ref=e145] [cursor=pointer]:
+            - cell "Belmont North 1 0 1 large transactions recorded" [ref=e146]:
+              - paragraph [ref=e147]: Belmont North
+              - generic [ref=e148]:
+                - generic [ref=e149]:
+                  - img [ref=e150]
+                  - text: "1"
+                - generic [ref=e153]:
+                  - img [ref=e154]
+                  - text: "0"
+              - paragraph [ref=e158]: 1 large transactions recorded
+            - cell "0.0%" [ref=e159]:
+              - generic [ref=e163]: 0.0%
+            - cell "$960,000" [ref=e164]:
+              - paragraph [ref=e165]: $960,000
+          - row "Swansea 1 0 1 large transactions recorded 0.0% $1,500,000" [ref=e166] [cursor=pointer]:
+            - cell "Swansea 1 0 1 large transactions recorded" [ref=e167]:
+              - paragraph [ref=e168]: Swansea
+              - generic [ref=e169]:
+                - generic [ref=e170]:
+                  - img [ref=e171]
+                  - text: "1"
+                - generic [ref=e174]:
+                  - img [ref=e175]
+                  - text: "0"
+              - paragraph [ref=e179]: 1 large transactions recorded
+            - cell "0.0%" [ref=e180]:
+              - generic [ref=e184]: 0.0%
+            - cell "$1,500,000" [ref=e185]:
+              - paragraph [ref=e186]: $1,500,000
+          - row "Banora Point 1 0 1 large transactions recorded 0.0% $333,333" [ref=e187] [cursor=pointer]:
+            - cell "Banora Point 1 0 1 large transactions recorded" [ref=e188]:
+              - paragraph [ref=e189]: Banora Point
+              - generic [ref=e190]:
+                - generic [ref=e191]:
+                  - img [ref=e192]
+                  - text: "1"
+                - generic [ref=e195]:
+                  - img [ref=e196]
+                  - text: "0"
+              - paragraph [ref=e200]: 1 large transactions recorded
+            - cell "0.0%" [ref=e201]:
+              - generic [ref=e205]: 0.0%
+            - cell "$333,333" [ref=e206]:
+              - paragraph [ref=e207]: $333,333
+          - row "Schofields 1 0 1 large transactions recorded 0.0% $2,850,000" [ref=e208] [cursor=pointer]:
+            - cell "Schofields 1 0 1 large transactions recorded" [ref=e209]:
+              - paragraph [ref=e210]: Schofields
+              - generic [ref=e211]:
+                - generic [ref=e212]:
+                  - img [ref=e213]
+                  - text: "1"
+                - generic [ref=e216]:
+                  - img [ref=e217]
+                  - text: "0"
+              - paragraph [ref=e221]: 1 large transactions recorded
+            - cell "0.0%" [ref=e222]:
+              - generic [ref=e226]: 0.0%
+            - cell "$2,850,000" [ref=e227]:
+              - paragraph [ref=e228]: $2,850,000
+          - row "Ashfield 1 0 1 large transactions recorded 0.0% $384,000" [ref=e229] [cursor=pointer]:
+            - cell "Ashfield 1 0 1 large transactions recorded" [ref=e230]:
+              - paragraph [ref=e231]: Ashfield
+              - generic [ref=e232]:
+                - generic [ref=e233]:
+                  - img [ref=e234]
+                  - text: "1"
+                - generic [ref=e237]:
+                  - img [ref=e238]
+                  - text: "0"
+              - paragraph [ref=e242]: 1 large transactions recorded
+            - cell "0.0%" [ref=e243]:
+              - generic [ref=e247]: 0.0%
+            - cell "$384,000" [ref=e248]:
+              - paragraph [ref=e249]: $384,000
+          - row "Port Macquarie 1 0 1 large transactions recorded 0.0% $600,000" [ref=e250] [cursor=pointer]:
+            - cell "Port Macquarie 1 0 1 large transactions recorded" [ref=e251]:
+              - paragraph [ref=e252]: Port Macquarie
+              - generic [ref=e253]:
+                - generic [ref=e254]:
+                  - img [ref=e255]
+                  - text: "1"
+                - generic [ref=e258]:
+                  - img [ref=e259]
+                  - text: "0"
+              - paragraph [ref=e263]: 1 large transactions recorded
+            - cell "0.0%" [ref=e264]:
+              - generic [ref=e268]: 0.0%
+            - cell "$600,000" [ref=e269]:
+              - paragraph [ref=e270]: $600,000
+          - row "Dungog 1 0 1 large transactions recorded 0.0% $185,000" [ref=e271] [cursor=pointer]:
+            - cell "Dungog 1 0 1 large transactions recorded" [ref=e272]:
+              - paragraph [ref=e273]: Dungog
+              - generic [ref=e274]:
+                - generic [ref=e275]:
+                  - img [ref=e276]
+                  - text: "1"
+                - generic [ref=e279]:
+                  - img [ref=e280]
+                  - text: "0"
+              - paragraph [ref=e284]: 1 large transactions recorded
+            - cell "0.0%" [ref=e285]:
+              - generic [ref=e289]: 0.0%
+            - cell "$185,000" [ref=e290]:
+              - paragraph [ref=e291]: $185,000
+          - row "Pelican 1 0 1 large transactions recorded 0.0% $700,000" [ref=e292] [cursor=pointer]:
+            - cell "Pelican 1 0 1 large transactions recorded" [ref=e293]:
+              - paragraph [ref=e294]: Pelican
+              - generic [ref=e295]:
+                - generic [ref=e296]:
+                  - img [ref=e297]
+                  - text: "1"
+                - generic [ref=e300]:
+                  - img [ref=e301]
+                  - text: "0"
+              - paragraph [ref=e305]: 1 large transactions recorded
+            - cell "0.0%" [ref=e306]:
+              - generic [ref=e310]: 0.0%
+            - cell "$700,000" [ref=e311]:
+              - paragraph [ref=e312]: $700,000
+          - row "Marks Point 1 0 1 large transactions recorded 0.0% $566,666" [ref=e313] [cursor=pointer]:
+            - cell "Marks Point 1 0 1 large transactions recorded" [ref=e314]:
+              - paragraph [ref=e315]: Marks Point
+              - generic [ref=e316]:
+                - generic [ref=e317]:
+                  - img [ref=e318]
+                  - text: "1"
+                - generic [ref=e321]:
+                  - img [ref=e322]
+                  - text: "0"
+              - paragraph [ref=e326]: 1 large transactions recorded
+            - cell "0.0%" [ref=e327]:
+              - generic [ref=e331]: 0.0%
+            - cell "$566,666" [ref=e332]:
+              - paragraph [ref=e333]: $566,666
+          - row "Farley 0 0 1 large transactions recorded 0.0% $234,112" [ref=e334] [cursor=pointer]:
+            - cell "Farley 0 0 1 large transactions recorded" [ref=e335]:
+              - paragraph [ref=e336]: Farley
+              - generic [ref=e337]:
+                - generic [ref=e338]:
+                  - img [ref=e339]
+                  - text: "0"
+                - generic [ref=e342]:
+                  - img [ref=e343]
+                  - text: "0"
+              - paragraph [ref=e347]: 1 large transactions recorded
+            - cell "0.0%" [ref=e348]:
+              - generic [ref=e352]: 0.0%
+            - cell "$234,112" [ref=e353]:
+              - paragraph [ref=e354]: $234,112
+          - row "Tighes Hill 1 0 1 large transactions recorded 0.0% $865,000" [ref=e355] [cursor=pointer]:
+            - cell "Tighes Hill 1 0 1 large transactions recorded" [ref=e356]:
+              - paragraph [ref=e357]: Tighes Hill
+              - generic [ref=e358]:
+                - generic [ref=e359]:
+                  - img [ref=e360]
+                  - text: "1"
+                - generic [ref=e363]:
+                  - img [ref=e364]
+                  - text: "0"
+              - paragraph [ref=e368]: 1 large transactions recorded
+            - cell "0.0%" [ref=e369]:
+              - generic [ref=e373]: 0.0%
+            - cell "$865,000" [ref=e374]:
+              - paragraph [ref=e375]: $865,000
+          - row "Medowie 1 0 1 large transactions recorded 0.0% $1,100,000" [ref=e376] [cursor=pointer]:
+            - cell "Medowie 1 0 1 large transactions recorded" [ref=e377]:
+              - paragraph [ref=e378]: Medowie
+              - generic [ref=e379]:
+                - generic [ref=e380]:
+                  - img [ref=e381]
+                  - text: "1"
+                - generic [ref=e384]:
+                  - img [ref=e385]
+                  - text: "0"
+              - paragraph [ref=e389]: 1 large transactions recorded
+            - cell "0.0%" [ref=e390]:
+              - generic [ref=e394]: 0.0%
+            - cell "$1,100,000" [ref=e395]:
+              - paragraph [ref=e396]: $1,100,000
+          - row "Corlette 1 0 1 large transactions recorded 0.0% $1,180,000" [ref=e397] [cursor=pointer]:
+            - cell "Corlette 1 0 1 large transactions recorded" [ref=e398]:
+              - paragraph [ref=e399]: Corlette
+              - generic [ref=e400]:
+                - generic [ref=e401]:
+                  - img [ref=e402]
+                  - text: "1"
+                - generic [ref=e405]:
+                  - img [ref=e406]
+                  - text: "0"
+              - paragraph [ref=e410]: 1 large transactions recorded
+            - cell "0.0%" [ref=e411]:
+              - generic [ref=e415]: 0.0%
+            - cell "$1,180,000" [ref=e416]:
+              - paragraph [ref=e417]: $1,180,000
+          - row "Pambula 0 0 1 large transactions recorded 0.0% $1,400,000" [ref=e418] [cursor=pointer]:
+            - cell "Pambula 0 0 1 large transactions recorded" [ref=e419]:
+              - paragraph [ref=e420]: Pambula
+              - generic [ref=e421]:
+                - generic [ref=e422]:
+                  - img [ref=e423]
+                  - text: "0"
+                - generic [ref=e426]:
+                  - img [ref=e427]
+                  - text: "0"
+              - paragraph [ref=e431]: 1 large transactions recorded
+            - cell "0.0%" [ref=e432]:
+              - generic [ref=e436]: 0.0%
+            - cell "$1,400,000" [ref=e437]:
+              - paragraph [ref=e438]: $1,400,000
+          - row "Boydtown 1 0 1 large transactions recorded 0.0% $717,000" [ref=e439] [cursor=pointer]:
+            - cell "Boydtown 1 0 1 large transactions recorded" [ref=e440]:
+              - paragraph [ref=e441]: Boydtown
+              - generic [ref=e442]:
+                - generic [ref=e443]:
+                  - img [ref=e444]
+                  - text: "1"
+                - generic [ref=e447]:
+                  - img [ref=e448]
+                  - text: "0"
+              - paragraph [ref=e452]: 1 large transactions recorded
+            - cell "0.0%" [ref=e453]:
+              - generic [ref=e457]: 0.0%
+            - cell "$717,000" [ref=e458]:
+              - paragraph [ref=e459]: $717,000
+          - row "Rouse Hill 0 0 1 large transactions recorded 0.0% $703,560" [ref=e460] [cursor=pointer]:
+            - cell "Rouse Hill 0 0 1 large transactions recorded" [ref=e461]:
+              - paragraph [ref=e462]: Rouse Hill
+              - generic [ref=e463]:
+                - generic [ref=e464]:
+                  - img [ref=e465]
+                  - text: "0"
+                - generic [ref=e468]:
+                  - img [ref=e469]
+                  - text: "0"
+              - paragraph [ref=e473]: 1 large transactions recorded
+            - cell "0.0%" [ref=e474]:
+              - generic [ref=e478]: 0.0%
+            - cell "$703,560" [ref=e479]:
+              - paragraph [ref=e480]: $703,560
+          - row "Gables 0 0 1 large transactions recorded 0.0% $571,100" [ref=e481] [cursor=pointer]:
+            - cell "Gables 0 0 1 large transactions recorded" [ref=e482]:
+              - paragraph [ref=e483]: Gables
+              - generic [ref=e484]:
+                - generic [ref=e485]:
+                  - img [ref=e486]
+                  - text: "0"
+                - generic [ref=e489]:
+                  - img [ref=e490]
+                  - text: "0"
+              - paragraph [ref=e494]: 1 large transactions recorded
+            - cell "0.0%" [ref=e495]:
+              - generic [ref=e499]: 0.0%
+            - cell "$571,100" [ref=e500]:
+              - paragraph [ref=e501]: $571,100
+          - row "Box Hill 0 0 1 large transactions recorded 0.0% $176,000" [ref=e502] [cursor=pointer]:
+            - cell "Box Hill 0 0 1 large transactions recorded" [ref=e503]:
+              - paragraph [ref=e504]: Box Hill
+              - generic [ref=e505]:
+                - generic [ref=e506]:
+                  - img [ref=e507]
+                  - text: "0"
+                - generic [ref=e510]:
+                  - img [ref=e511]
+                  - text: "0"
+              - paragraph [ref=e515]: 1 large transactions recorded
+            - cell "0.0%" [ref=e516]:
+              - generic [ref=e520]: 0.0%
+            - cell "$176,000" [ref=e521]:
+              - paragraph [ref=e522]: $176,000
+          - row "Box Hill 0 0 1 large transactions recorded 0.0% $100,000" [ref=e523] [cursor=pointer]:
+            - cell "Box Hill 0 0 1 large transactions recorded" [ref=e524]:
+              - paragraph [ref=e525]: Box Hill
+              - generic [ref=e526]:
+                - generic [ref=e527]:
+                  - img [ref=e528]
+                  - text: "0"
+                - generic [ref=e531]:
+                  - img [ref=e532]
+                  - text: "0"
+              - paragraph [ref=e536]: 1 large transactions recorded
+            - cell "0.0%" [ref=e537]:
+              - generic [ref=e541]: 0.0%
+            - cell "$100,000" [ref=e542]:
+              - paragraph [ref=e543]: $100,000
+          - row "Beecroft 1 0 1 large transactions recorded 0.0% $935,000" [ref=e544] [cursor=pointer]:
+            - cell "Beecroft 1 0 1 large transactions recorded" [ref=e545]:
+              - paragraph [ref=e546]: Beecroft
+              - generic [ref=e547]:
+                - generic [ref=e548]:
+                  - img [ref=e549]
+                  - text: "1"
+                - generic [ref=e552]:
+                  - img [ref=e553]
+                  - text: "0"
+              - paragraph [ref=e557]: 1 large transactions recorded
+            - cell "0.0%" [ref=e558]:
+              - generic [ref=e562]: 0.0%
+            - cell "$935,000" [ref=e563]:
+              - paragraph [ref=e564]: $935,000
+          - row "Waitara 1 0 1 large transactions recorded 0.0% $700,000" [ref=e565] [cursor=pointer]:
+            - cell "Waitara 1 0 1 large transactions recorded" [ref=e566]:
+              - paragraph [ref=e567]: Waitara
+              - generic [ref=e568]:
+                - generic [ref=e569]:
+                  - img [ref=e570]
+                  - text: "1"
+                - generic [ref=e573]:
+                  - img [ref=e574]
+                  - text: "0"
+              - paragraph [ref=e578]: 1 large transactions recorded
+            - cell "0.0%" [ref=e579]:
+              - generic [ref=e583]: 0.0%
+            - cell "$700,000" [ref=e584]:
+              - paragraph [ref=e585]: $700,000
+          - row "Shoalhaven Heads 1 0 1 large transactions recorded 0.0% $850,000" [ref=e586] [cursor=pointer]:
+            - cell "Shoalhaven Heads 1 0 1 large transactions recorded" [ref=e587]:
+              - paragraph [ref=e588]: Shoalhaven Heads
+              - generic [ref=e589]:
+                - generic [ref=e590]:
+                  - img [ref=e591]
+                  - text: "1"
+                - generic [ref=e594]:
+                  - img [ref=e595]
+                  - text: "0"
+              - paragraph [ref=e599]: 1 large transactions recorded
+            - cell "0.0%" [ref=e600]:
+              - generic [ref=e604]: 0.0%
+            - cell "$850,000" [ref=e605]:
+              - paragraph [ref=e606]: $850,000
+          - row "Exeter 0 0 1 large transactions recorded 0.0% $607,500" [ref=e607] [cursor=pointer]:
+            - cell "Exeter 0 0 1 large transactions recorded" [ref=e608]:
+              - paragraph [ref=e609]: Exeter
+              - generic [ref=e610]:
+                - generic [ref=e611]:
+                  - img [ref=e612]
+                  - text: "0"
+                - generic [ref=e615]:
+                  - img [ref=e616]
+                  - text: "0"
+              - paragraph [ref=e620]: 1 large transactions recorded
+            - cell "0.0%" [ref=e621]:
+              - generic [ref=e625]: 0.0%
+            - cell "$607,500" [ref=e626]:
+              - paragraph [ref=e627]: $607,500
+          - row "Oberon 1 0 1 large transactions recorded 0.0% $220,000" [ref=e628] [cursor=pointer]:
+            - cell "Oberon 1 0 1 large transactions recorded" [ref=e629]:
+              - paragraph [ref=e630]: Oberon
+              - generic [ref=e631]:
+                - generic [ref=e632]:
+                  - img [ref=e633]
+                  - text: "1"
+                - generic [ref=e636]:
+                  - img [ref=e637]
+                  - text: "0"
+              - paragraph [ref=e641]: 1 large transactions recorded
+            - cell "0.0%" [ref=e642]:
+              - generic [ref=e646]: 0.0%
+            - cell "$220,000" [ref=e647]:
+              - paragraph [ref=e648]: $220,000
+          - row "Orange 1 0 1 large transactions recorded 0.0% $325,000" [ref=e649] [cursor=pointer]:
+            - cell "Orange 1 0 1 large transactions recorded" [ref=e650]:
+              - paragraph [ref=e651]: Orange
+              - generic [ref=e652]:
+                - generic [ref=e653]:
+                  - img [ref=e654]
+                  - text: "1"
+                - generic [ref=e657]:
+                  - img [ref=e658]
+                  - text: "0"
+              - paragraph [ref=e662]: 1 large transactions recorded
+            - cell "0.0%" [ref=e663]:
+              - generic [ref=e667]: 0.0%
+            - cell "$325,000" [ref=e668]:
+              - paragraph [ref=e669]: $325,000
+          - row "Orange 1 0 1 large transactions recorded 0.0% $557,000" [ref=e670] [cursor=pointer]:
+            - cell "Orange 1 0 1 large transactions recorded" [ref=e671]:
+              - paragraph [ref=e672]: Orange
+              - generic [ref=e673]:
+                - generic [ref=e674]:
+                  - img [ref=e675]
+                  - text: "1"
+                - generic [ref=e678]:
+                  - img [ref=e679]
+                  - text: "0"
+              - paragraph [ref=e683]: 1 large transactions recorded
+            - cell "0.0%" [ref=e684]:
+              - generic [ref=e688]: 0.0%
+            - cell "$557,000" [ref=e689]:
+              - paragraph [ref=e690]: $557,000
+          - row "Mortlake 1 0 1 large transactions recorded 0.0% $575,000" [ref=e691] [cursor=pointer]:
+            - cell "Mortlake 1 0 1 large transactions recorded" [ref=e692]:
+              - paragraph [ref=e693]: Mortlake
+              - generic [ref=e694]:
+                - generic [ref=e695]:
+                  - img [ref=e696]
+                  - text: "1"
+                - generic [ref=e699]:
+                  - img [ref=e700]
+                  - text: "0"
+              - paragraph [ref=e704]: 1 large transactions recorded
+            - cell "0.0%" [ref=e705]:
+              - generic [ref=e709]: 0.0%
+            - cell "$575,000" [ref=e710]:
+              - paragraph [ref=e711]: $575,000
+          - row "Boambee East 1 0 1 large transactions recorded 0.0% $660,000" [ref=e712] [cursor=pointer]:
+            - cell "Boambee East 1 0 1 large transactions recorded" [ref=e713]:
+              - paragraph [ref=e714]: Boambee East
+              - generic [ref=e715]:
+                - generic [ref=e716]:
+                  - img [ref=e717]
+                  - text: "1"
+                - generic [ref=e720]:
+                  - img [ref=e721]
+                  - text: "0"
+              - paragraph [ref=e725]: 1 large transactions recorded
+            - cell "0.0%" [ref=e726]:
+              - generic [ref=e730]: 0.0%
+            - cell "$660,000" [ref=e731]:
+              - paragraph [ref=e732]: $660,000
+          - row "Kinchela 1 0 1 large transactions recorded 0.0% $625,000" [ref=e733] [cursor=pointer]:
+            - cell "Kinchela 1 0 1 large transactions recorded" [ref=e734]:
+              - paragraph [ref=e735]: Kinchela
+              - generic [ref=e736]:
+                - generic [ref=e737]:
+                  - img [ref=e738]
+                  - text: "1"
+                - generic [ref=e741]:
+                  - img [ref=e742]
+                  - text: "0"
+              - paragraph [ref=e746]: 1 large transactions recorded
+            - cell "0.0%" [ref=e747]:
+              - generic [ref=e751]: 0.0%
+            - cell "$625,000" [ref=e752]:
+              - paragraph [ref=e753]: $625,000
+          - row "South Kempsey 1 0 1 large transactions recorded 0.0% $20,047" [ref=e754] [cursor=pointer]:
+            - cell "South Kempsey 1 0 1 large transactions recorded" [ref=e755]:
+              - paragraph [ref=e756]: South Kempsey
+              - generic [ref=e757]:
+                - generic [ref=e758]:
+                  - img [ref=e759]
+                  - text: "1"
+                - generic [ref=e762]:
+                  - img [ref=e763]
+                  - text: "0"
+              - paragraph [ref=e767]: 1 large transactions recorded
+            - cell "0.0%" [ref=e768]:
+              - generic [ref=e772]: 0.0%
+            - cell "$20,047" [ref=e773]:
+              - paragraph [ref=e774]: $20,047
+          - row "Clunes 1 0 1 large transactions recorded 0.0% $1,050,000" [ref=e775] [cursor=pointer]:
+            - cell "Clunes 1 0 1 large transactions recorded" [ref=e776]:
+              - paragraph [ref=e777]: Clunes
+              - generic [ref=e778]:
+                - generic [ref=e779]:
+                  - img [ref=e780]
+                  - text: "1"
+                - generic [ref=e783]:
+                  - img [ref=e784]
+                  - text: "0"
+              - paragraph [ref=e788]: 1 large transactions recorded
+            - cell "0.0%" [ref=e789]:
+              - generic [ref=e793]: 0.0%
+            - cell "$1,050,000" [ref=e794]:
+              - paragraph [ref=e795]: $1,050,000
+          - row "Murwillumbah 1 0 1 large transactions recorded 0.0% $970,000" [ref=e796] [cursor=pointer]:
+            - cell "Murwillumbah 1 0 1 large transactions recorded" [ref=e797]:
+              - paragraph [ref=e798]: Murwillumbah
+              - generic [ref=e799]:
+                - generic [ref=e800]:
+                  - img [ref=e801]
+                  - text: "1"
+                - generic [ref=e804]:
+                  - img [ref=e805]
+                  - text: "0"
+              - paragraph [ref=e809]: 1 large transactions recorded
+            - cell "0.0%" [ref=e810]:
+              - generic [ref=e814]: 0.0%
+            - cell "$970,000" [ref=e815]:
+              - paragraph [ref=e816]: $970,000
+          - row "Maroubra 1 0 1 large transactions recorded 0.0% $2,100,000" [ref=e817] [cursor=pointer]:
+            - cell "Maroubra 1 0 1 large transactions recorded" [ref=e818]:
+              - paragraph [ref=e819]: Maroubra
+              - generic [ref=e820]:
+                - generic [ref=e821]:
+                  - img [ref=e822]
+                  - text: "1"
+                - generic [ref=e825]:
+                  - img [ref=e826]
+                  - text: "0"
+              - paragraph [ref=e830]: 1 large transactions recorded
+            - cell "0.0%" [ref=e831]:
+              - generic [ref=e835]: 0.0%
+            - cell "$2,100,000" [ref=e836]:
+              - paragraph [ref=e837]: $2,100,000
+          - row "Maroubra 1 0 1 large transactions recorded 0.0% $2,100,000" [ref=e838] [cursor=pointer]:
+            - cell "Maroubra 1 0 1 large transactions recorded" [ref=e839]:
+              - paragraph [ref=e840]: Maroubra
+              - generic [ref=e841]:
+                - generic [ref=e842]:
+                  - img [ref=e843]
+                  - text: "1"
+                - generic [ref=e846]:
+                  - img [ref=e847]
+                  - text: "0"
+              - paragraph [ref=e851]: 1 large transactions recorded
+            - cell "0.0%" [ref=e852]:
+              - generic [ref=e856]: 0.0%
+            - cell "$2,100,000" [ref=e857]:
+              - paragraph [ref=e858]: $2,100,000
+          - row "Edgecliff 0 0 1 large transactions recorded 0.0% $29,605,575" [ref=e859] [cursor=pointer]:
+            - cell "Edgecliff 0 0 1 large transactions recorded" [ref=e860]:
+              - paragraph [ref=e861]: Edgecliff
+              - generic [ref=e862]:
+                - generic [ref=e863]:
+                  - img [ref=e864]
+                  - text: "0"
+                - generic [ref=e867]:
+                  - img [ref=e868]
+                  - text: "0"
+              - paragraph [ref=e872]: 1 large transactions recorded
+            - cell "0.0%" [ref=e873]:
+              - generic [ref=e877]: 0.0%
+            - cell "$29,605,575" [ref=e878]:
+              - paragraph [ref=e879]: $29,605,575
+          - row "Edgecliff 0 0 1 large transactions recorded 0.0% $29,605,575" [ref=e880] [cursor=pointer]:
+            - cell "Edgecliff 0 0 1 large transactions recorded" [ref=e881]:
+              - paragraph [ref=e882]: Edgecliff
+              - generic [ref=e883]:
+                - generic [ref=e884]:
+                  - img [ref=e885]
+                  - text: "0"
+                - generic [ref=e888]:
+                  - img [ref=e889]
+                  - text: "0"
+              - paragraph [ref=e893]: 1 large transactions recorded
+            - cell "0.0%" [ref=e894]:
+              - generic [ref=e898]: 0.0%
+            - cell "$29,605,575" [ref=e899]:
+              - paragraph [ref=e900]: $29,605,575
+          - row "Katoomba 1 0 1 large transactions recorded 0.0% $246,000" [ref=e901] [cursor=pointer]:
+            - cell "Katoomba 1 0 1 large transactions recorded" [ref=e902]:
+              - paragraph [ref=e903]: Katoomba
+              - generic [ref=e904]:
+                - generic [ref=e905]:
+                  - img [ref=e906]
+                  - text: "1"
+                - generic [ref=e909]:
+                  - img [ref=e910]
+                  - text: "0"
+              - paragraph [ref=e914]: 1 large transactions recorded
+            - cell "0.0%" [ref=e915]:
+              - generic [ref=e919]: 0.0%
+            - cell "$246,000" [ref=e920]:
+              - paragraph [ref=e921]: $246,000
+          - row "Minto Heights 1 0 1 large transactions recorded 0.0% $2,610,000" [ref=e922] [cursor=pointer]:
+            - cell "Minto Heights 1 0 1 large transactions recorded" [ref=e923]:
+              - paragraph [ref=e924]: Minto Heights
+              - generic [ref=e925]:
+                - generic [ref=e926]:
+                  - img [ref=e927]
+                  - text: "1"
+                - generic [ref=e930]:
+                  - img [ref=e931]
+                  - text: "0"
+              - paragraph [ref=e935]: 1 large transactions recorded
+            - cell "0.0%" [ref=e936]:
+              - generic [ref=e940]: 0.0%
+            - cell "$2,610,000" [ref=e941]:
+              - paragraph [ref=e942]: $2,610,000
+          - row "Webbs Creek 1 0 1 large transactions recorded 0.0% $187,500" [ref=e943] [cursor=pointer]:
+            - cell "Webbs Creek 1 0 1 large transactions recorded" [ref=e944]:
+              - paragraph [ref=e945]: Webbs Creek
+              - generic [ref=e946]:
+                - generic [ref=e947]:
+                  - img [ref=e948]
+                  - text: "1"
+                - generic [ref=e951]:
+                  - img [ref=e952]
+                  - text: "0"
+              - paragraph [ref=e956]: 1 large transactions recorded
+            - cell "0.0%" [ref=e957]:
+              - generic [ref=e961]: 0.0%
+            - cell "$187,500" [ref=e962]:
+              - paragraph [ref=e963]: $187,500
+          - row "Middleton Grange 1 0 1 large transactions recorded 0.0% $950,000" [ref=e964] [cursor=pointer]:
+            - cell "Middleton Grange 1 0 1 large transactions recorded" [ref=e965]:
+              - paragraph [ref=e966]: Middleton Grange
+              - generic [ref=e967]:
+                - generic [ref=e968]:
+                  - img [ref=e969]
+                  - text: "1"
+                - generic [ref=e972]:
+                  - img [ref=e973]
+                  - text: "0"
+              - paragraph [ref=e977]: 1 large transactions recorded
+            - cell "0.0%" [ref=e978]:
+              - generic [ref=e982]: 0.0%
+            - cell "$950,000" [ref=e983]:
+              - paragraph [ref=e984]: $950,000
+          - row "Belmore 1 0 1 large transactions recorded 0.0% $600,000" [ref=e985] [cursor=pointer]:
+            - cell "Belmore 1 0 1 large transactions recorded" [ref=e986]:
+              - paragraph [ref=e987]: Belmore
+              - generic [ref=e988]:
+                - generic [ref=e989]:
+                  - img [ref=e990]
+                  - text: "1"
+                - generic [ref=e993]:
+                  - img [ref=e994]
+                  - text: "0"
+              - paragraph [ref=e998]: 1 large transactions recorded
+            - cell "0.0%" [ref=e999]:
+              - generic [ref=e1003]: 0.0%
+            - cell "$600,000" [ref=e1004]:
+              - paragraph [ref=e1005]: $600,000
+          - row "Belmore 1 0 1 large transactions recorded 0.0% $1,600,000" [ref=e1006] [cursor=pointer]:
+            - cell "Belmore 1 0 1 large transactions recorded" [ref=e1007]:
+              - paragraph [ref=e1008]: Belmore
+              - generic [ref=e1009]:
+                - generic [ref=e1010]:
+                  - img [ref=e1011]
+                  - text: "1"
+                - generic [ref=e1014]:
+                  - img [ref=e1015]
+                  - text: "0"
+              - paragraph [ref=e1019]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1020]:
+              - generic [ref=e1024]: 0.0%
+            - cell "$1,600,000" [ref=e1025]:
+              - paragraph [ref=e1026]: $1,600,000
+          - row "Yagoona 1 0 1 large transactions recorded 0.0% $210,000" [ref=e1027] [cursor=pointer]:
+            - cell "Yagoona 1 0 1 large transactions recorded" [ref=e1028]:
+              - paragraph [ref=e1029]: Yagoona
+              - generic [ref=e1030]:
+                - generic [ref=e1031]:
+                  - img [ref=e1032]
+                  - text: "1"
+                - generic [ref=e1035]:
+                  - img [ref=e1036]
+                  - text: "0"
+              - paragraph [ref=e1040]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1041]:
+              - generic [ref=e1045]: 0.0%
+            - cell "$210,000" [ref=e1046]:
+              - paragraph [ref=e1047]: $210,000
+          - row "Blue Haven 1 0 1 large transactions recorded 0.0% $175,000" [ref=e1048] [cursor=pointer]:
+            - cell "Blue Haven 1 0 1 large transactions recorded" [ref=e1049]:
+              - paragraph [ref=e1050]: Blue Haven
+              - generic [ref=e1051]:
+                - generic [ref=e1052]:
+                  - img [ref=e1053]
+                  - text: "1"
+                - generic [ref=e1056]:
+                  - img [ref=e1057]
+                  - text: "0"
+              - paragraph [ref=e1061]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1062]:
+              - generic [ref=e1066]: 0.0%
+            - cell "$175,000" [ref=e1067]:
+              - paragraph [ref=e1068]: $175,000
+          - row "Wadalba 1 0 1 large transactions recorded 0.0% $3,965,888" [ref=e1069] [cursor=pointer]:
+            - cell "Wadalba 1 0 1 large transactions recorded" [ref=e1070]:
+              - paragraph [ref=e1071]: Wadalba
+              - generic [ref=e1072]:
+                - generic [ref=e1073]:
+                  - img [ref=e1074]
+                  - text: "1"
+                - generic [ref=e1077]:
+                  - img [ref=e1078]
+                  - text: "0"
+              - paragraph [ref=e1082]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1083]:
+              - generic [ref=e1087]: 0.0%
+            - cell "$3,965,888" [ref=e1088]:
+              - paragraph [ref=e1089]: $3,965,888
+          - row "Eastwood 1 0 1 large transactions recorded 0.0% $2,040,000" [ref=e1090] [cursor=pointer]:
+            - cell "Eastwood 1 0 1 large transactions recorded" [ref=e1091]:
+              - paragraph [ref=e1092]: Eastwood
+              - generic [ref=e1093]:
+                - generic [ref=e1094]:
+                  - img [ref=e1095]
+                  - text: "1"
+                - generic [ref=e1098]:
+                  - img [ref=e1099]
+                  - text: "0"
+              - paragraph [ref=e1103]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1104]:
+              - generic [ref=e1108]: 0.0%
+            - cell "$2,040,000" [ref=e1109]:
+              - paragraph [ref=e1110]: $2,040,000
+          - row "Lidcombe 1 0 1 large transactions recorded 0.0% $950,000" [ref=e1111] [cursor=pointer]:
+            - cell "Lidcombe 1 0 1 large transactions recorded" [ref=e1112]:
+              - paragraph [ref=e1113]: Lidcombe
+              - generic [ref=e1114]:
+                - generic [ref=e1115]:
+                  - img [ref=e1116]
+                  - text: "1"
+                - generic [ref=e1119]:
+                  - img [ref=e1120]
+                  - text: "0"
+              - paragraph [ref=e1124]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1125]:
+              - generic [ref=e1129]: 0.0%
+            - cell "$950,000" [ref=e1130]:
+              - paragraph [ref=e1131]: $950,000
+          - row "Carss Park 1 0 1 large transactions recorded 0.0% $2,780,000" [ref=e1132] [cursor=pointer]:
+            - cell "Carss Park 1 0 1 large transactions recorded" [ref=e1133]:
+              - paragraph [ref=e1134]: Carss Park
+              - generic [ref=e1135]:
+                - generic [ref=e1136]:
+                  - img [ref=e1137]
+                  - text: "1"
+                - generic [ref=e1140]:
+                  - img [ref=e1141]
+                  - text: "0"
+              - paragraph [ref=e1145]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1146]:
+              - generic [ref=e1150]: 0.0%
+            - cell "$2,780,000" [ref=e1151]:
+              - paragraph [ref=e1152]: $2,780,000
+          - row "Young 0 0 1 large transactions recorded 0.0% $1,450,000" [ref=e1153] [cursor=pointer]:
+            - cell "Young 0 0 1 large transactions recorded" [ref=e1154]:
+              - paragraph [ref=e1155]: Young
+              - generic [ref=e1156]:
+                - generic [ref=e1157]:
+                  - img [ref=e1158]
+                  - text: "0"
+                - generic [ref=e1161]:
+                  - img [ref=e1162]
+                  - text: "0"
+              - paragraph [ref=e1166]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1167]:
+              - generic [ref=e1171]: 0.0%
+            - cell "$1,450,000" [ref=e1172]:
+              - paragraph [ref=e1173]: $1,450,000
+          - row "Ashfield 0 0 1 large transactions recorded 0.0% $495,000" [ref=e1174] [cursor=pointer]:
+            - cell "Ashfield 0 0 1 large transactions recorded" [ref=e1175]:
+              - paragraph [ref=e1176]: Ashfield
+              - generic [ref=e1177]:
+                - generic [ref=e1178]:
+                  - img [ref=e1179]
+                  - text: "0"
+                - generic [ref=e1182]:
+                  - img [ref=e1183]
+                  - text: "0"
+              - paragraph [ref=e1187]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1188]:
+              - generic [ref=e1192]: 0.0%
+            - cell "$495,000" [ref=e1193]:
+              - paragraph [ref=e1194]: $495,000
+          - row "Leichhardt 1 0 1 large transactions recorded 0.0% $1,330,000" [ref=e1195] [cursor=pointer]:
+            - cell "Leichhardt 1 0 1 large transactions recorded" [ref=e1196]:
+              - paragraph [ref=e1197]: Leichhardt
+              - generic [ref=e1198]:
+                - generic [ref=e1199]:
+                  - img [ref=e1200]
+                  - text: "1"
+                - generic [ref=e1203]:
+                  - img [ref=e1204]
+                  - text: "0"
+              - paragraph [ref=e1208]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1209]:
+              - generic [ref=e1213]: 0.0%
+            - cell "$1,330,000" [ref=e1214]:
+              - paragraph [ref=e1215]: $1,330,000
+          - row "Newtown 1 0 1 large transactions recorded 0.0% $483,333" [ref=e1216] [cursor=pointer]:
+            - cell "Newtown 1 0 1 large transactions recorded" [ref=e1217]:
+              - paragraph [ref=e1218]: Newtown
+              - generic [ref=e1219]:
+                - generic [ref=e1220]:
+                  - img [ref=e1221]
+                  - text: "1"
+                - generic [ref=e1224]:
+                  - img [ref=e1225]
+                  - text: "0"
+              - paragraph [ref=e1229]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1230]:
+              - generic [ref=e1234]: 0.0%
+            - cell "$483,333" [ref=e1235]:
+              - paragraph [ref=e1236]: $483,333
+          - row "Tea Gardens 0 0 1 large transactions recorded 0.0% $9,446" [ref=e1237] [cursor=pointer]:
+            - cell "Tea Gardens 0 0 1 large transactions recorded" [ref=e1238]:
+              - paragraph [ref=e1239]: Tea Gardens
+              - generic [ref=e1240]:
+                - generic [ref=e1241]:
+                  - img [ref=e1242]
+                  - text: "0"
+                - generic [ref=e1245]:
+                  - img [ref=e1246]
+                  - text: "0"
+              - paragraph [ref=e1250]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1251]:
+              - generic [ref=e1255]: 0.0%
+            - cell "$9,446" [ref=e1256]:
+              - paragraph [ref=e1257]: $9,446
+          - row "Gloucester 1 0 1 large transactions recorded 0.0% $570,000" [ref=e1258] [cursor=pointer]:
+            - cell "Gloucester 1 0 1 large transactions recorded" [ref=e1259]:
+              - paragraph [ref=e1260]: Gloucester
+              - generic [ref=e1261]:
+                - generic [ref=e1262]:
+                  - img [ref=e1263]
+                  - text: "1"
+                - generic [ref=e1266]:
+                  - img [ref=e1267]
+                  - text: "0"
+              - paragraph [ref=e1271]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1272]:
+              - generic [ref=e1276]: 0.0%
+            - cell "$570,000" [ref=e1277]:
+              - paragraph [ref=e1278]: $570,000
+          - row "Narrabeen 1 0 1 large transactions recorded 0.0% $1,300,000" [ref=e1279] [cursor=pointer]:
+            - cell "Narrabeen 1 0 1 large transactions recorded" [ref=e1280]:
+              - paragraph [ref=e1281]: Narrabeen
+              - generic [ref=e1282]:
+                - generic [ref=e1283]:
+                  - img [ref=e1284]
+                  - text: "1"
+                - generic [ref=e1287]:
+                  - img [ref=e1288]
+                  - text: "0"
+              - paragraph [ref=e1292]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1293]:
+              - generic [ref=e1297]: 0.0%
+            - cell "$1,300,000" [ref=e1298]:
+              - paragraph [ref=e1299]: $1,300,000
+          - row "Cooma 1 0 1 large transactions recorded 0.0% $360,000" [ref=e1300] [cursor=pointer]:
+            - cell "Cooma 1 0 1 large transactions recorded" [ref=e1301]:
+              - paragraph [ref=e1302]: Cooma
+              - generic [ref=e1303]:
+                - generic [ref=e1304]:
+                  - img [ref=e1305]
+                  - text: "1"
+                - generic [ref=e1308]:
+                  - img [ref=e1309]
+                  - text: "0"
+              - paragraph [ref=e1313]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1314]:
+              - generic [ref=e1318]: 0.0%
+            - cell "$360,000" [ref=e1319]:
+              - paragraph [ref=e1320]: $360,000
+          - row "Batlow 1 0 1 large transactions recorded 0.0% $360,000" [ref=e1321] [cursor=pointer]:
+            - cell "Batlow 1 0 1 large transactions recorded" [ref=e1322]:
+              - paragraph [ref=e1323]: Batlow
+              - generic [ref=e1324]:
+                - generic [ref=e1325]:
+                  - img [ref=e1326]
+                  - text: "1"
+                - generic [ref=e1329]:
+                  - img [ref=e1330]
+                  - text: "0"
+              - paragraph [ref=e1334]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1335]:
+              - generic [ref=e1339]: 0.0%
+            - cell "$360,000" [ref=e1340]:
+              - paragraph [ref=e1341]: $360,000
+          - row "Gadara 1 0 1 large transactions recorded 0.0% $800,000" [ref=e1342] [cursor=pointer]:
+            - cell "Gadara 1 0 1 large transactions recorded" [ref=e1343]:
+              - paragraph [ref=e1344]: Gadara
+              - generic [ref=e1345]:
+                - generic [ref=e1346]:
+                  - img [ref=e1347]
+                  - text: "1"
+                - generic [ref=e1350]:
+                  - img [ref=e1351]
+                  - text: "0"
+              - paragraph [ref=e1355]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1356]:
+              - generic [ref=e1360]: 0.0%
+            - cell "$800,000" [ref=e1361]:
+              - paragraph [ref=e1362]: $800,000
+          - row "Tumbarumba 1 0 1 large transactions recorded 0.0% $430,000" [ref=e1363] [cursor=pointer]:
+            - cell "Tumbarumba 1 0 1 large transactions recorded" [ref=e1364]:
+              - paragraph [ref=e1365]: Tumbarumba
+              - generic [ref=e1366]:
+                - generic [ref=e1367]:
+                  - img [ref=e1368]
+                  - text: "1"
+                - generic [ref=e1371]:
+                  - img [ref=e1372]
+                  - text: "0"
+              - paragraph [ref=e1376]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1377]:
+              - generic [ref=e1381]: 0.0%
+            - cell "$430,000" [ref=e1382]:
+              - paragraph [ref=e1383]: $430,000
+          - row "Wattle Flat 1 0 1 large transactions recorded 0.0% $300,000" [ref=e1384] [cursor=pointer]:
+            - cell "Wattle Flat 1 0 1 large transactions recorded" [ref=e1385]:
+              - paragraph [ref=e1386]: Wattle Flat
+              - generic [ref=e1387]:
+                - generic [ref=e1388]:
+                  - img [ref=e1389]
+                  - text: "1"
+                - generic [ref=e1392]:
+                  - img [ref=e1393]
+                  - text: "0"
+              - paragraph [ref=e1397]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1398]:
+              - generic [ref=e1402]: 0.0%
+            - cell "$300,000" [ref=e1403]:
+              - paragraph [ref=e1404]: $300,000
+          - row "Laurieton 1 0 1 large transactions recorded 0.0% $120,000" [ref=e1405] [cursor=pointer]:
+            - cell "Laurieton 1 0 1 large transactions recorded" [ref=e1406]:
+              - paragraph [ref=e1407]: Laurieton
+              - generic [ref=e1408]:
+                - generic [ref=e1409]:
+                  - img [ref=e1410]
+                  - text: "1"
+                - generic [ref=e1413]:
+                  - img [ref=e1414]
+                  - text: "0"
+              - paragraph [ref=e1418]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1419]:
+              - generic [ref=e1423]: 0.0%
+            - cell "$120,000" [ref=e1424]:
+              - paragraph [ref=e1425]: $120,000
+          - row "Hanging Rock 1 0 1 large transactions recorded 0.0% $500,000" [ref=e1426] [cursor=pointer]:
+            - cell "Hanging Rock 1 0 1 large transactions recorded" [ref=e1427]:
+              - paragraph [ref=e1428]: Hanging Rock
+              - generic [ref=e1429]:
+                - generic [ref=e1430]:
+                  - img [ref=e1431]
+                  - text: "1"
+                - generic [ref=e1434]:
+                  - img [ref=e1435]
+                  - text: "0"
+              - paragraph [ref=e1439]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1440]:
+              - generic [ref=e1444]: 0.0%
+            - cell "$500,000" [ref=e1445]:
+              - paragraph [ref=e1446]: $500,000
+          - row "Oxley Vale 1 0 1 large transactions recorded 0.0% $480,000" [ref=e1447] [cursor=pointer]:
+            - cell "Oxley Vale 1 0 1 large transactions recorded" [ref=e1448]:
+              - paragraph [ref=e1449]: Oxley Vale
+              - generic [ref=e1450]:
+                - generic [ref=e1451]:
+                  - img [ref=e1452]
+                  - text: "1"
+                - generic [ref=e1455]:
+                  - img [ref=e1456]
+                  - text: "0"
+              - paragraph [ref=e1460]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1461]:
+              - generic [ref=e1465]: 0.0%
+            - cell "$480,000" [ref=e1466]:
+              - paragraph [ref=e1467]: $480,000
+          - row "North Tamworth 0 0 1 large transactions recorded 0.0% $620,000" [ref=e1468] [cursor=pointer]:
+            - cell "North Tamworth 0 0 1 large transactions recorded" [ref=e1469]:
+              - paragraph [ref=e1470]: North Tamworth
+              - generic [ref=e1471]:
+                - generic [ref=e1472]:
+                  - img [ref=e1473]
+                  - text: "0"
+                - generic [ref=e1476]:
+                  - img [ref=e1477]
+                  - text: "0"
+              - paragraph [ref=e1481]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1482]:
+              - generic [ref=e1486]: 0.0%
+            - cell "$620,000" [ref=e1487]:
+              - paragraph [ref=e1488]: $620,000
+          - row "Rushcutters Bay 1 0 1 large transactions recorded 0.0% $6,300" [ref=e1489] [cursor=pointer]:
+            - cell "Rushcutters Bay 1 0 1 large transactions recorded" [ref=e1490]:
+              - paragraph [ref=e1491]: Rushcutters Bay
+              - generic [ref=e1492]:
+                - generic [ref=e1493]:
+                  - img [ref=e1494]
+                  - text: "1"
+                - generic [ref=e1497]:
+                  - img [ref=e1498]
+                  - text: "0"
+              - paragraph [ref=e1502]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1503]:
+              - generic [ref=e1507]: 0.0%
+            - cell "$6,300" [ref=e1508]:
+              - paragraph [ref=e1509]: $6,300
+          - row "Millers Point 1 0 1 large transactions recorded 0.0% $1,000,000" [ref=e1510] [cursor=pointer]:
+            - cell "Millers Point 1 0 1 large transactions recorded" [ref=e1511]:
+              - paragraph [ref=e1512]: Millers Point
+              - generic [ref=e1513]:
+                - generic [ref=e1514]:
+                  - img [ref=e1515]
+                  - text: "1"
+                - generic [ref=e1518]:
+                  - img [ref=e1519]
+                  - text: "0"
+              - paragraph [ref=e1523]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1524]:
+              - generic [ref=e1528]: 0.0%
+            - cell "$1,000,000" [ref=e1529]:
+              - paragraph [ref=e1530]: $1,000,000
+          - row "Sydney 1 0 1 large transactions recorded 0.0% $2,030,000" [ref=e1531] [cursor=pointer]:
+            - cell "Sydney 1 0 1 large transactions recorded" [ref=e1532]:
+              - paragraph [ref=e1533]: Sydney
+              - generic [ref=e1534]:
+                - generic [ref=e1535]:
+                  - img [ref=e1536]
+                  - text: "1"
+                - generic [ref=e1539]:
+                  - img [ref=e1540]
+                  - text: "0"
+              - paragraph [ref=e1544]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1545]:
+              - generic [ref=e1549]: 0.0%
+            - cell "$2,030,000" [ref=e1550]:
+              - paragraph [ref=e1551]: $2,030,000
+          - row "Aberdare 1 0 1 large transactions recorded 0.0% $560,000" [ref=e1552] [cursor=pointer]:
+            - cell "Aberdare 1 0 1 large transactions recorded" [ref=e1553]:
+              - paragraph [ref=e1554]: Aberdare
+              - generic [ref=e1555]:
+                - generic [ref=e1556]:
+                  - img [ref=e1557]
+                  - text: "1"
+                - generic [ref=e1560]:
+                  - img [ref=e1561]
+                  - text: "0"
+              - paragraph [ref=e1565]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1566]:
+              - generic [ref=e1570]: 0.0%
+            - cell "$560,000" [ref=e1571]:
+              - paragraph [ref=e1572]: $560,000
+          - row "Cessnock 1 0 1 large transactions recorded 0.0% $250,000" [ref=e1573] [cursor=pointer]:
+            - cell "Cessnock 1 0 1 large transactions recorded" [ref=e1574]:
+              - paragraph [ref=e1575]: Cessnock
+              - generic [ref=e1576]:
+                - generic [ref=e1577]:
+                  - img [ref=e1578]
+                  - text: "1"
+                - generic [ref=e1581]:
+                  - img [ref=e1582]
+                  - text: "0"
+              - paragraph [ref=e1586]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1587]:
+              - generic [ref=e1591]: 0.0%
+            - cell "$250,000" [ref=e1592]:
+              - paragraph [ref=e1593]: $250,000
+          - row "Belmont 1 0 1 large transactions recorded 0.0% $570,000" [ref=e1594] [cursor=pointer]:
+            - cell "Belmont 1 0 1 large transactions recorded" [ref=e1595]:
+              - paragraph [ref=e1596]: Belmont
+              - generic [ref=e1597]:
+                - generic [ref=e1598]:
+                  - img [ref=e1599]
+                  - text: "1"
+                - generic [ref=e1602]:
+                  - img [ref=e1603]
+                  - text: "0"
+              - paragraph [ref=e1607]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1608]:
+              - generic [ref=e1612]: 0.0%
+            - cell "$570,000" [ref=e1613]:
+              - paragraph [ref=e1614]: $570,000
+          - row "Belmont 1 0 1 large transactions recorded 0.0% $1,040,000" [ref=e1615] [cursor=pointer]:
+            - cell "Belmont 1 0 1 large transactions recorded" [ref=e1616]:
+              - paragraph [ref=e1617]: Belmont
+              - generic [ref=e1618]:
+                - generic [ref=e1619]:
+                  - img [ref=e1620]
+                  - text: "1"
+                - generic [ref=e1623]:
+                  - img [ref=e1624]
+                  - text: "0"
+              - paragraph [ref=e1628]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1629]:
+              - generic [ref=e1633]: 0.0%
+            - cell "$1,040,000" [ref=e1634]:
+              - paragraph [ref=e1635]: $1,040,000
+          - row "Belmont North 1 0 1 large transactions recorded 0.0% $375,000" [ref=e1636] [cursor=pointer]:
+            - cell "Belmont North 1 0 1 large transactions recorded" [ref=e1637]:
+              - paragraph [ref=e1638]: Belmont North
+              - generic [ref=e1639]:
+                - generic [ref=e1640]:
+                  - img [ref=e1641]
+                  - text: "1"
+                - generic [ref=e1644]:
+                  - img [ref=e1645]
+                  - text: "0"
+              - paragraph [ref=e1649]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1650]:
+              - generic [ref=e1654]: 0.0%
+            - cell "$375,000" [ref=e1655]:
+              - paragraph [ref=e1656]: $375,000
+          - row "Cams Wharf 1 0 1 large transactions recorded 0.0% $610,000" [ref=e1657] [cursor=pointer]:
+            - cell "Cams Wharf 1 0 1 large transactions recorded" [ref=e1658]:
+              - paragraph [ref=e1659]: Cams Wharf
+              - generic [ref=e1660]:
+                - generic [ref=e1661]:
+                  - img [ref=e1662]
+                  - text: "1"
+                - generic [ref=e1665]:
+                  - img [ref=e1666]
+                  - text: "0"
+              - paragraph [ref=e1670]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1671]:
+              - generic [ref=e1675]: 0.0%
+            - cell "$610,000" [ref=e1676]:
+              - paragraph [ref=e1677]: $610,000
+          - row "Charlestown 1 0 1 large transactions recorded 0.0% $825,000" [ref=e1678] [cursor=pointer]:
+            - cell "Charlestown 1 0 1 large transactions recorded" [ref=e1679]:
+              - paragraph [ref=e1680]: Charlestown
+              - generic [ref=e1681]:
+                - generic [ref=e1682]:
+                  - img [ref=e1683]
+                  - text: "1"
+                - generic [ref=e1686]:
+                  - img [ref=e1687]
+                  - text: "0"
+              - paragraph [ref=e1691]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1692]:
+              - generic [ref=e1696]: 0.0%
+            - cell "$825,000" [ref=e1697]:
+              - paragraph [ref=e1698]: $825,000
+          - row "Croudace Bay 1 0 1 large transactions recorded 0.0% $1,240,000" [ref=e1699] [cursor=pointer]:
+            - cell "Croudace Bay 1 0 1 large transactions recorded" [ref=e1700]:
+              - paragraph [ref=e1701]: Croudace Bay
+              - generic [ref=e1702]:
+                - generic [ref=e1703]:
+                  - img [ref=e1704]
+                  - text: "1"
+                - generic [ref=e1707]:
+                  - img [ref=e1708]
+                  - text: "0"
+              - paragraph [ref=e1712]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1713]:
+              - generic [ref=e1717]: 0.0%
+            - cell "$1,240,000" [ref=e1718]:
+              - paragraph [ref=e1719]: $1,240,000
+          - row "Fishing Point 1 0 1 large transactions recorded 0.0% $971,500" [ref=e1720] [cursor=pointer]:
+            - cell "Fishing Point 1 0 1 large transactions recorded" [ref=e1721]:
+              - paragraph [ref=e1722]: Fishing Point
+              - generic [ref=e1723]:
+                - generic [ref=e1724]:
+                  - img [ref=e1725]
+                  - text: "1"
+                - generic [ref=e1728]:
+                  - img [ref=e1729]
+                  - text: "0"
+              - paragraph [ref=e1733]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1734]:
+              - generic [ref=e1738]: 0.0%
+            - cell "$971,500" [ref=e1739]:
+              - paragraph [ref=e1740]: $971,500
+          - row "Swansea 1 0 1 large transactions recorded 0.0% $1,000,000" [ref=e1741] [cursor=pointer]:
+            - cell "Swansea 1 0 1 large transactions recorded" [ref=e1742]:
+              - paragraph [ref=e1743]: Swansea
+              - generic [ref=e1744]:
+                - generic [ref=e1745]:
+                  - img [ref=e1746]
+                  - text: "1"
+                - generic [ref=e1749]:
+                  - img [ref=e1750]
+                  - text: "0"
+              - paragraph [ref=e1754]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1755]:
+              - generic [ref=e1759]: 0.0%
+            - cell "$1,000,000" [ref=e1760]:
+              - paragraph [ref=e1761]: $1,000,000
+          - row "Cooranbong 1 0 1 large transactions recorded 0.0% $855,000" [ref=e1762] [cursor=pointer]:
+            - cell "Cooranbong 1 0 1 large transactions recorded" [ref=e1763]:
+              - paragraph [ref=e1764]: Cooranbong
+              - generic [ref=e1765]:
+                - generic [ref=e1766]:
+                  - img [ref=e1767]
+                  - text: "1"
+                - generic [ref=e1770]:
+                  - img [ref=e1771]
+                  - text: "0"
+              - paragraph [ref=e1775]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1776]:
+              - generic [ref=e1780]: 0.0%
+            - cell "$855,000" [ref=e1781]:
+              - paragraph [ref=e1782]: $855,000
+          - row "Cameron Park 1 0 1 large transactions recorded 0.0% $1,090,000" [ref=e1783] [cursor=pointer]:
+            - cell "Cameron Park 1 0 1 large transactions recorded" [ref=e1784]:
+              - paragraph [ref=e1785]: Cameron Park
+              - generic [ref=e1786]:
+                - generic [ref=e1787]:
+                  - img [ref=e1788]
+                  - text: "1"
+                - generic [ref=e1791]:
+                  - img [ref=e1792]
+                  - text: "0"
+              - paragraph [ref=e1796]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1797]:
+              - generic [ref=e1801]: 0.0%
+            - cell "$1,090,000" [ref=e1802]:
+              - paragraph [ref=e1803]: $1,090,000
+          - row "Morisset Park 1 0 1 large transactions recorded 0.0% $950,000" [ref=e1804] [cursor=pointer]:
+            - cell "Morisset Park 1 0 1 large transactions recorded" [ref=e1805]:
+              - paragraph [ref=e1806]: Morisset Park
+              - generic [ref=e1807]:
+                - generic [ref=e1808]:
+                  - img [ref=e1809]
+                  - text: "1"
+                - generic [ref=e1812]:
+                  - img [ref=e1813]
+                  - text: "0"
+              - paragraph [ref=e1817]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1818]:
+              - generic [ref=e1822]: 0.0%
+            - cell "$950,000" [ref=e1823]:
+              - paragraph [ref=e1824]: $950,000
+          - row "Edgeworth 1 0 1 large transactions recorded 0.0% $380,000" [ref=e1825] [cursor=pointer]:
+            - cell "Edgeworth 1 0 1 large transactions recorded" [ref=e1826]:
+              - paragraph [ref=e1827]: Edgeworth
+              - generic [ref=e1828]:
+                - generic [ref=e1829]:
+                  - img [ref=e1830]
+                  - text: "1"
+                - generic [ref=e1833]:
+                  - img [ref=e1834]
+                  - text: "0"
+              - paragraph [ref=e1838]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1839]:
+              - generic [ref=e1843]: 0.0%
+            - cell "$380,000" [ref=e1844]:
+              - paragraph [ref=e1845]: $380,000
+          - row "Charlestown 1 0 1 large transactions recorded 0.0% $670,000" [ref=e1846] [cursor=pointer]:
+            - cell "Charlestown 1 0 1 large transactions recorded" [ref=e1847]:
+              - paragraph [ref=e1848]: Charlestown
+              - generic [ref=e1849]:
+                - generic [ref=e1850]:
+                  - img [ref=e1851]
+                  - text: "1"
+                - generic [ref=e1854]:
+                  - img [ref=e1855]
+                  - text: "0"
+              - paragraph [ref=e1859]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1860]:
+              - generic [ref=e1864]: 0.0%
+            - cell "$670,000" [ref=e1865]:
+              - paragraph [ref=e1866]: $670,000
+          - row "East Maitland 1 0 1 large transactions recorded 0.0% $500,000" [ref=e1867] [cursor=pointer]:
+            - cell "East Maitland 1 0 1 large transactions recorded" [ref=e1868]:
+              - paragraph [ref=e1869]: East Maitland
+              - generic [ref=e1870]:
+                - generic [ref=e1871]:
+                  - img [ref=e1872]
+                  - text: "1"
+                - generic [ref=e1875]:
+                  - img [ref=e1876]
+                  - text: "0"
+              - paragraph [ref=e1880]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1881]:
+              - generic [ref=e1885]: 0.0%
+            - cell "$500,000" [ref=e1886]:
+              - paragraph [ref=e1887]: $500,000
+          - row "Chisholm 1 0 1 large transactions recorded 0.0% $867,000" [ref=e1888] [cursor=pointer]:
+            - cell "Chisholm 1 0 1 large transactions recorded" [ref=e1889]:
+              - paragraph [ref=e1890]: Chisholm
+              - generic [ref=e1891]:
+                - generic [ref=e1892]:
+                  - img [ref=e1893]
+                  - text: "1"
+                - generic [ref=e1896]:
+                  - img [ref=e1897]
+                  - text: "0"
+              - paragraph [ref=e1901]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1902]:
+              - generic [ref=e1906]: 0.0%
+            - cell "$867,000" [ref=e1907]:
+              - paragraph [ref=e1908]: $867,000
+          - row "Muswellbrook 1 0 1 large transactions recorded 0.0% $447,000" [ref=e1909] [cursor=pointer]:
+            - cell "Muswellbrook 1 0 1 large transactions recorded" [ref=e1910]:
+              - paragraph [ref=e1911]: Muswellbrook
+              - generic [ref=e1912]:
+                - generic [ref=e1913]:
+                  - img [ref=e1914]
+                  - text: "1"
+                - generic [ref=e1917]:
+                  - img [ref=e1918]
+                  - text: "0"
+              - paragraph [ref=e1922]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1923]:
+              - generic [ref=e1927]: 0.0%
+            - cell "$447,000" [ref=e1928]:
+              - paragraph [ref=e1929]: $447,000
+          - row "Fletcher 1 0 1 large transactions recorded 0.0% $1,075,000" [ref=e1930] [cursor=pointer]:
+            - cell "Fletcher 1 0 1 large transactions recorded" [ref=e1931]:
+              - paragraph [ref=e1932]: Fletcher
+              - generic [ref=e1933]:
+                - generic [ref=e1934]:
+                  - img [ref=e1935]
+                  - text: "1"
+                - generic [ref=e1938]:
+                  - img [ref=e1939]
+                  - text: "0"
+              - paragraph [ref=e1943]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1944]:
+              - generic [ref=e1948]: 0.0%
+            - cell "$1,075,000" [ref=e1949]:
+              - paragraph [ref=e1950]: $1,075,000
+          - row "Wickham 1 0 1 large transactions recorded 0.0% $355,000" [ref=e1951] [cursor=pointer]:
+            - cell "Wickham 1 0 1 large transactions recorded" [ref=e1952]:
+              - paragraph [ref=e1953]: Wickham
+              - generic [ref=e1954]:
+                - generic [ref=e1955]:
+                  - img [ref=e1956]
+                  - text: "1"
+                - generic [ref=e1959]:
+                  - img [ref=e1960]
+                  - text: "0"
+              - paragraph [ref=e1964]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1965]:
+              - generic [ref=e1969]: 0.0%
+            - cell "$355,000" [ref=e1970]:
+              - paragraph [ref=e1971]: $355,000
+          - row "Hamilton South 0 0 1 large transactions recorded 0.0% $1,140,000" [ref=e1972] [cursor=pointer]:
+            - cell "Hamilton South 0 0 1 large transactions recorded" [ref=e1973]:
+              - paragraph [ref=e1974]: Hamilton South
+              - generic [ref=e1975]:
+                - generic [ref=e1976]:
+                  - img [ref=e1977]
+                  - text: "0"
+                - generic [ref=e1980]:
+                  - img [ref=e1981]
+                  - text: "0"
+              - paragraph [ref=e1985]: 1 large transactions recorded
+            - cell "0.0%" [ref=e1986]:
+              - generic [ref=e1990]: 0.0%
+            - cell "$1,140,000" [ref=e1991]:
+              - paragraph [ref=e1992]: $1,140,000
+          - row "Newcastle 1 0 1 large transactions recorded 0.0% $90,000" [ref=e1993] [cursor=pointer]:
+            - cell "Newcastle 1 0 1 large transactions recorded" [ref=e1994]:
+              - paragraph [ref=e1995]: Newcastle
+              - generic [ref=e1996]:
+                - generic [ref=e1997]:
+                  - img [ref=e1998]
+                  - text: "1"
+                - generic [ref=e2001]:
+                  - img [ref=e2002]
+                  - text: "0"
+              - paragraph [ref=e2006]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2007]:
+              - generic [ref=e2011]: 0.0%
+            - cell "$90,000" [ref=e2012]:
+              - paragraph [ref=e2013]: $90,000
+          - row "Newcastle 1 0 1 large transactions recorded 0.0% $90,000" [ref=e2014] [cursor=pointer]:
+            - cell "Newcastle 1 0 1 large transactions recorded" [ref=e2015]:
+              - paragraph [ref=e2016]: Newcastle
+              - generic [ref=e2017]:
+                - generic [ref=e2018]:
+                  - img [ref=e2019]
+                  - text: "1"
+                - generic [ref=e2022]:
+                  - img [ref=e2023]
+                  - text: "0"
+              - paragraph [ref=e2027]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2028]:
+              - generic [ref=e2032]: 0.0%
+            - cell "$90,000" [ref=e2033]:
+              - paragraph [ref=e2034]: $90,000
+          - row "Raymond Terrace 1 0 1 large transactions recorded 0.0% $620,000" [ref=e2035] [cursor=pointer]:
+            - cell "Raymond Terrace 1 0 1 large transactions recorded" [ref=e2036]:
+              - paragraph [ref=e2037]: Raymond Terrace
+              - generic [ref=e2038]:
+                - generic [ref=e2039]:
+                  - img [ref=e2040]
+                  - text: "1"
+                - generic [ref=e2043]:
+                  - img [ref=e2044]
+                  - text: "0"
+              - paragraph [ref=e2048]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2049]:
+              - generic [ref=e2053]: 0.0%
+            - cell "$620,000" [ref=e2054]:
+              - paragraph [ref=e2055]: $620,000
+          - row "Soldiers Point 1 0 1 large transactions recorded 0.0% $1,340,000" [ref=e2056] [cursor=pointer]:
+            - cell "Soldiers Point 1 0 1 large transactions recorded" [ref=e2057]:
+              - paragraph [ref=e2058]: Soldiers Point
+              - generic [ref=e2059]:
+                - generic [ref=e2060]:
+                  - img [ref=e2061]
+                  - text: "1"
+                - generic [ref=e2064]:
+                  - img [ref=e2065]
+                  - text: "0"
+              - paragraph [ref=e2069]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2070]:
+              - generic [ref=e2074]: 0.0%
+            - cell "$1,340,000" [ref=e2075]:
+              - paragraph [ref=e2076]: $1,340,000
+          - row "Seaham 1 0 1 large transactions recorded 0.0% $1,525,000" [ref=e2077] [cursor=pointer]:
+            - cell "Seaham 1 0 1 large transactions recorded" [ref=e2078]:
+              - paragraph [ref=e2079]: Seaham
+              - generic [ref=e2080]:
+                - generic [ref=e2081]:
+                  - img [ref=e2082]
+                  - text: "1"
+                - generic [ref=e2085]:
+                  - img [ref=e2086]
+                  - text: "0"
+              - paragraph [ref=e2090]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2091]:
+              - generic [ref=e2095]: 0.0%
+            - cell "$1,525,000" [ref=e2096]:
+              - paragraph [ref=e2097]: $1,525,000
+          - row "Salamander Bay 1 0 1 large transactions recorded 0.0% $158,000" [ref=e2098] [cursor=pointer]:
+            - cell "Salamander Bay 1 0 1 large transactions recorded" [ref=e2099]:
+              - paragraph [ref=e2100]: Salamander Bay
+              - generic [ref=e2101]:
+                - generic [ref=e2102]:
+                  - img [ref=e2103]
+                  - text: "1"
+                - generic [ref=e2106]:
+                  - img [ref=e2107]
+                  - text: "0"
+              - paragraph [ref=e2111]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2112]:
+              - generic [ref=e2116]: 0.0%
+            - cell "$158,000" [ref=e2117]:
+              - paragraph [ref=e2118]: $158,000
+          - row "Hunterview 1 0 1 large transactions recorded 0.0% $580,000" [ref=e2119] [cursor=pointer]:
+            - cell "Hunterview 1 0 1 large transactions recorded" [ref=e2120]:
+              - paragraph [ref=e2121]: Hunterview
+              - generic [ref=e2122]:
+                - generic [ref=e2123]:
+                  - img [ref=e2124]
+                  - text: "1"
+                - generic [ref=e2127]:
+                  - img [ref=e2128]
+                  - text: "0"
+              - paragraph [ref=e2132]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2133]:
+              - generic [ref=e2137]: 0.0%
+            - cell "$580,000" [ref=e2138]:
+              - paragraph [ref=e2139]: $580,000
+          - row "Billimari 1 0 1 large transactions recorded 0.0% $180,000" [ref=e2140] [cursor=pointer]:
+            - cell "Billimari 1 0 1 large transactions recorded" [ref=e2141]:
+              - paragraph [ref=e2142]: Billimari
+              - generic [ref=e2143]:
+                - generic [ref=e2144]:
+                  - img [ref=e2145]
+                  - text: "1"
+                - generic [ref=e2148]:
+                  - img [ref=e2149]
+                  - text: "0"
+              - paragraph [ref=e2153]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2154]:
+              - generic [ref=e2158]: 0.0%
+            - cell "$180,000" [ref=e2159]:
+              - paragraph [ref=e2160]: $180,000
+          - row "Cowra 1 0 1 large transactions recorded 0.0% $505,000" [ref=e2161] [cursor=pointer]:
+            - cell "Cowra 1 0 1 large transactions recorded" [ref=e2162]:
+              - paragraph [ref=e2163]: Cowra
+              - generic [ref=e2164]:
+                - generic [ref=e2165]:
+                  - img [ref=e2166]
+                  - text: "1"
+                - generic [ref=e2169]:
+                  - img [ref=e2170]
+                  - text: "0"
+              - paragraph [ref=e2174]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2175]:
+              - generic [ref=e2179]: 0.0%
+            - cell "$505,000" [ref=e2180]:
+              - paragraph [ref=e2181]: $505,000
+          - row "Grenfell 0 0 1 large transactions recorded 0.0% $5,000" [ref=e2182] [cursor=pointer]:
+            - cell "Grenfell 0 0 1 large transactions recorded" [ref=e2183]:
+              - paragraph [ref=e2184]: Grenfell
+              - generic [ref=e2185]:
+                - generic [ref=e2186]:
+                  - img [ref=e2187]
+                  - text: "0"
+                - generic [ref=e2190]:
+                  - img [ref=e2191]
+                  - text: "0"
+              - paragraph [ref=e2195]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2196]:
+              - generic [ref=e2200]: 0.0%
+            - cell "$5,000" [ref=e2201]:
+              - paragraph [ref=e2202]: $5,000
+          - row "Lavington 1 0 1 large transactions recorded 0.0% $325,000" [ref=e2203] [cursor=pointer]:
+            - cell "Lavington 1 0 1 large transactions recorded" [ref=e2204]:
+              - paragraph [ref=e2205]: Lavington
+              - generic [ref=e2206]:
+                - generic [ref=e2207]:
+                  - img [ref=e2208]
+                  - text: "1"
+                - generic [ref=e2211]:
+                  - img [ref=e2212]
+                  - text: "0"
+              - paragraph [ref=e2216]: 1 large transactions recorded
+            - cell "0.0%" [ref=e2217]:
+              - generic [ref=e2221]: 0.0%
+            - cell "$325,000" [ref=e2222]:
+              - paragraph [ref=e2223]: $325,000
+  - generic [ref=e2224]: Greenlands

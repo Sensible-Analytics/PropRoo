@@ -218,7 +218,6 @@ def _calc_street_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
 
     cagr_df = con.execute(cagr_query).fetchdf()
 
-    # Street-level aggregates from all sales
     street_query = """
     SELECT
         property_street_name AS street_name,
@@ -235,7 +234,6 @@ def _calc_street_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
     street_stats = con.execute(street_query).fetchdf()
     con.close()
 
-    # Aggregate CAGR by street
     if not cagr_df.empty:
         street_cagr = (
             cagr_df.groupby(["street_name", "suburb", "post_code"])
@@ -259,7 +257,6 @@ def _calc_street_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
         street_stats["property_count"].fillna(0).astype(int)
     )
 
-    # is_top_performer: 90th percentile threshold
     cagr_threshold = (
         street_stats["avg_cagr"].quantile(0.9)
         if not street_stats["avg_cagr"].dropna().empty
@@ -280,7 +277,6 @@ def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
     con = duckdb.connect()
     con.register("sales", sales_df)
 
-    # Compute property-level CAGR
     cagr_query = """
     WITH cleaned AS (
         SELECT
@@ -334,7 +330,6 @@ def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
 
     cagr_df = con.execute(cagr_query).fetchdf()
 
-    # Suburb-level aggregates from all sales
     suburb_query = """
     SELECT
         property_locality AS suburb,
@@ -349,7 +344,6 @@ def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
     suburb_stats = con.execute(suburb_query).fetchdf()
     con.close()
 
-    # Aggregate CAGR by suburb
     if not cagr_df.empty:
         suburb_cagr = (
             cagr_df.groupby(["suburb"]).agg(avg_cagr=("cagr", "mean")).reset_index()
@@ -364,7 +358,6 @@ def _calc_suburb_summary(sales_df: pd.DataFrame, data_path: Path) -> None:
 
     suburb_stats["avg_cagr"] = suburb_stats["avg_cagr"].fillna(0.0)
 
-    # is_top_performer: 90th percentile threshold
     cagr_threshold = (
         suburb_stats["avg_cagr"].quantile(0.9)
         if not suburb_stats["avg_cagr"].dropna().empty
@@ -385,7 +378,6 @@ def _calc_h3_tiles(sales_df: pd.DataFrame, data_path: Path) -> None:
     con = duckdb.connect()
     con.register("sales", sales_df)
 
-    # Compute property-level CAGR
     cagr_query = """
     WITH cleaned AS (
         SELECT
@@ -443,7 +435,6 @@ def _calc_h3_tiles(sales_df: pd.DataFrame, data_path: Path) -> None:
     cagr_map = dict(zip(cagr_df["property_id"], cagr_df["cagr"]))
     con.close()
 
-    # Filter valid records
     df = sales_df.copy()
     df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
     df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
@@ -453,7 +444,7 @@ def _calc_h3_tiles(sales_df: pd.DataFrame, data_path: Path) -> None:
 
     for resolution in range(5, 15):
         df["h3_index"] = df.apply(
-            lambda row: h3.geo_to_h3(
+            lambda row: h3.latlng_to_cell(
                 float(row["latitude"]), float(row["longitude"]), resolution
             ),
             axis=1,
@@ -486,7 +477,6 @@ def _calc_suburb_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
     con = duckdb.connect()
     con.register("sales", sales_df)
 
-    # Compute property-level CAGR
     cagr_query = """
     WITH cleaned AS (
         SELECT
@@ -573,7 +563,6 @@ def _calc_street_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
     con = duckdb.connect()
     con.register("sales", sales_df)
 
-    # Compute property-level CAGR
     cagr_query = """
     WITH cleaned AS (
         SELECT
@@ -625,7 +614,6 @@ def _calc_street_year_stats(sales_df: pd.DataFrame, data_path: Path) -> None:
     cagr_map = dict(zip(cagr_df["property_id"], cagr_df["cagr"]))
     con.close()
 
-    # Street year stats
     df = sales_df.copy()
     df["contract_date"] = pd.to_datetime(df["contract_date"], errors="coerce")
     df["purchase_price"] = pd.to_numeric(df["purchase_price"], errors="coerce")
@@ -732,7 +720,6 @@ def _calc_property_history(sales_df: pd.DataFrame, data_path: Path) -> None:
         logger.warning("No property history records to write")
         return
 
-    # Apply CAGR logic: ignore if held < 6 months
     result.loc[result["days_held"] < 182.625, "cagr"] = 0.0
     result["avg_cagr"] = result["cagr"].round(6)
 
@@ -824,7 +811,6 @@ def _calc_top_performers(sales_df: pd.DataFrame, data_path: Path) -> None:
         logger.warning("No top performer records to write")
         return
 
-    # Apply CAGR logic: ignore if held < 6 months
     result.loc[result["days_held"] < 182.625, "cagr"] = 0.0
     result["years_held"] = result["days_held"].apply(lambda d: int(max(0, d / 365.25)))
     result["avg_cagr"] = result["cagr"].round(6)

@@ -35,7 +35,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['@deck.gl/geo-layers', '@deck.gl/aggregation-layers', '@deck.gl/layers', '@deck.gl/react', '@deck.gl/core'],
-    exclude: ['@duckdb/duckdb-wasm'],
+    exclude: ['@duckdb/duckdb-wasm', 'h3-js'],
   },
   assetsInclude: ['**/*.geojson'],
   json: {

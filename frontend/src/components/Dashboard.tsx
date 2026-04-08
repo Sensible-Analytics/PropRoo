@@ -540,6 +540,13 @@ export default function Dashboard() {
     } else if (viewLevel === 'suburb') {
       setViewLevel('state');
       setSelection({ suburb: null, street: null, propertyId: null });
+      // Reset zoom to show full NSW when going back to state level
+      setViewState(prev => ({
+        ...prev,
+        zoom: 8,  // NSW state level zoom
+        transitionDuration: 1000,
+        transitionInterpolator: new FlyToInterpolator(),
+      }));
     }
   }, [viewLevel]);
 
@@ -776,11 +783,11 @@ export default function Dashboard() {
           data: nswSuburbsGeoJSON as any,
           stroked: true,
           filled: false,
-          lineWidthMinPixels: 3,
-          getLineColor: [20, 20, 20, 255],
+          lineWidthMinPixels: 2,
+          getLineColor: [0, 0, 0, 200],
           pickable: true,
           autoHighlight: true,
-          highlightColor: [59, 130, 246, 150],
+          highlightColor: [59, 130, 246, 100],
           onClick: (info: any) => {
             if (info.object?.properties?.suburb_name) {
               setSelectedSuburb(info.object.properties.suburb_name);
@@ -1001,15 +1008,15 @@ export default function Dashboard() {
     }
 
     // Major Roads Layer
-    if (showStreets && mapZoom >= 7) {
+    if (showStreets && mapZoom >= 5) {
       result.push(
         new PathLayer({
           id: 'major-roads',
           data: majorRoads as any,
           getPath: (d: any) => d.geometry.coordinates,
-          getColor: [100, 116, 139, 180],
-          getWidth: 3,
-          widthMinPixels: 2,
+          getColor: [30, 30, 30, 220],
+          getWidth: 4,
+          widthMinPixels: 3,
           pickable: true,
           getTooltip: (d: any) => d.properties && {
             html: `<div style="padding: 8px; font-family: sans-serif; font-size: 12px;">

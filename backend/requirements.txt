@@ -9,7 +9,7 @@ h3==3.7.7
 python-dotenv==1.2.2
 httpx==0.28.1
 pydantic==2.13.0
-pydantic-settings==2.13.1
+pydantic-settings==2.14.0
 requests==2.33.1
 beautifulsoup4==4.14.3
 lxml==6.1.0

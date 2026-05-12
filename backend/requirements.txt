@@ -2,7 +2,7 @@ boto3==1.43.3
 fastapi==0.136.1
 uvicorn[standard]==0.46.0
 python-dateutil==2.9.0.post0
-pandas==3.0.2
+pandas==3.0.3
 pyarrow==23.0.1
 duckdb==1.5.2
 h3==3.7.7

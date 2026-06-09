@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: PropRoo
+  description: "Australian property analytics engine - market data, rental insights & investment metrics"
+  annotations:
+    github.com/project-slug: Sensible-Analytics/PropRoo
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  lifecycle: production
+  owner: sensible-analytics/engineering

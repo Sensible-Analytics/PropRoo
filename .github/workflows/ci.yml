@@ -52,7 +52,7 @@ jobs:
           pytest -v tests/test_data_quality.py || echo "Data quality tests had issues"
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage.xml
           fail_ci_if_error: false

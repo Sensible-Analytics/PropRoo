@@ -1,4 +1,4 @@
-boto3==1.43.66
+boto3==1.43.71
 fastapi==0.141.1
 uvicorn[standard]==0.52.1
 python-dateutil==2.9.0.post0
